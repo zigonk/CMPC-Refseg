@@ -10,6 +10,7 @@ import time
 # import matplotlib.pyplot as plt
 from get_model import get_segmentation_model
 from pydensecrf import densecrf
+from tqdm.notebook import tqdm
 
 from util import data_reader
 from util.processing_tools import *
@@ -157,6 +158,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
     H, W = 320, 320
     vocab_size = 8803 if dataset == 'referit' else 12112
     emb_name = 'referit' if dataset == 'referit' else 'Gref'
+    vocab_file = './data/vocabulary_Gref.txt'
     vocab_dict = text_processing.load_vocab_dict_from_file(vocab_file)
     IU_result = list()
 
