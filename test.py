@@ -305,15 +305,12 @@ def visualize_seg(vis_path, im, sent, predicts, mask=None):
     fontScale              = 1
     fontColor              = (255,0,0)
     lineType               = 2
-    sent_dir = os.path.join(vis_dir, sent)
-    if not os.path.exists(sent_dir):
-        os.makedirs(sent_dir)
 
     # Ignore sio warnings of low-contrast image.
     import warnings
     warnings.filterwarnings('ignore')
 
-    sio.imsave(os.path.join(sent_dir, "im.png"), im)
+    sio.imsave(os.path.join(vis_path, "im.png"), im)
 
     # im_gt = np.zeros_like(im)
     # im_gt[:, :, 2] = 170
