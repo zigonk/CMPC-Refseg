@@ -245,7 +245,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
                     visualize_seg(vis_path, im, exp, predicts)
                     if dcrf:
                         visualize_seg(vis_path, im, exp, predicts_dcrf)
-
+        break
     # I, U = eval_tools.compute_mask_IU(predicts, mask)
     # IU_result.append({'batch_no': n_iter, 'I': I, 'U': U})
     # mean_IoU += float(I) / U
