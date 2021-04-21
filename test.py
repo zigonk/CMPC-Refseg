@@ -198,19 +198,17 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
     videos = meta_expression['videos']
     for vid_ind, vid in enumerate(videos.keys()):  
         print("Running on video {}/{}".format(vid_ind + 1, len(videos.keys())))
-        vid = 'fef7e84268'
         expressions = [videos[vid]['expressions'][expression_id]['exp'] for expression_id in videos[vid]['expressions'].keys()]
         # instance_ids = [expression['obj_id'] for expression_id in videos[vid]['expressions']]
         frame_ids = videos[vid]['frames']
         for index, exp in enumerate(expressions):
             vis_dir = os.path.join(args.visdir, str('{}/{}/'.format(vid, index)))
-            if not os.path.exists(vis_dir):
-                os.makedirs(vis_dir)
             for fid in frame_ids:
                 frame = load_frame_from_id(vid, fid)
                 if frame is None:
                     continue
-                print("Finish read frame")
+                if not os.path.exists(vis_dir):
+                    os.makedirs(vis_dir)
                 vis_path = os.path.join(vis_dir, str('{}.png'.format(fid)))
 
                 text = np.array(text_processing.preprocess_sentence(exp, vocab_dict, T))
@@ -226,14 +224,12 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
                 proc_im_ = proc_im.astype(np.float32)
                 proc_im_ = proc_im_[:, :, ::-1]
                 proc_im_ -= mu
-                print("Start evaluate")
                 scores_val, up_val, sigm_val = sess.run([model.pred, model.up, model.sigm],
                                                         feed_dict={
                                                             model.words: np.expand_dims(text, axis=0),
                                                             model.im: np.expand_dims(proc_im_, axis=0),
                                                             model.valid_idx: np.expand_dims(valid_idx, axis=0)
                                                         })
-                print("Finish evaluate")
                 # scores_val = np.squeeze(scores_val)
                 # pred_raw = (scores_val >= score_thresh).astype(np.float32)
                 up_val = np.squeeze(up_val)
@@ -253,12 +249,10 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
                     Q = d.inference(5)
                     pred_raw_dcrf = np.argmax(Q, axis=0).reshape((H, W)).astype(np.float32)
                     predicts_dcrf = im_processing.resize_and_crop(pred_raw_dcrf, mask.shape[0], mask.shape[1])
-                print("Start visualize")
                 if visualize:
                     visualize_seg(vis_path, im, exp, predicts)
                     if dcrf:
                         visualize_seg(vis_path, im, exp, predicts_dcrf)
-        break
     # I, U = eval_tools.compute_mask_IU(predicts, mask)
     # IU_result.append({'batch_no': n_iter, 'I': I, 'U': U})
     # mean_IoU += float(I) / U
