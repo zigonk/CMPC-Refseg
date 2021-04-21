@@ -134,6 +134,15 @@ def train(max_iter, snapshot, dataset, setname, mu, lr, bs, tfmodel_folder,
 
     print('Optimization done.')
 
+def load_image(img_path):
+    # if (not os.path.exists(img_path)):
+    #     print(f'Not found {img_path}')
+    img = cv2.imread(img_path)
+    return img
+
+def load_frame_from_id(vid, frame_id):
+    frame_path = os.path.join(args.imdir, str('{}/{}.jpg'.format(vid, frame_id)))
+    return load_image(frame_path)
 
 def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name, pre_emb=False):
     data_folder = './' + dataset + '/' + setname + '_batch/'
