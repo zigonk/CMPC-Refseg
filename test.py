@@ -215,7 +215,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
 
                 text = np.array(text_processing.preprocess_sentence(exp, vocab_dict, T))
                 im = frame.copy()
-                mask = frame.astype(np.float32)
+                mask = np.array(frame, dtype=np.float32)
                 valid_idx = np.zeros([1], dtype=np.int32)
                 for idx in range(text.shape[0]):
                     if text[idx] != 0:
@@ -300,7 +300,11 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
 
 def visualize_seg(vis_path, im, sent, predicts, mask=None):
     # print("visualizing")
-    
+    font                   = cv2.FONT_HERSHEY_SIMPLEX
+    bottomLeftCornerOfText = (30, 30)
+    fontScale              = 1
+    fontColor              = (255,0,0)
+    lineType               = 2
     sent_dir = os.path.join(vis_dir, sent)
     if not os.path.exists(sent_dir):
         os.makedirs(sent_dir)
