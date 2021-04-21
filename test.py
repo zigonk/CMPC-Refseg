@@ -323,7 +323,7 @@ def visualize_seg(vis_path, im, sent, predicts, mask=None):
     im_seg = im / 2
     im_seg[:, :, 0] += predicts.astype('uint8') * 100
     im_seg = im_seg.astype('uint8')
-    vis_img = cv2.putText(im_seg, exp, 
+    vis_img = cv2.putText(im_seg, sent, 
                         bottomLeftCornerOfText, 
                         font, 
                         fontScale,
