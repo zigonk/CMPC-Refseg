@@ -191,14 +191,14 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
         # instance_ids = [expression['obj_id'] for expression_id in videos[vid]['expressions']]
         frame_ids = videos[vid]['frames']
         for index, exp in enumerate(expressions):
-            vis_dir = os.path.join(args.vis, str(f'{vid}/{index}/'))
+            vis_dir = os.path.join(args.vis, str('{}/{}/'.format(vid, index)))
             if not os.path.exists(vis_dir):
                 os.makedirs(vis_dir)
             for fid in frame_ids:
                 frame = load_frame_from_id(vid, fid)
                 if frame is None:
                     continue
-                vis_path = os.path.join(vis_dir, str(f'{fid}.png'))
+                vis_path = os.path.join(vis_dir, str('{}.png'.format(fid)))
 
                 text = text_processing.preprocess_sentence(exp, vocab_dict, T)
                 im = frame
@@ -268,21 +268,21 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
     seg_total += 1
 
     # Print results
-    print('Segmentation evaluation (without DenseCRF):')
-    result_str = ''
-    for n_eval_iou in range(len(eval_seg_iou_list)):
-        result_str += 'precision@%s = %f\n' % \
-                      (str(eval_seg_iou_list[n_eval_iou]), seg_correct[n_eval_iou] / seg_total)
-    result_str += 'overall IoU = %f; mean IoU = %f\n' % (cum_I / cum_U, mean_IoU / seg_total)
-    print(result_str)
-    if dcrf:
-        print('Segmentation evaluation (with DenseCRF):')
-        result_str = ''
-        for n_eval_iou in range(len(eval_seg_iou_list)):
-            result_str += 'precision@%s = %f\n' % \
-                          (str(eval_seg_iou_list[n_eval_iou]), seg_correct_dcrf[n_eval_iou] / seg_total)
-        result_str += 'overall IoU = %f; mean IoU = %f\n' % (cum_I_dcrf / cum_U_dcrf, mean_dcrf_IoU / seg_total)
-        print(result_str)
+    # print('Segmentation evaluation (without DenseCRF):')
+    # result_str = ''
+    # for n_eval_iou in range(len(eval_seg_iou_list)):
+    #     result_str += 'precision@%s = %f\n' % \
+    #                   (str(eval_seg_iou_list[n_eval_iou]), seg_correct[n_eval_iou] / seg_total)
+    # result_str += 'overall IoU = %f; mean IoU = %f\n' % (cum_I / cum_U, mean_IoU / seg_total)
+    # print(result_str)
+    # if dcrf:
+    #     print('Segmentation evaluation (with DenseCRF):')
+    #     result_str = ''
+    #     for n_eval_iou in range(len(eval_seg_iou_list)):
+    #         result_str += 'precision@%s = %f\n' % \
+    #                       (str(eval_seg_iou_list[n_eval_iou]), seg_correct_dcrf[n_eval_iou] / seg_total)
+    #     result_str += 'overall IoU = %f; mean IoU = %f\n' % (cum_I_dcrf / cum_U_dcrf, mean_dcrf_IoU / seg_total)
+    #     print(result_str)
 
 
 def visualize_seg(vis_path, im, sent, predicts, mask=None):
