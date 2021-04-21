@@ -9,6 +9,7 @@ from skimage import io as sio
 import time
 import cv2
 import json
+from PIL import Image
 # import matplotlib.pyplot as plt
 from get_model import get_segmentation_model
 from pydensecrf import densecrf
@@ -138,7 +139,7 @@ def train(max_iter, snapshot, dataset, setname, mu, lr, bs, tfmodel_folder,
 def load_image(img_path):
     # if (not os.path.exists(img_path)):
     #     print(f'Not found {img_path}')
-    img = cv2.imread(img_path)
+    img = Image.open(img_path)
     return img
 
 def load_frame_from_id(vid, frame_id):
@@ -222,7 +223,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
 
                 proc_im = skimage.img_as_ubyte(im_processing.resize_and_pad(im, H, W))
                 proc_im_ = proc_im.astype(np.float32)
-                proc_im_ = proc_im_[:, :, ::-1]
+                # proc_im_ = proc_im_[:, :, ::-1]
                 proc_im_ -= mu
                 scores_val, up_val, sigm_val = sess.run([model.pred, model.up, model.sigm],
                                                         feed_dict={
