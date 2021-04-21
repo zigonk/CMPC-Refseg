@@ -143,7 +143,6 @@ def load_image(img_path):
 
 def load_frame_from_id(vid, frame_id):
     frame_path = os.path.join(args.imdir, str('{}/{}.jpg'.format(vid, frame_id)))
-    print(frame_path)
     return load_image(frame_path)
 
 def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name, pre_emb=False):
@@ -208,6 +207,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
                 os.makedirs(vis_dir)
             for fid in frame_ids:
                 frame = load_frame_from_id(vid, fid)
+                print(frame)
                 if frame is None:
                     continue
                 print("Finish read frame")
