@@ -7,6 +7,7 @@ import tensorflow as tf
 import skimage
 from skimage import io as sio
 import time
+import cv2
 import json
 # import matplotlib.pyplot as plt
 from get_model import get_segmentation_model
