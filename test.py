@@ -198,6 +198,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
     videos = meta_expression['videos']
     for vid_ind, vid in enumerate(videos.keys()):  
         print("Running on video {}/{}".format(vid_ind + 1, len(videos.keys())))
+        vid = 'fef7e84268'
         expressions = [videos[vid]['expressions'][expression_id]['exp'] for expression_id in videos[vid]['expressions'].keys()]
         # instance_ids = [expression['obj_id'] for expression_id in videos[vid]['expressions']]
         frame_ids = videos[vid]['frames']
