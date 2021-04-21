@@ -208,13 +208,12 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
                 os.makedirs(vis_dir)
             for fid in frame_ids:
                 frame = load_frame_from_id(vid, fid)
-                print(frame)
                 if frame is None:
                     continue
                 print("Finish read frame")
                 vis_path = os.path.join(vis_dir, str('{}.png'.format(fid)))
 
-                text = text_processing.preprocess_sentence(exp, vocab_dict, T)
+                text = np.array(text_processing.preprocess_sentence(exp, vocab_dict, T))
                 im = frame
                 # mask = batch['mask_batch'].astype(np.float32)
                 valid_idx = np.zeros([1], dtype=np.int32)
