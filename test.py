@@ -192,7 +192,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
         # instance_ids = [expression['obj_id'] for expression_id in videos[vid]['expressions']]
         frame_ids = videos[vid]['frames']
         for index, exp in enumerate(expressions):
-            vis_dir = os.path.join(args.vis, str('{}/{}/'.format(vid, index)))
+            vis_dir = os.path.join(args.visdir, str('{}/{}/'.format(vid, index)))
             if not os.path.exists(vis_dir):
                 os.makedirs(vis_dir)
             for fid in frame_ids:
