@@ -143,6 +143,7 @@ def load_image(img_path):
 
 def load_frame_from_id(vid, frame_id):
     frame_path = os.path.join(args.imdir, str('{}/{}.jpg'.format(vid, frame_id)))
+    print(frame_path)
     return load_image(frame_path)
 
 def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name, pre_emb=False):
