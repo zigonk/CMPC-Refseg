@@ -10,7 +10,6 @@ import time
 # import matplotlib.pyplot as plt
 from get_model import get_segmentation_model
 from pydensecrf import densecrf
-from tqdm.notebook import tqdm
 
 from util import data_reader
 from util.processing_tools import *
@@ -186,7 +185,8 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
     with open(args.meta) as meta_file:
         meta_expression = json.load(meta_file)
     videos = meta_expression['videos']
-    for vid in tqdm(videos.keys()):  
+    for vid_ind, vid in enumerate(videos.keys()):  
+        print("Running on video {}/{}".format(vid_ind + 1, len(videos.keys())))
         expressions = [videos[vid]['expressions'][expression_id]['exp'] for expression_id in videos[vid]['expressions'].keys()]
         # instance_ids = [expression['obj_id'] for expression_id in videos[vid]['expressions']]
         frame_ids = videos[vid]['frames']
