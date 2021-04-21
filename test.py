@@ -310,7 +310,7 @@ def visualize_seg(vis_path, im, sent, predicts, mask=None):
     import warnings
     warnings.filterwarnings('ignore')
 
-    sio.imsave(os.path.join(vis_path, "im.png"), im)
+    sio.imsave(vis_path, im)
 
     # im_gt = np.zeros_like(im)
     # im_gt[:, :, 2] = 170
