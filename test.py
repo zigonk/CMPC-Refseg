@@ -137,10 +137,9 @@ def train(max_iter, snapshot, dataset, setname, mu, lr, bs, tfmodel_folder,
     print('Optimization done.')
 
 def load_image(img_path):
-    # if (not os.path.exists(img_path)):
-    #     print(f'Not found {img_path}')
-    img = Image.open(img_path)
-    return img
+    if (not os.path.exists(img_path)):
+        return None
+    return Image.open(img_path)
 
 def load_frame_from_id(vid, frame_id):
     frame_path = os.path.join(args.imdir, str('{}/{}.jpg'.format(vid, frame_id)))
