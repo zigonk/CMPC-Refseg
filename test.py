@@ -166,7 +166,10 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
         # use pretrained embbeding
         print("Use pretrained Embeddings.")
         model = get_segmentation_model(model_name, H=H, W=W,
-                                       mode='eval', vocab_size=vocab_size, emb_name=emb_name)
+                                       mode='eval', 
+                                       vocab_size=vocab_size, 
+                                       emb_name=emb_name, 
+                                       emb_dir=args.embdir)
     else:
         model = get_segmentation_model(model_name, H=H, W=W,
                                        mode='eval', vocab_size=vocab_size)
@@ -328,6 +331,7 @@ if __name__ == "__main__":
     parser.add_argument('-imdir', type=str)
     parser.add_argument('-visdir', type=str)
     parser.add_argument('-meta', type=str)
+    parser.add_argument('-embdir', type=str)
     parser.add_argument('-d', type=str, default='referit')  # 'Gref' 'unc' 'unc+' 'referit'
     parser.add_argument('-t', type=str)  # 'train' 'trainval' 'val' 'test' 'testA' 'testB'
     parser.add_argument('-f', type=str)  # directory to save models

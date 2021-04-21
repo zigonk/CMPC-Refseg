@@ -36,7 +36,8 @@ class LSTM_model(object):
                  mode='eval',
                  conv5=False,
                  glove_dim=300,
-                 emb_name='Gref'):
+                 emb_name='Gref',
+                 emb_dir='data'):
         self.batch_size = batch_size
         self.num_steps = num_steps
         self.vf_h = vf_h
@@ -74,7 +75,7 @@ class LSTM_model(object):
         self.visual_feat_c3 = resmodel.layers['res3b3_relu']
 
         # GloVe Embedding
-        glove_np = np.load('data/{}_emb.npy'.format(self.emb_name))
+        glove_np = np.load('{}/{}_emb.npy'.format(emb_dir, self.emb_name))
         print("Loaded embedding npy at data/{}_emb.npy".format(self.emb_name))
         self.glove = tf.convert_to_tensor(glove_np, tf.float32)  # [vocab_size, 400]
 
