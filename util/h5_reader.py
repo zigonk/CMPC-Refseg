@@ -56,7 +56,7 @@ class DataReader:
         self.num_batch = num_batch  # 一共有多少个batch
 
         # Start prefetching thread
-        self.prefetch_queue = queue.Queue(maxsize=prefetch_num)
+        self.prefetch_queue = queue.queue(maxsize=prefetch_num)
         # 读数据的线程，只有一个？
         self.prefetch_thread = threading.Thread(target=run_prefetch,
             args=(self.prefetch_queue, self.h5_file,

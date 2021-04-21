@@ -3,7 +3,7 @@ from __future__ import print_function
 import numpy as np
 import os
 import threading
-import Queue as queue
+import queue as queue
 
 def run_prefetch(prefetch_queue, folder_name, prefix, num_batch, shuffle):
     n_batch_prefetch = 0
@@ -48,7 +48,7 @@ class DataReader:
         self.num_batch = num_batch
 
         # Start prefetching thread
-        self.prefetch_queue = queue.Queue(maxsize=prefetch_num)
+        self.prefetch_queue = queue.queue(maxsize=prefetch_num)
         self.prefetch_thread = threading.Thread(target=run_prefetch,
             args=(self.prefetch_queue, self.folder_name, self.prefix,
                   self.num_batch, self.shuffle))
