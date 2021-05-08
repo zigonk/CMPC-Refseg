@@ -254,9 +254,12 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
                     pred_raw_dcrf = np.argmax(Q, axis=0).reshape((H, W)).astype(np.float32)
                     predicts_dcrf = im_processing.resize_and_crop(pred_raw_dcrf, mask.shape[0], mask.shape[1])
                 if visualize:
-                    visualize_seg(vis_path, im, exp, predicts, mask_path=mask_path)
                     if dcrf:
-                        visualize_seg(vis_path, im, exp, predicts_dcrf, mask_path=mask_path)
+                        np.save(mask_path, np.array(pred_raw_dcrf))
+                        visualize_seg(vis_path, im, exp, predicts_dcrf)
+                    else:
+                        visualize_seg(vis_path, im, exp, predicts)
+                        np.save(mask_path, np.array(pred_raw))
     # I, U = eval_tools.compute_mask_IU(predicts, mask)
     # IU_result.append({'batch_no': n_iter, 'I': I, 'U': U})
     # mean_IoU += float(I) / U
@@ -296,7 +299,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
     #     print(result_str)
 
 
-def visualize_seg(vis_path, im, sent, predicts, mask=None, mask_path=None):
+def visualize_seg(vis_path, im, sent, predicts, mask=None):
     # print("visualizing")
     font                   = cv2.FONT_HERSHEY_SIMPLEX
     bottomLeftCornerOfText = (30, 30)
@@ -317,8 +320,6 @@ def visualize_seg(vis_path, im, sent, predicts, mask=None, mask_path=None):
     # im_gt[:, :, 2] += mask.astype('int16') * (-170)
     # im_gt = im_gt.astype('uint8')
     # sio.imsave(os.path.join(sent_dir, "gt.png"), im_gt)
-    if mask_path is not None:
-        np.save(mask_path, np.array(predicts))
     im_seg = im / 2
     im_seg[:, :, 0] += predicts.astype('uint8') * 100
     im_seg = im_seg.astype('uint8')
