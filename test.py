@@ -341,6 +341,7 @@ if __name__ == "__main__":
     parser.add_argument('-m', type=str)  # 'train' 'test'
     parser.add_argument('-imdir', type=str)
     parser.add_argument('-visdir', type=str)
+    parser.add_argument('-maskdir', type=str)
     parser.add_argument('-meta', type=str)
     parser.add_argument('-embdir', type=str)
     parser.add_argument('-d', type=str, default='referit')  # 'Gref' 'unc' 'unc+' 'referit'
