@@ -210,12 +210,12 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
                     continue
                 if not os.path.exists(vis_dir):
                     os.makedirs(vis_dir)
-                else:
-                    continue
                 if not os.path.exists(mask_dir):
                     os.makedirs(mask_dir)
                 vis_path = os.path.join(vis_dir, str('{}.png'.format(fid)))
                 mask_path = os.path.join(mask_dir, str('{}.npy'.format(fid)))
+                if os.path.exists(vis_path):
+                    continue
 
                 text = np.array(text_processing.preprocess_sentence(exp, vocab_dict, T))
                 im = frame.copy()
