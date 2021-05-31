@@ -268,7 +268,8 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
                     else:
                         visualize_seg(vis_path, im, exp, predicts)
                         np.save(mask_path, np.array(pred_raw))
-            print(avg_time/total_frame)
+            if (total_frame > 0):  
+                    print(avg_time/total_frame)
     # I, U = eval_tools.compute_mask_IU(predicts, mask)
     # IU_result.append({'batch_no': n_iter, 'I': I, 'U': U})
     # mean_IoU += float(I) / U
