@@ -216,8 +216,8 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
                     os.makedirs(mask_dir)
                 vis_path = os.path.join(vis_dir, str('{}.png'.format(fid)))
                 mask_path = os.path.join(mask_dir, str('{}.npy'.format(fid)))
-#                 if os.path.exists(vis_path):
-#                     continue
+                if os.path.exists(vis_path):
+                    continue
                 last_time = time.time()
                 text = np.array(text_processing.preprocess_sentence(exp, vocab_dict, T))
                 im = frame.copy()
@@ -242,10 +242,6 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
                 # pred_raw = (scores_val >= score_thresh).astype(np.float32)
                 up_val = np.squeeze(up_val)
                 pred_raw = (up_val >= score_thresh).astype(np.float32)
-                cur_time = time.time()
-                avg_time += cur_time - last_time
-                total_frame += 1
-                continue
                 predicts = im_processing.resize_and_crop(pred_raw, mask.shape[0], mask.shape[1])
                 if dcrf:
                     # Dense CRF post-processing
@@ -268,8 +264,6 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
                     else:
                         visualize_seg(vis_path, im, exp, predicts)
                         np.save(mask_path, np.array(pred_raw))
-            if (total_frame > 0):  
-                    print(avg_time/total_frame)
     # I, U = eval_tools.compute_mask_IU(predicts, mask)
     # IU_result.append({'batch_no': n_iter, 'I': I, 'U': U})
     # mean_IoU += float(I) / U
