@@ -202,7 +202,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
         # instance_ids = [expression['obj_id'] for expression_id in videos[vid]['expressions']]
         frame_ids = videos[vid]['frames']
         for eid in expressions:
-            exp = expressions[eid]
+            exp = expressions[eid]['exp']
             index = int(eid)
             vis_dir = os.path.join(args.visdir, str('{}/{}/'.format(vid, index)))
             mask_dir = os.path.join(args.maskdir, str('{}/{}/'.format(vid, index)))
