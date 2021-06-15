@@ -196,9 +196,9 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
     with open(args.meta) as meta_file:
         meta_expression = json.load(meta_file)
     videos = meta_expression['videos']
-    for vid_ind, vid in list(enumerate(videos.keys()))[args.from:]:  
+    for vid_ind, vid in list(enumerate(videos.keys()))[args.startvid:]:  
         print("Running on video {}/{}".format(vid_ind + 1, len(videos.keys())))
-        if (vid_ind == args.to):
+        if (vid_ind == args.endvid):
             break
         expressions = videos[vid]['expressions']
         # instance_ids = [expression['obj_id'] for expression_id in videos[vid]['expressions']]
@@ -353,8 +353,8 @@ if __name__ == "__main__":
     parser.add_argument('-g', type=str, default='0')
     parser.add_argument('-i', type=int, default=800000)
     parser.add_argument('-s', type=int, default=100000)
-    parser.add_argument('-from', type=int, default=0)
-    parser.add_argument('-to', type=int, default=1000000)
+    parser.add_argument('-startvid', type=int, default=0)
+    parser.add_argument('-endvid', type=int, default=1000000)
     parser.add_argument('-st', type=int, default=700000)  # stop training when get st iters
     parser.add_argument('-m', type=str)  # 'train' 'test'
     parser.add_argument('-imdir', type=str)
