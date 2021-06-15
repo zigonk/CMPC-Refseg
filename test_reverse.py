@@ -245,7 +245,8 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
                 # scores_val = np.squeeze(scores_val)
                 # pred_raw = (scores_val >= score_thresh).astype(np.float32)
                 up_val = np.squeeze(up_val)
-                pred_raw = (up_val >= score_thresh).astype(np.float32)
+                pred_raw = (up_val >= score_thresh).astype('uint8') * 255
+#                 pred_raw = (up_val >= score_thresh).astype(np.float32)
 #                 predicts = im_processing.resize_and_crop(pred_raw, mask.shape[0], mask.shape[1])
                 if dcrf:
                     # Dense CRF post-processing
