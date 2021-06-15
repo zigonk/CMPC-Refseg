@@ -196,7 +196,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
     with open(args.meta) as meta_file:
         meta_expression = json.load(meta_file)
     videos = meta_expression['videos']
-    for vid_ind, vid in enumerate(videos.keys()):  
+    for vid_ind, vid in reversed(list(enumerate(videos.keys())):  
         print("Running on video {}/{}".format(vid_ind + 1, len(videos.keys())))
         expressions = videos[vid]['expressions']
         # instance_ids = [expression['obj_id'] for expression_id in videos[vid]['expressions']]
