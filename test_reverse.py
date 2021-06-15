@@ -269,7 +269,8 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
 #                         np.save(mask_path, np.array(pred_raw_dcrf))
 #                         visualize_seg(vis_path, im, exp, predicts_dcrf)
                     else:
-                        cv2.imwrite(vis_path, pred_raw)
+                        np.save(mask_path, np.array(sigm_val))
+#                         cv2.imwrite(vis_path, pred_raw)
 #                         visualize_seg(vis_path, im, exp, predicts)
 #                         np.save(mask_path, np.array(pred_raw))
     # I, U = eval_tools.compute_mask_IU(predicts, mask)
