@@ -250,7 +250,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
 #                 predicts = im_processing.resize_and_crop(pred_raw, mask.shape[0], mask.shape[1])
                 if dcrf:
                     # Dense CRF post-processing
-                    sigm_val = np.squeeze(sigm_val)
+                    sigm_val = np.squeeze(sigm_val) + 1e-7
                     d = densecrf.DenseCRF2D(W, H, 2)
                     U = np.expand_dims(-np.log(sigm_val), axis=0)
                     U_ = np.expand_dims(-np.log(1 - sigm_val), axis=0)
