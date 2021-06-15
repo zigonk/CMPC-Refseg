@@ -215,10 +215,10 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
 #             Process text
             text = np.array(text_processing.preprocess_sentence(exp, vocab_dict, T))
             valid_idx = np.zeros([1], dtype=np.int32)
-                for idx in range(text.shape[0]):
-                    if text[idx] != 0:
-                        valid_idx[0] = idx
-                        break
+            for idx in range(text.shape[0]):
+                if text[idx] != 0:
+                    valid_idx[0] = idx
+                    break
             for fid in frame_ids:
                 vis_path = os.path.join(vis_dir, str('{}.png'.format(fid)))
                 mask_path = os.path.join(mask_dir, str('{}.npy'.format(fid)))
