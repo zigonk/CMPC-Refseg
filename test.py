@@ -198,19 +198,28 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
     videos = meta_expression['videos']
     for vid_ind, vid in enumerate(videos.keys()):  
         print("Running on video {}/{}".format(vid_ind + 1, len(videos.keys())))
-        expressions = [videos[vid]['expressions'][expression_id]['exp'] for expression_id in videos[vid]['expressions'].keys()]
+        expressions = videos[vid]['expressions']
         # instance_ids = [expression['obj_id'] for expression_id in videos[vid]['expressions']]
         frame_ids = videos[vid]['frames']
-        for index, exp in enumerate(expressions):
+        for eid in expressions:
+            exp = expressions[eid]
+            index = int(eid)
             vis_dir = os.path.join(args.visdir, str('{}/{}/'.format(vid, index)))
             mask_dir = os.path.join(args.maskdir, str('{}/{}/'.format(vid, index)))
+            if not os.path.exists(vis_dir):
+                os.makedirs(vis_dir)
+            if not os.path.exists(mask_dir):
+                os.makedirs(mask_dir)
             avg_time = 0
             total_frame = 0
+#             Process text
+            text = np.array(text_processing.preprocess_sentence(exp, vocab_dict, T))
+            valid_idx = np.zeros([1], dtype=np.int32)
+                for idx in range(text.shape[0]):
+                    if text[idx] != 0:
+                        valid_idx[0] = idx
+                        break
             for fid in frame_ids:
-                if not os.path.exists(vis_dir):
-                    os.makedirs(vis_dir)
-                if not os.path.exists(mask_dir):
-                    os.makedirs(mask_dir)
                 vis_path = os.path.join(vis_dir, str('{}.png'.format(fid)))
                 mask_path = os.path.join(mask_dir, str('{}.npy'.format(fid)))
                 if os.path.exists(vis_path):
@@ -219,14 +228,9 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
                 if frame is None:
                     continue
                 last_time = time.time()
-                text = np.array(text_processing.preprocess_sentence(exp, vocab_dict, T))
-                im = frame.copy()
-                mask = np.array(frame, dtype=np.float32)
-                valid_idx = np.zeros([1], dtype=np.int32)
-                for idx in range(text.shape[0]):
-                    if text[idx] != 0:
-                        valid_idx[0] = idx
-                        break
+#                 im = frame.copy()
+                im = frame
+#                 mask = np.array(frame, dtype=np.float32)
 
                 proc_im = skimage.img_as_ubyte(im_processing.resize_and_pad(im, H, W))
                 proc_im_ = proc_im.astype(np.float32)
@@ -242,7 +246,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
                 # pred_raw = (scores_val >= score_thresh).astype(np.float32)
                 up_val = np.squeeze(up_val)
                 pred_raw = (up_val >= score_thresh).astype(np.float32)
-                predicts = im_processing.resize_and_crop(pred_raw, mask.shape[0], mask.shape[1])
+#                 predicts = im_processing.resize_and_crop(pred_raw, mask.shape[0], mask.shape[1])
                 if dcrf:
                     # Dense CRF post-processing
                     sigm_val = np.squeeze(sigm_val)
@@ -256,14 +260,16 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
                     d.addPairwiseBilateral(sxy=20, srgb=3, rgbim=proc_im, compat=10)
                     Q = d.inference(5)
                     pred_raw_dcrf = np.argmax(Q, axis=0).reshape((H, W)).astype(np.float32)
-                    predicts_dcrf = im_processing.resize_and_crop(pred_raw_dcrf, mask.shape[0], mask.shape[1])
+#                     predicts_dcrf = im_processing.resize_and_crop(pred_raw_dcrf, mask.shape[0], mask.shape[1])
                 if visualize:
                     if dcrf:
-                        np.save(mask_path, np.array(pred_raw_dcrf))
-                        visualize_seg(vis_path, im, exp, predicts_dcrf)
+                        cv2.imwrite(vis_path, pred_raw_dcrf)
+#                         np.save(mask_path, np.array(pred_raw_dcrf))
+#                         visualize_seg(vis_path, im, exp, predicts_dcrf)
                     else:
-                        visualize_seg(vis_path, im, exp, predicts)
-                        np.save(mask_path, np.array(pred_raw))
+                        cv2.imwrite(vis_path, pred_raw)
+#                         visualize_seg(vis_path, im, exp, predicts)
+#                         np.save(mask_path, np.array(pred_raw))
     # I, U = eval_tools.compute_mask_IU(predicts, mask)
     # IU_result.append({'batch_no': n_iter, 'I': I, 'U': U})
     # mean_IoU += float(I) / U
