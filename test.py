@@ -354,7 +354,7 @@ if __name__ == "__main__":
     parser.add_argument('-i', type=int, default=800000)
     parser.add_argument('-s', type=int, default=100000)
     parser.add_argument('-from', type=int, default=0)
-    parser.add_argument('-to', type=int, default=0)
+    parser.add_argument('-to', type=int, default=1000000)
     parser.add_argument('-st', type=int, default=700000)  # stop training when get st iters
     parser.add_argument('-m', type=str)  # 'train' 'test'
     parser.add_argument('-imdir', type=str)
