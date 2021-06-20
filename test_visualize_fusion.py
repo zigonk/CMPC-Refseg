@@ -251,9 +251,11 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
                                                         })
                 # scores_val = np.squeeze(scores_val)
                 # pred_raw = (scores_val >= score_thresh).astype(np.float32)
+                print(frame.shape)
                 up_c3 = sigmoid(np.squeeze(up_c3))
                 up_c4 = sigmoid(np.squeeze(up_c4))
                 up_c5 = sigmoid(np.squeeze(up_c5))
+                 
                 up_val = np.squeeze(up_val)
                 plt.clf()
                 plt.subplot(3, 2, 1)
