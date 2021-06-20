@@ -1,4 +1,6 @@
 import sys
+
+from numpy.lib.npyio import save
 sys.path.append('./external/coco/PythonAPI')
 import os
 import argparse
@@ -10,7 +12,7 @@ import skimage.io
 from util import im_processing, text_processing
 from util.io import load_referit_gt_mask as load_gt_mask
 # from refer import REFER
-from pycocotools import mask as cocomask
+# from pycocotools import mask as cocomask
 
 object_color = {
     '1': [236, 95, 103],
@@ -122,8 +124,9 @@ def build_referit_batches(setname, T, input_H, input_W):
 def build_refvos_batch(setname, T, input_H, input_W, im_dir, mask_dir, meta_expressions, save_dir):
     vocab_file = './data/vocabulary_Gref.txt'
 
+    print(save_dir)
     # saving directory
-    data_folder = os.path.join(save_dir, '/refvos/' + setname + '_batch/')
+    data_folder = os.path.join(save_dir, 'refvos/' + setname + '_batch/')
     data_prefix = 'refvos_' + setname
     if not os.path.isdir(data_folder):
         os.makedirs(data_folder)
@@ -141,8 +144,8 @@ def build_refvos_batch(setname, T, input_H, input_W, im_dir, mask_dir, meta_expr
             obj_id = expressions[eid]['obj_id']
             for fid in frames:
                 im_name = os.path.join(vid, fid + '.jpg')
-                mask_name = os.path.join(vid, eid, fid + '.png')
-                samples.append((im_name, mask_name, exp, eid))
+                mask_name = os.path.join(vid, fid + '.png')
+                samples.append((im_name, mask_name, exp, obj_id))
 
     vocab_dict = text_processing.load_vocab_dict_from_file(vocab_file)
 
@@ -151,10 +154,6 @@ def build_refvos_batch(setname, T, input_H, input_W, im_dir, mask_dir, meta_expr
     for n_batch in range(num_batch):
         print('saving batch %d / %d' % (n_batch + 1, num_batch))
         im_name, mask_name, sent, obj_id = samples[n_batch]
-        if (not os.path.exists(os.path.join(im_dir,im_name))):
-            continue
-        if (not os.path.exists(os.path.join(mask_dir,mask_name))):
-            continue
         im = skimage.io.imread(os.path.join(im_dir,im_name))
         mask = skimage.io.imread(os.path.join(mask_dir,mask_name)).astype(np.float32)
         mask_color = object_color[obj_id][::-1]
@@ -194,6 +193,6 @@ if __name__ == "__main__":
     elif args.d == 'refvos':
         build_refvos_batch(setname=args.d, T = T, input_H=input_H, input_W=input_W, 
             im_dir=args.imdir, mask_dir=args.maskdir, meta_expressions=args.meta, save_dir=args.savedir)
-    else:
-        build_coco_batches(dataset = args.d, setname = args.t,
-            T = T, input_H = input_H, input_W = input_W)
+    # else:
+    #     build_coco_batches(dataset = args.d, setname = args.t,
+    #         T = T, input_H = input_H, input_W = input_W)
