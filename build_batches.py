@@ -158,7 +158,6 @@ def build_refvos_batch(setname, T, input_H, input_W, im_dir, mask_dir, meta_expr
         mask = skimage.io.imread(os.path.join(mask_dir,mask_name)).astype(np.float32)
         mask_color = object_color[obj_id]
         mask_obj = np.asarray((mask == mask_color)*1.0, dtype=np.float32)[:,:,0]
-        print(mask_obj.shape)
         if np.sum(mask_obj) == 0:
             print(im_name)
             continue
@@ -175,6 +174,7 @@ def build_refvos_batch(setname, T, input_H, input_W, im_dir, mask_dir, meta_expr
             im_batch = im,
             mask_batch = (mask > 0),
             sent_batch = [sent])
+        break
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
