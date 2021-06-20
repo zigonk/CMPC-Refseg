@@ -199,7 +199,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
     with open(args.meta) as meta_file:
         meta_expression = json.load(meta_file)
     videos = meta_expression['videos']
-    plt.figure()
+    plt.figure(figsize=[5, 13])
     for vid_ind, vid in reversed(list(enumerate(videos.keys()))):  
         print("Running on video {}/{}".format(vid_ind + 1, len(videos.keys())))
         expressions = videos[vid]['expressions']
