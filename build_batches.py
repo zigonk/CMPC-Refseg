@@ -156,8 +156,9 @@ def build_refvos_batch(setname, T, input_H, input_W, im_dir, mask_dir, meta_expr
         im_name, mask_name, sent, obj_id = samples[n_batch]
         im = skimage.io.imread(os.path.join(im_dir,im_name))
         mask = skimage.io.imread(os.path.join(mask_dir,mask_name)).astype(np.float32)
-        mask_color = object_color[obj_id][::-1]
-        mask_obj = np.asarray((mask == mask_color)*1.0, dtype=np.float32)[:,:,0]
+        mask_color = object_color[obj_id]
+        print(mask.shape)
+        mask_obj = np.asarray((mask == mask_color)*1.0, dtype=np.float32)
         if np.sum(mask_obj) == 0:
             print(im_name)
             continue
