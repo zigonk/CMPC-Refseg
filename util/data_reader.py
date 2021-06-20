@@ -48,7 +48,7 @@ class DataReader:
         self.num_batch = num_batch
 
         # Start prefetching thread
-        self.prefetch_queue = queue.queue(maxsize=prefetch_num)
+        self.prefetch_queue = queue.Queue(maxsize=prefetch_num)
         self.prefetch_thread = threading.Thread(target=run_prefetch,
             args=(self.prefetch_queue, self.folder_name, self.prefix,
                   self.num_batch, self.shuffle))
