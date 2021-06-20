@@ -208,7 +208,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
         for eid in expressions:
             exp = expressions[eid]['exp']
             index = int(eid)
-            vis_dir = agrs.visdir
+            vis_dir = args.visdir
 #             mask_dir = os.path.join(args.maskdir, str('{}/{}/'.format(vid, index)))
             if not os.path.exists(vis_dir):
                 os.makedirs(vis_dir)
