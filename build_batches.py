@@ -151,6 +151,10 @@ def build_refvos_batch(setname, T, input_H, input_W, im_dir, mask_dir, meta_expr
     for n_batch in range(num_batch):
         print('saving batch %d / %d' % (n_batch + 1, num_batch))
         im_name, mask_name, sent, obj_id = samples[n_batch]
+        if (not os.path.exists(os.path.join(im_dir,im_name))):
+            continue
+        if (not os.path.exists(os.path.join(mask_dir,mask_name))):
+            continue
         im = skimage.io.imread(os.path.join(im_dir,im_name))
         mask = skimage.io.imread(os.path.join(mask_dir,mask_name)).astype(np.float32)
         mask_color = object_color[obj_id][::-1]
