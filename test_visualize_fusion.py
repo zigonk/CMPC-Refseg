@@ -224,6 +224,9 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
                     valid_idx[0] = idx
                     break
             for fid in frame_ids:
+                frame_id = int(fid)
+                if (frame_id % 20 != 0):
+                    continue
                 vis_path = os.path.join(vis_dir, str('{}_{}_{}.png'.format(vid,eid,fid)))
 #                 mask_path = os.path.join(mask_dir, str('{}.npy'.format(fid)))
                 if os.path.exists(vis_path):
