@@ -17,7 +17,7 @@ from util import im_processing, eval_tools, MovingAverage
 
 
 def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_folder,
-          conv5, model_name, stop_iter, pre_emb=False, finetune=False, pretrain_folder = '', emb_dir=''):
+          conv5, model_name, stop_iter, last_iter, pre_emb=False, finetune=False, pretrain_folder = '', emb_dir=''):
     iters_per_log = 100
     data_folder = os.path.join(data_dir, dataset + '/' + setname + '_batch/')
     data_prefix = dataset + '_' + setname
@@ -41,7 +41,7 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
                                        vocab_size=vocab_size, start_lr=lr,
                                        batch_size=bs, conv5=conv5)
     if finetune:
-        weights = os.path.join(pretrain_folder, dataset + '_iter_' + str(iter) + '.tfmodel')
+        weights = os.path.join(pretrain_folder, dataset + '_iter_' + str(last_iter) + '.tfmodel')
     else:
         weights = './data/weights/deeplab_resnet_init.ckpt'
     print("Loading pretrained weights from {}".format(weights))
@@ -353,7 +353,7 @@ if __name__ == "__main__":
               stop_iter=args.st,
               pre_emb=args.emb,
               finetune=args.finetune,
-              last_iter=args.lastiter
+              last_iter=args.lastiter,
               pretrain_folder=pretrain_folder,
               emb_dir=args.embdir)
     elif args.m == 'test':
