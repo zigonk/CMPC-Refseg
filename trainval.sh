@@ -6,11 +6,14 @@ now=$(date +"%Y%m%d_%H%M%S")
 
 python -u trainval_model.py \
 -m train \
--d unc \
+-d refvos \
+-datadir /home/zigonk/Documents/Thesis/CMPC-Refseg/data_preprocessing \
 -t train \
 -n CMPC_model \
+-i 100000 \
 -emb \
--f ckpts/unc/cmpc_model 2>&1 | tee ${LOG}/train_$now.txt
+-embdir /home/zigonk/Documents/Thesis/CMPC-Refseg/data \
+-f /home/zigonk/Documents/Thesis/CMPC-Refseg/model/refvos/ 
 
 python -u trainval_model.py \
 -m test \

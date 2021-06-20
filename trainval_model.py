@@ -76,7 +76,7 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
             im = batch['im_batch'].astype(np.float32)
             # mask = batch['mask_batch']
             mask = np.expand_dims(batch['mask_batch'].astype(np.float32), axis=2)
-
+            
             im = im[:, :, ::-1]
             im -= mu
 
