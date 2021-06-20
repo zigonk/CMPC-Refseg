@@ -16,10 +16,10 @@ from util.processing_tools import *
 from util import im_processing, eval_tools, MovingAverage
 
 
-def train(max_iter, snapshot, dataset, setname, mu, lr, bs, tfmodel_folder,
-          conv5, model_name, stop_iter, pre_emb=False):
+def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_folder,
+          conv5, model_name, stop_iter, pre_emb=False, finetune=False, pretrain_folder = ''):
     iters_per_log = 100
-    data_folder = './' + dataset + '/' + setname + '_batch/'
+    data_folder = os.path.join(data_dir, dataset + '/' + setname + '_batch/')
     data_prefix = dataset + '_' + setname
     snapshot_file = os.path.join(tfmodel_folder, dataset + '_iter_%d.tfmodel')
     if not os.path.isdir(tfmodel_folder):
@@ -40,11 +40,13 @@ def train(max_iter, snapshot, dataset, setname, mu, lr, bs, tfmodel_folder,
         model = get_segmentation_model(model_name, mode='train',
                                        vocab_size=vocab_size, start_lr=lr,
                                        batch_size=bs, conv5=conv5)
-
-    weights = './data/weights/deeplab_resnet_init.ckpt'
+    if finetune:
+        weights = os.path.join(pretrain_folder, dataset + '_iter_' + str(iter) + '.tfmodel')
+    else:
+        weights = './data/weights/deeplab_resnet_init.ckpt'
     print("Loading pretrained weights from {}".format(weights))
     load_var = {var.op.name: var for var in tf.global_variables()
-                if var.name.startswith('res') or var.name.startswith('bn') or var.name.startswith('conv1')}
+                if var.name.startswith('res') or var.name.startswith('bn') or var.name.startswith('conv1') or var.name.startswith('Adam')}
 
     snapshot_loader = tf.train.Saver(load_var)
     snapshot_saver = tf.train.Saver(max_to_keep=4)
@@ -317,6 +319,9 @@ if __name__ == "__main__":
     parser.add_argument('-f', type=str)  # directory to save models
     parser.add_argument('-lr', type=float, default=0.00025)  # start learning rate
     parser.add_argument('-bs', type=int, default=1)  # batch size
+    parser.add_argument('-datadir', type=str, default='./')
+    parser.add_argument('-pretrain', type=str, default='')
+    parser.add_argument('-finetune', default=False, action='store_true') 
     parser.add_argument('-v', default=False, action='store_true')  # visualization
     parser.add_argument('-c', default=False, action='store_true')  # whether or not apply DenseCRF
     parser.add_argument('-emb', default=False, action='store_true')  # whether or not use Pretrained Embeddings
@@ -327,10 +332,15 @@ if __name__ == "__main__":
     # os.environ['CUDA_VISIBLE_DEVICES'] = args.g
     mu = np.array((104.00698793, 116.66876762, 122.67891434))
 
+    pretrain_folder = args.pretrain
+    if (pretrain_folder == ''):
+        pretrain_folder = args.f
+
     if args.m == 'train':
         train(max_iter=args.i,
               snapshot=args.s,
               dataset=args.d,
+              data_dir=args.datadir,
               setname=args.t,
               mu=mu,
               lr=args.lr,
@@ -339,7 +349,9 @@ if __name__ == "__main__":
               conv5=args.conv5,
               model_name=args.n,
               stop_iter=args.st,
-              pre_emb=args.emb)
+              pre_emb=args.emb,
+              finetune=args.finetune,
+              pretrain_folder=pretrain_folder)
     elif args.m == 'test':
         test(iter=args.i,
              dataset=args.d,

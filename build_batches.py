@@ -109,11 +109,11 @@ def build_coco_batches(dataset, setname, T, input_H, input_W):
                 sent_batch = [sent])
             n_batch += 1
 
-def build_refvos_batch(setname, T, input_H, input_W, im_dir, mask_dir, meta_expressions):
+def build_refvos_batch(setname, T, input_H, input_W, im_dir, mask_dir, meta_expressions, save_dir):
     vocab_file = './data/vocabulary_Gref.txt'
 
     # saving directory
-    data_folder = './refvos/' + setname + '_batch/'
+    data_folder = os.path.join(save_dir, '/refvos/' + setname + '_batch/')
     data_prefix = 'refvos_' + setname
     if not os.path.isdir(data_folder):
         os.makedirs(data_folder)
@@ -164,6 +164,7 @@ if __name__ == "__main__":
     parser.add_argument('-imdir', type = str, default='', help='Image folder (RE YoutubeVOS)') 
     parser.add_argument('-maskdir', type = str, default='', help='Mask folder (RE YoutueVOS)') 
     parser.add_argument('-meta', type = str, default='', help='Meta expression (RE YoutubeVOS')
+    parser.add_argument('-savedir', type = str, default='', help='Export directory (RE YoutubeVOS')
 
     args = parser.parse_args()
     T = 20
@@ -174,7 +175,7 @@ if __name__ == "__main__":
             T = T, input_H = input_H, input_W = input_W)
     elif args.d == 'refvos':
         build_refvos_batch(setname=args.T, input_H=input_H, input_W=input_W, 
-            im_dir=args.imdir, mask_dir=args.maskdir, meta_expressions=args.meta)
+            im_dir=args.imdir, mask_dir=args.maskdir, meta_expressions=args.meta, save_dir=args.savedir)
     else:
         build_coco_batches(dataset = args.d, setname = args.t,
             T = T, input_H = input_H, input_W = input_W)
