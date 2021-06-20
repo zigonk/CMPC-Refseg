@@ -158,7 +158,8 @@ def build_refvos_batch(setname, T, input_H, input_W, im_dir, mask_dir, meta_expr
         mask = skimage.io.imread(os.path.join(mask_dir,mask_name)).astype(np.float32)
         mask_color = object_color[obj_id][::-1]
         mask_obj = np.asarray((mask == mask_color)*1.0, dtype=np.float32)
-        if np.sum(mask_obj) == 0: 
+        if np.sum(mask_obj) == 0:
+            print(im_name)
             continue
         if 'train' in setname:
             im = skimage.img_as_ubyte(im_processing.resize_and_pad(im, input_H, input_W))
