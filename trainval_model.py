@@ -17,7 +17,7 @@ from util import im_processing, eval_tools, MovingAverage
 
 
 def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_folder,
-          conv5, model_name, stop_iter, pre_emb=False, finetune=False, pretrain_folder = ''):
+          conv5, model_name, stop_iter, pre_emb=False, finetune=False, pretrain_folder = '', emb_dir):
     iters_per_log = 100
     data_folder = os.path.join(data_dir, dataset + '/' + setname + '_batch/')
     data_prefix = dataset + '_' + setname
@@ -35,7 +35,7 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
         print("Use pretrained Embeddings.")
         model = get_segmentation_model(model_name, mode='train',
                                        vocab_size=vocab_size, start_lr=lr,
-                                       batch_size=bs, conv5=conv5, emb_name=emb_name)
+                                       batch_size=bs, conv5=conv5, emb_name=emb_name, emb_dir=emb_dir)
     else:
         model = get_segmentation_model(model_name, mode='train',
                                        vocab_size=vocab_size, start_lr=lr,
@@ -325,6 +325,7 @@ if __name__ == "__main__":
     parser.add_argument('-v', default=False, action='store_true')  # visualization
     parser.add_argument('-c', default=False, action='store_true')  # whether or not apply DenseCRF
     parser.add_argument('-emb', default=False, action='store_true')  # whether or not use Pretrained Embeddings
+    parser.add_argument('-emb_dir', default=False, action='store_true')  # whether or not use Pretrained Embeddings
     parser.add_argument('-n', type=str, default='')  # select model
     parser.add_argument('-conv5', default=False, action='store_true')  # finetune conv layers
 
