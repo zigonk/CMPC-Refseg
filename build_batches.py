@@ -174,7 +174,6 @@ def build_refvos_batch(setname, T, input_H, input_W, im_dir, mask_dir, meta_expr
             im_batch = im,
             mask_batch = (mask > 0),
             sent_batch = [sent])
-        break
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
