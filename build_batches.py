@@ -1,6 +1,8 @@
+from genericpath import exists
 import sys
 
 from numpy.lib.npyio import save
+from tensorflow.python.ops.gen_batch_ops import batch
 sys.path.append('./external/coco/PythonAPI')
 import os
 import argparse
@@ -151,9 +153,14 @@ def build_refvos_batch(setname, T, input_H, input_W, im_dir, mask_dir, meta_expr
 
     # save batches to disk
     num_batch = len(samples)
+    batch_ind = 0
     for n_batch in range(num_batch):
         print('saving batch %d / %d' % (n_batch + 1, num_batch))
         im_name, mask_name, sent, obj_id = samples[n_batch]
+        im_path = os.path.join(im_dir,im_name)
+        mask_path = os.path.join(mask_dir,mask_name)
+        if not (os.path.exists(im_path) and os.path.exists(mask_path)):
+            continue
         im = skimage.io.imread(os.path.join(im_dir,im_name))
         mask = skimage.io.imread(os.path.join(mask_dir,mask_name))
         mask_color = object_color[obj_id]
@@ -172,11 +179,12 @@ def build_refvos_batch(setname, T, input_H, input_W, im_dir, mask_dir, meta_expr
 
         text = text_processing.preprocess_sentence(sent, vocab_dict, T)
 
-        np.savez(file = data_folder + data_prefix + '_' + str(n_batch) + '.npz',
+        np.savez(file = data_folder + data_prefix + '_' + str(batch_ind) + '.npz',
             text_batch = text,
             im_batch = im,
             mask_batch = (mask > 0),
             sent_batch = [sent])
+        batch_ind += 1
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

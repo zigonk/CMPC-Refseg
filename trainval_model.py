@@ -68,15 +68,15 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
     # for time calculate
     last_time = time.time()
     time_avg = MovingAverage()
+    meanIoU = 0
     for n_iter in range(max_iter):
-
         for n_batch in range(bs):
             batch = reader.read_batch(is_log=(n_batch == 0 and n_iter % iters_per_log == 0))
             text = batch['text_batch']
             im = batch['im_batch'].astype(np.float32)
             # mask = batch['mask_batch']
             mask = np.expand_dims(batch['mask_batch'].astype(np.float32), axis=2)
-            
+
             im = im[:, :, ::-1]
             im -= mu
 
@@ -88,7 +88,6 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
                 if text[idx] != 0:
                     valid_idx_batch[n_batch, :] = idx
                     break
-
         _, cls_loss_val, lr_val, scores_val, label_val = sess.run([model.train_step,
                                                                    model.cls_loss,
                                                                    model.learning_rate,
@@ -110,7 +109,8 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
         avg_accuracy_all = decay * avg_accuracy_all + (1 - decay) * accuracy_all
         avg_accuracy_pos = decay * avg_accuracy_pos + (1 - decay) * accuracy_pos
         avg_accuracy_neg = decay * avg_accuracy_neg + (1 - decay) * accuracy_neg
-
+        IoU = compute_meanIoU(scores_val, label_val)
+        meanIoU += IoU
         # timing
         cur_time = time.time()
         elapsed = cur_time - last_time
@@ -123,6 +123,9 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
                   % (n_iter, accuracy_all, accuracy_pos, accuracy_neg))
             print('iter = %d, accuracy (avg) = %f (all), %f (pos), %f (neg)'
                   % (n_iter, avg_accuracy_all, avg_accuracy_pos, avg_accuracy_neg))
+            print('iter = %d, meanIoU = %f (neg)'
+                  % (n_iter, meanIoU / iters_per_log))
+            meanIoU = 0
             time_avg.add(elapsed)
             print('iter = %d, cur time = %.5f, avg time = %.5f, model_name: %s' % (n_iter, elapsed, time_avg.get_avg(), model_name))
 

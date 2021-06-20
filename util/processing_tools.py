@@ -34,6 +34,14 @@ def compute_accuracy(scores, labels):
     accuracy_neg = np.sum(is_correct[is_neg]) / num_neg
     return accuracy_all, accuracy_pos, accuracy_neg
 
+def compute_meanIoU(scores, labels):
+    gt = (labels != 0)
+    pred = (scores > 0)
+    union = pred | gt
+    intersect = pred & gt
+    return np.sum(intersect) / np.sum(union)
+    
+
 def spatial_feature_from_bbox(bboxes, imsize):
     if isinstance(bboxes, list):
         bboxes = np.array(bboxes)
