@@ -55,7 +55,7 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
     config.gpu_options.allow_growth = True
     sess = tf.Session(config=config)
     sess.run(tf.global_variables_initializer())
-    snapshot_loader.recover_last_checkpoints(sess, snapshot_loader.latest_checkpoint())
+    snapshot_loader.recover_last_checkpoints(sess, weights)
 
     im_h, im_w, num_steps = model.H, model.W, model.num_steps
     text_batch = np.zeros((bs, num_steps), dtype=np.float32)
