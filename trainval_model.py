@@ -55,7 +55,7 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
     config.gpu_options.allow_growth = True
     sess = tf.Session(config=config)
     sess.run(tf.global_variables_initializer())
-    snapshot_loader.restore(sess, weights)
+    snapshot_loader.recover_last_checkpoints(sess, snapshot_loader.latest_checkpoint())
 
     im_h, im_w, num_steps = model.H, model.W, model.num_steps
     text_batch = np.zeros((bs, num_steps), dtype=np.float32)
@@ -312,6 +312,7 @@ if __name__ == "__main__":
     parser.add_argument('-g', type=str, default='0')
     parser.add_argument('-i', type=int, default=800000)
     parser.add_argument('-s', type=int, default=100000)
+    parser.add_argument('-lastiter', type=int, default=700000) #last iter for continue training
     parser.add_argument('-st', type=int, default=700000)  # stop training when get st iters
     parser.add_argument('-m', type=str)  # 'train' 'test'
     parser.add_argument('-d', type=str, default='referit')  # 'Gref' 'unc' 'unc+' 'referit'
@@ -352,6 +353,7 @@ if __name__ == "__main__":
               stop_iter=args.st,
               pre_emb=args.emb,
               finetune=args.finetune,
+              last_iter=args.lastiter
               pretrain_folder=pretrain_folder,
               emb_dir=args.embdir)
     elif args.m == 'test':
