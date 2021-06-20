@@ -253,9 +253,13 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
                 up_c5 = sigmoid(np.squeeze(up_c5))
                 up_val = np.squeeze(up_val)
                 plt.clf()
+                plt.subplot(2, 2, 1)
                 plt.imshow(up_c3)
+                plt.subplot(2, 2, 2)
                 plt.imshow(up_c4)
+                plt.subplot(2, 2, 3)
                 plt.imshow(up_c5)
+                plt.subplot(2, 2, 4)
                 plt.imshow(up_val)
                 plt.savefig(vis_path)
 #                 pred_raw = (up_val >= score_thresh).astype('uint8') * 255
