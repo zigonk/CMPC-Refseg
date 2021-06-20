@@ -325,7 +325,7 @@ if __name__ == "__main__":
     parser.add_argument('-v', default=False, action='store_true')  # visualization
     parser.add_argument('-c', default=False, action='store_true')  # whether or not apply DenseCRF
     parser.add_argument('-emb', default=False, action='store_true')  # whether or not use Pretrained Embeddings
-    parser.add_argument('-embdir', default=False, action='store_true')  # whether or not use Pretrained Embeddings
+    parser.add_argument('-embdir', type=str, default='')  # whether or not use Pretrained Embeddings
     parser.add_argument('-n', type=str, default='')  # select model
     parser.add_argument('-conv5', default=False, action='store_true')  # finetune conv layers
 
