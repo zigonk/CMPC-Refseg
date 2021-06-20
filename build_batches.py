@@ -134,11 +134,11 @@ def build_refvos_batch(setname, T, input_H, input_W, im_dir, mask_dir, meta_expr
     samples = []
     for vid in videos:
         video = videos[vid]
-        expression = video['expressions']
+        expressions = video['expressions']
         frames = video['frames']
-        for eid in expression:
-            exp = expression[eid]['exp']
-            obj_id = expression['obj_id']
+        for eid in expressions:
+            exp = expressions[eid]['exp']
+            obj_id = expressions[eid]['obj_id']
             for fid in frames:
                 im_name = os.path.join(vid, fid + '.jpg')
                 mask_name = os.path.join(vid, eid, fid + '.png')
