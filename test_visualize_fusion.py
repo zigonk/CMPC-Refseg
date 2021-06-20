@@ -265,7 +265,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
                 plt.subplot(3, 2, 4)
                 plt.imshow(up_c5)
                 plt.subplot(3, 2, 5)
-                plt.imshow(sigm_val)
+                plt.imshow(np.squeeze(sigm_val))
                 plt.savefig(vis_path)
 #                 pred_raw = (up_val >= score_thresh).astype('uint8') * 255
 #                 pred_raw = (up_val >= score_thresh).astype(np.float32)
