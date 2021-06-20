@@ -129,8 +129,8 @@ def build_refvos_batch(setname, T, input_H, input_W, im_dir, mask_dir, meta_expr
         for eid in expression:
             exp = expression[eid]['exp']
             for fid in frames:
-                im_name = fid + '.jpg'
-                mask_name = fid + '.png'
+                im_name = os.path.join(vid, fid + '.jpg')
+                mask_name = os.path.join(vid, eid, fid + '.png')
                 samples.append((im_name, mask_name, exp))
 
     vocab_dict = text_processing.load_vocab_dict_from_file(vocab_file)
