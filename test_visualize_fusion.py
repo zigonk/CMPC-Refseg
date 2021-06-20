@@ -199,7 +199,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
     with open(args.meta) as meta_file:
         meta_expression = json.load(meta_file)
     videos = meta_expression['videos']
-    plt.figure(figsize=[5, 13])
+    plt.figure(figsize=[15, 4])
     for vid_ind, vid in reversed(list(enumerate(videos.keys()))):  
         print("Running on video {}/{}".format(vid_ind + 1, len(videos.keys())))
         expressions = videos[vid]['expressions']
@@ -254,16 +254,16 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
                 sigm_val = im_processing.resize_and_crop(sigmoid(np.squeeze(sigm_val)), frame.shape[0], frame.shape[1])
                 up_val = np.squeeze(up_val)
                 plt.clf()
-                plt.subplot(5, 1, 1)
+                plt.subplot(1, 5, 1)
                 plt.imshow(frame)
-                plt.text(-0.2, -0.2, exp)
-                plt.subplot(5, 1, 2)
+                plt.text(-0.5, -0.5, exp)
+                plt.subplot(1, 5, 2)
                 plt.imshow(up_c3)
-                plt.subplot(5, 1, 3)
+                plt.subplot(1, 5, 3)
                 plt.imshow(up_c4)
-                plt.subplot(5, 1, 4)
+                plt.subplot(1, 5, 4)
                 plt.imshow(up_c5)
-                plt.subplot(5, 1, 5)
+                plt.subplot(1, 5, 5)
                 plt.imshow(sigm_val)
                 plt.savefig(vis_path)
 #                 pred_raw = (up_val >= score_thresh).astype('uint8') * 255
