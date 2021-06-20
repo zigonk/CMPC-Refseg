@@ -132,7 +132,6 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
             print('snapshot saved to ' + snapshot_file % (n_iter + 1))
         if (n_iter + 1) >= stop_iter:
             print('stop training at iter ' + str(stop_iter))
-            break
 
     print('Optimization done.')
 
