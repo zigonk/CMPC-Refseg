@@ -192,7 +192,7 @@ if __name__ == "__main__":
         build_referit_batches(setname = args.t,
             T = T, input_H = input_H, input_W = input_W)
     elif args.d == 'refvos':
-        build_refvos_batch(setname=args.d, T = T, input_H=input_H, input_W=input_W, 
+        build_refvos_batch(setname=args.t, T = T, input_H=input_H, input_W=input_W, 
             im_dir=args.imdir, mask_dir=args.maskdir, meta_expressions=args.meta, save_dir=args.savedir)
     # else:
     #     build_coco_batches(dataset = args.d, setname = args.t,
