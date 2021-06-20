@@ -17,7 +17,7 @@ from util import im_processing, eval_tools, MovingAverage
 
 
 def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_folder,
-          conv5, model_name, stop_iter, pre_emb=False, finetune=False, pretrain_folder = '', emb_dir):
+          conv5, model_name, stop_iter, pre_emb=False, finetune=False, pretrain_folder = '', emb_dir=''):
     iters_per_log = 100
     data_folder = os.path.join(data_dir, dataset + '/' + setname + '_batch/')
     data_prefix = dataset + '_' + setname
@@ -325,7 +325,7 @@ if __name__ == "__main__":
     parser.add_argument('-v', default=False, action='store_true')  # visualization
     parser.add_argument('-c', default=False, action='store_true')  # whether or not apply DenseCRF
     parser.add_argument('-emb', default=False, action='store_true')  # whether or not use Pretrained Embeddings
-    parser.add_argument('-emb_dir', default=False, action='store_true')  # whether or not use Pretrained Embeddings
+    parser.add_argument('-embdir', default=False, action='store_true')  # whether or not use Pretrained Embeddings
     parser.add_argument('-n', type=str, default='')  # select model
     parser.add_argument('-conv5', default=False, action='store_true')  # finetune conv layers
 
@@ -352,7 +352,8 @@ if __name__ == "__main__":
               stop_iter=args.st,
               pre_emb=args.emb,
               finetune=args.finetune,
-              pretrain_folder=pretrain_folder)
+              pretrain_folder=pretrain_folder,
+              emb_dir=args.embdir)
     elif args.m == 'test':
         test(iter=args.i,
              dataset=args.d,
