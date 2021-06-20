@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-LOG=logs/unc/cmpc_model
+LOG=logs/cmpc_model
 mkdir -p ${LOG}
 now=$(date +"%Y%m%d_%H%M%S")
 
