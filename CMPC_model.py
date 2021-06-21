@@ -309,7 +309,7 @@ class LSTM_model(object):
         # Convolutional LSTM Fuse
         convlstm_cell = ConvLSTMCell([self.vf_h, self.vf_w], self.mlp_dim, [1, 1])
         convlstm_outputs, states = tf.nn.dynamic_rnn(convlstm_cell, tf.convert_to_tensor(
-            [zip(feat_exg3_2, feat_exg4_2, feat_exg5_2)]), dtype=tf.float32)
+            [list(zip(feat_exg3_2, feat_exg4_2, feat_exg5_2))]), dtype=tf.float32)
         fused_feat = convlstm_outputs[:,:,-1]
         print("Build Gated Fusion with ConvLSTM two times.")
 
