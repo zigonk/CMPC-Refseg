@@ -181,7 +181,7 @@ def build_refvos_batch(setname, T, input_H, input_W, im_dir, mask_dir, meta_expr
 
         text = text_processing.preprocess_sentence(sent, vocab_dict, T)
 
-        np.savez(file = data_folder + data_prefix + '_' + str(batch_ind) + '.npz',
+        np.savez(file = data_folder + data_prefix + '_' + str(n_batch) + '.npz',
             text_batch = text,
             im_batch = im,
             mask_batch = (mask > 0),
