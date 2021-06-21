@@ -305,11 +305,11 @@ class LSTM_model(object):
         feat_exg4_2 = tf.nn.l2_normalize(feat_exg4_2, 3)
         feat_exg5_2 = self.gated_exchange_module(feat_exg5, feat_exg3, feat_exg4, lang_feat, 'c5_2')
         feat_exg5_2 = tf.nn.l2_normalize(feat_exg5_2, 3)
-
+        
         # Convolutional LSTM Fuse
         convlstm_cell = ConvLSTMCell([self.vf_h, self.vf_w], self.mlp_dim, [1, 1])
         convlstm_outputs, states = tf.nn.dynamic_rnn(convlstm_cell, tf.convert_to_tensor(
-            [list(zip(feat_exg3_2, feat_exg4_2, feat_exg5_2))]), dtype=tf.float32)
+            tf.stack((feat_exg3_2, feat_exg4_2, feat_exg5_2), axis=1)), dtype=tf.float32)
         fused_feat = convlstm_outputs[:,:,-1]
         print("Build Gated Fusion with ConvLSTM two times.")
 
