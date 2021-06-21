@@ -88,6 +88,8 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
                 if text[idx] != 0:
                     valid_idx_batch[n_batch, :] = idx
                     break
+        print(mask_batch.shape)
+        print(image_batch.shape)
         _, cls_loss_val, lr_val, scores_val, label_val = sess.run([model.train_step,
                                                                    model.cls_loss,
                                                                    model.learning_rate,
