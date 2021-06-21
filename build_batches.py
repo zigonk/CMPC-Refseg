@@ -123,7 +123,7 @@ def build_referit_batches(setname, T, input_H, input_W):
 #                 sent_batch = [sent])
 #             n_batch += 1
 
-def build_refvos_batch(setname, T, input_H, input_W, im_dir, mask_dir, meta_expressions, save_dir):
+def build_refvos_batch(setname, T, input_H, input_W, im_dir, mask_dir, meta_expressions, save_dir, inrange=None):
     vocab_file = './data/vocabulary_Gref.txt'
 
     print(save_dir)
@@ -154,7 +154,9 @@ def build_refvos_batch(setname, T, input_H, input_W, im_dir, mask_dir, meta_expr
     # save batches to disk
     num_batch = len(samples)
     batch_ind = 0
-    for n_batch in range(num_batch):
+    if inrange == None:
+        inrange = range(num_batch)
+    for n_batch in inrange:
         print('saving batch %d / %d' % (n_batch + 1, num_batch))
         im_name, mask_name, sent, obj_id = samples[n_batch]
         im_path = os.path.join(im_dir,im_name)
@@ -194,6 +196,7 @@ if __name__ == "__main__":
     parser.add_argument('-maskdir', type = str, default='', help='Mask folder (RE YoutueVOS)') 
     parser.add_argument('-meta', type = str, default='', help='Meta expression (RE YoutubeVOS')
     parser.add_argument('-savedir', type = str, default='', help='Export directory (RE YoutubeVOS')
+    parser.add_argument('-inrange', nargs='+', type=int)
 
     args = parser.parse_args()
     T = 20
@@ -204,7 +207,7 @@ if __name__ == "__main__":
             T = T, input_H = input_H, input_W = input_W)
     elif args.d == 'refvos':
         build_refvos_batch(setname=args.t, T = T, input_H=input_H, input_W=input_W, 
-            im_dir=args.imdir, mask_dir=args.maskdir, meta_expressions=args.meta, save_dir=args.savedir)
+            im_dir=args.imdir, mask_dir=args.maskdir, meta_expressions=args.meta, save_dir=args.savedir, inrange=range(args.inrange[0], args.inrange[1]))
     # else:
     #     build_coco_batches(dataset = args.d, setname = args.t,
     #         T = T, input_H = input_H, input_W = input_W)
