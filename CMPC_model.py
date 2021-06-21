@@ -310,7 +310,7 @@ class LSTM_model(object):
         convlstm_cell = ConvLSTMCell([self.vf_h, self.vf_w], self.mlp_dim, [1, 1])
         convlstm_outputs, states = tf.nn.dynamic_rnn(convlstm_cell, tf.convert_to_tensor(
             tf.stack((feat_exg3_2, feat_exg4_2, feat_exg5_2), axis=1)), dtype=tf.float32)
-        fused_feat = convlstm_outputs[:,:,-1]
+        fused_feat = convlstm_outputs[:,-1]
         print("Build Gated Fusion with ConvLSTM two times.")
 
         return fused_feat
