@@ -5,7 +5,7 @@ import os
 import threading
 import queue as queue
 
-def run_prefetch(prefetch_queue, folder_name, prefix, num_batch, shuffle):
+def run_prefetch(prefetch_queue, folder_name, filelist, prefix, num_batch, shuffle):
     n_batch_prefetch = 0
     fetch_order = np.arange(num_batch)
     while True:
@@ -15,7 +15,7 @@ def run_prefetch(prefetch_queue, folder_name, prefix, num_batch, shuffle):
 
         # Load batch from file
         batch_id = fetch_order[n_batch_prefetch]
-        save_file = os.path.join(folder_name, prefix+'_'+str(batch_id)+'.npz')
+        save_file = os.path.join(folder_name, filelist[batch_id])
         npz_filemap = np.load(save_file)
         batch = dict(npz_filemap)
         npz_filemap.close()
@@ -27,7 +27,7 @@ def run_prefetch(prefetch_queue, folder_name, prefix, num_batch, shuffle):
         n_batch_prefetch = (n_batch_prefetch + 1) % num_batch
 
 class DataReader:
-    def __init__(self, folder_name, prefix, shuffle=True, prefetch_num=8):
+    def __init__(self, folder_name, prefix, shuffle=True, prefetch_num=32):
         self.folder_name = folder_name
         self.prefix = prefix
         self.shuffle = shuffle
@@ -37,10 +37,8 @@ class DataReader:
         self.n_epoch = 0
 
         # Search the folder to see the number of num_batch
-        filelist = os.listdir(folder_name)
-        num_batch = 0
-        while (prefix + '_' + str(num_batch) + '.npz') in filelist:
-            num_batch += 1
+        self.filelist = os.listdir(folder_name)
+        num_batch = len(self.filelist)
         if num_batch > 0:
             print('found %d batches under %s with prefix "%s"' % (num_batch, folder_name, prefix))
         else:
@@ -50,7 +48,7 @@ class DataReader:
         # Start prefetching thread
         self.prefetch_queue = queue.Queue(maxsize=prefetch_num)
         self.prefetch_thread = threading.Thread(target=run_prefetch,
-            args=(self.prefetch_queue, self.folder_name, self.prefix,
+            args=(self.prefetch_queue, self.folder_name, self.filelist, self.prefix,
                   self.num_batch, self.shuffle))
         self.prefetch_thread.daemon = True
         self.prefetch_thread.start()
