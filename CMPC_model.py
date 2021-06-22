@@ -488,3 +488,14 @@ class LSTM_model(object):
 
         # training step
         self.train_step = optimizer.apply_gradients(grads_and_vars, global_step=lr)
+
+        # Summary in tensorboard
+        tf.summary.scalar('loss_all', self.cls_loss_all)
+        tf.summary.scalar('loss_c3', self.cls_loss_c3)
+        tf.summary.scalar('loss_c4', self.cls_loss_c4)
+        tf.summary.scalar('loss_c5', self.cls_loss_c5)
+        tf.summary.scalar('loss_last', self.cls_loss)
+        pred = tf.convert_to_tensor((self.up > 0), tf.int32)
+        mIOU, _ = tf.metrics.mean_iou(self.target_fine, pred, num_classes=2)
+        tf.summary.scalar('mean_IOU', mIOU)
+        self.merged = tf.summary.merge_all()

@@ -18,6 +18,7 @@ from util import im_processing, eval_tools, MovingAverage
 
 def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_folder,
           conv5, model_name, stop_iter, last_iter, pre_emb=False, finetune=False, pretrain_folder = '', emb_dir=''):
+    global args
     iters_per_log = 100
     data_folder = os.path.join(data_dir, dataset + '/' + setname + '_batch/')
     data_prefix = dataset + '_' + setname
@@ -51,10 +52,14 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
     snapshot_loader = tf.train.Saver(load_var)
     snapshot_saver = tf.train.Saver(max_to_keep=4)
 
+    # Log tensorboard
+    train_writer = tf.summary.FileWriter(agrs.log_dir + '/train')
+
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
     sess = tf.Session(config=config)
     sess.run(tf.global_variables_initializer())
+    sess.run(tf.local_variables_initializer())
     snapshot_loader.restore(sess, weights)
 
     im_h, im_w, num_steps = model.H, model.W, model.num_steps
@@ -88,46 +93,46 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
                 if text[idx] != 0:
                     valid_idx_batch[n_batch, :] = idx
                     break
-        _, cls_loss_val, lr_val, scores_val, label_val = sess.run([model.train_step,
-                                                                   model.cls_loss,
-                                                                   model.learning_rate,
-                                                                   model.pred,
-                                                                   model.target],
-                                                                  feed_dict={
-                                                                      model.words: text_batch,
-                                                                      # np.expand_dims(text, axis=0),
-                                                                      model.im: image_batch,
-                                                                      # np.expand_dims(im, axis=0),
-                                                                      model.target_fine: mask_batch,
-                                                                      # np.expand_dims(mask, axis=0)
-                                                                      model.valid_idx: valid_idx_batch
-                                                                  })
-        cls_loss_avg = decay * cls_loss_avg + (1 - decay) * cls_loss_val
-
+        train_step, cls_loss_val, lr_val, scores_val, summary = sess.run([model.train_step,
+                                                                            model.cls_loss,
+                                                                            model.learning_rate,
+                                                                            model.up
+                                                                            model.merged],
+                                                                            feed_dict={
+                                                                                model.words: text_batch,
+                                                                                # np.expand_dims(text, axis=0),
+                                                                                model.im: image_batch,
+                                                                                # np.expand_dims(im, axis=0),
+                                                                                model.target_fine: mask_batch,
+                                                                                # np.expand_dims(mask, axis=0)
+                                                                                model.valid_idx: valid_idx_batch
+                                                                            })
+        # cls_loss_avg = decay * cls_loss_avg + (1 - decay) * cls_loss_val
+        # cls_loss_avg 
         # Accuracy
-        accuracy_all, accuracy_pos, accuracy_neg = compute_accuracy(scores_val, label_val)
-        avg_accuracy_all = decay * avg_accuracy_all + (1 - decay) * accuracy_all
-        avg_accuracy_pos = decay * avg_accuracy_pos + (1 - decay) * accuracy_pos
-        avg_accuracy_neg = decay * avg_accuracy_neg + (1 - decay) * accuracy_neg
-        IoU = compute_meanIoU(scores_val, label_val)
-        meanIoU += IoU
+        # accuracy_all, accuracy_pos, accuracy_neg = compute_accuracy(scores_val, label_val)
+        # avg_accuracy_all = decay * avg_accuracy_all + (1 - decay) * accuracy_all
+        # avg_accuracy_pos = decay * avg_accuracy_pos + (1 - decay) * accuracy_pos
+        # avg_accuracy_neg = decay * avg_accuracy_neg + (1 - decay) * accuracy_neg
+        # IoU = compute_meanIoU(scores_val, mask_batch)
+        # meanIoU += IoU
         # timing
         cur_time = time.time()
         elapsed = cur_time - last_time
         last_time = cur_time
-
-        if n_iter % iters_per_log == 0:
-            print('iter = %d, loss (cur) = %f, loss (avg) = %f, lr = %f'
-                  % (n_iter, cls_loss_val, cls_loss_avg, lr_val))
-            print('iter = %d, accuracy (cur) = %f (all), %f (pos), %f (neg)'
-                  % (n_iter, accuracy_all, accuracy_pos, accuracy_neg))
-            print('iter = %d, accuracy (avg) = %f (all), %f (pos), %f (neg)'
-                  % (n_iter, avg_accuracy_all, avg_accuracy_pos, avg_accuracy_neg))
-            print('iter = %d, meanIoU = %f (neg)'
-                  % (n_iter, meanIoU / iters_per_log))
-            meanIoU = 0
-            time_avg.add(elapsed)
-            print('iter = %d, cur time = %.5f, avg time = %.5f, model_name: %s' % (n_iter, elapsed, time_avg.get_avg(), model_name))
+        train_writer.add_summary(summary, train_step)
+        # if n_iter % iters_per_log == 0:
+        #     print('iter = %d, loss (cur) = %f, loss (avg) = %f, lr = %f'
+        #           % (n_iter, cls_loss_val, cls_loss_avg, lr_val))
+        #     print('iter = %d, accuracy (cur) = %f (all), %f (pos), %f (neg)'
+        #           % (n_iter, accuracy_all, accuracy_pos, accuracy_neg))
+        #     print('iter = %d, accuracy (avg) = %f (all), %f (pos), %f (neg)'
+        #           % (n_iter, avg_accuracy_all, avg_accuracy_pos, avg_accuracy_neg))
+        #     print('iter = %d, meanIoU = %f (neg)'
+        #           % (n_iter, meanIoU / iters_per_log))
+        #     meanIoU = 0
+        #     time_avg.add(elapsed)
+        #     print('iter = %d, cur time = %.5f, avg time = %.5f, model_name: %s' % (n_iter, elapsed, time_avg.get_avg(), model_name))
 
         # Save snapshot
         if (n_iter + 1) % snapshot == 0 or (n_iter + 1) >= max_iter:
@@ -333,6 +338,7 @@ if __name__ == "__main__":
     parser.add_argument('-embdir', type=str, default='')  # whether or not use Pretrained Embeddings
     parser.add_argument('-n', type=str, default='')  # select model
     parser.add_argument('-conv5', default=False, action='store_true')  # finetune conv layers
+    parser.add_argument('-logdir', default='./logdir')
 
     args = parser.parse_args()
     # os.environ['CUDA_VISIBLE_DEVICES'] = args.g

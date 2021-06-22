@@ -162,7 +162,7 @@ def build_refvos_batch(setname, T, input_H, input_W, im_dir, mask_dir, meta_expr
         if not (os.path.exists(im_path) and os.path.exists(mask_path)):
             continue
         im = skimage.io.imread(im_path)
-        mask = skimage.io.imread(mask_path)
+        mask = skimage.io.imread(mask_path)[:,:,:3]
         mask_color = object_color[obj_id]
         mask_obj = np.asarray((mask == mask_color))
         if (len(mask_obj.shape) == 0):
