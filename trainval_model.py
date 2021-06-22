@@ -22,7 +22,7 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
     iters_per_log = 100
     data_folder = os.path.join(data_dir, dataset + '/' + setname + '_batch/')
     data_prefix = dataset + '_' + setname
-    snapshot_file = os.path.join(tfmodel_folder, dataset + '_iter_%d.tfmodel')
+    snapshot_file = os.path.join(tfmodel_folder, dataset + '_finetune')
     if not os.path.isdir(tfmodel_folder):
         os.makedirs(tfmodel_folder)
 
@@ -46,10 +46,10 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
     else:
         weights = './data/weights/deeplab_resnet_init.ckpt'
     print("Loading pretrained weights from {}".format(weights))
-    load_var = {var.op.name: var for var in tf.global_variables()
-                if var.name.startswith('res') or var.name.startswith('bn') or var.name.startswith('conv1') or var.name.startswith('Adam')}
+    # load_var = {var.op.name: var for var in tf.global_variables()
+    #             if var.name.startswith('res') or var.name.startswith('bn') or var.name.startswith('conv1') or var.name.startswith('Adam')}
 
-    snapshot_loader = tf.train.Saver(load_var)
+    snapshot_loader = tf.train.Saver()
     snapshot_saver = tf.train.Saver(max_to_keep=4)
 
 
@@ -141,7 +141,7 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
 
         # Save snapshot
         if (n_iter + 1) % snapshot == 0 or (n_iter + 1) >= max_iter:
-            snapshot_saver.save(sess, snapshot_file % (n_iter + 1))
+            snapshot_saver.save(sess, snapshot_file, global_step= train_step)
             print('snapshot saved to ' + snapshot_file % (n_iter + 1))
         if (n_iter + 1) >= stop_iter:
             print('stop training at iter ' + str(stop_iter))
