@@ -96,7 +96,7 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
         train_step, cls_loss_val, lr_val, scores_val, summary = sess.run([model.train_step,
                                                                             model.cls_loss,
                                                                             model.learning_rate,
-                                                                            model.up
+                                                                            model.up,
                                                                             model.merged],
                                                                             feed_dict={
                                                                                 model.words: text_batch,
