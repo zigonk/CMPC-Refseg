@@ -120,6 +120,7 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
         cur_time = time.time()
         elapsed = cur_time - last_time
         last_time = cur_time
+        print(train_step)
         train_writer.add_summary(summary, train_step)
         # if n_iter % iters_per_log == 0:
         #     print('iter = %d, loss (cur) = %f, loss (avg) = %f, lr = %f'
