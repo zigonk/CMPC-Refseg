@@ -459,8 +459,8 @@ class LSTM_model(object):
         self.cost = self.cls_loss_all + self.reg_loss
 
         # learning rate
-        lr = tf.Variable(0.0, trainable=False)
-        self.learning_rate = tf.train.polynomial_decay(self.start_lr, lr, self.lr_decay_step, end_learning_rate=0.00001,
+        self.train_step = tf.Variable(0, trainable=False)
+        self.learning_rate = tf.train.polynomial_decay(self.start_lr, self.train_step, self.lr_decay_step, end_learning_rate=0.00001,
                                                        power=0.9)
 
         # optimizer
@@ -487,8 +487,7 @@ class LSTM_model(object):
                           grads_and_vars]
 
         # training step
-        optimizer.apply_gradients(grads_and_vars, global_step=lr)
-        self.train_step = lr
+        optimizer.apply_gradients(grads_and_vars, global_step=self.train_step)
 
         # Summary in tensorboard
         tf.summary.scalar('loss_all', self.cls_loss_all)
