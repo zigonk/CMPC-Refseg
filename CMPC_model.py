@@ -459,7 +459,7 @@ class LSTM_model(object):
         self.cost = self.cls_loss_all + self.reg_loss
 
         # learning rate
-        self.train_step = tf.Variable(0, trainable=False)
+        self.train_step = tf.Variable(0, name='global_step', trainable=False)
         self.learning_rate = tf.train.polynomial_decay(self.start_lr, self.train_step, self.lr_decay_step, end_learning_rate=0.00001,
                                                        power=0.9)
 
