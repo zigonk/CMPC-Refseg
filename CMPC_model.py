@@ -496,6 +496,6 @@ class LSTM_model(object):
         tf.summary.scalar('loss_c5', self.cls_loss_c5)
         tf.summary.scalar('loss_last', self.cls_loss)
         pred = tf.convert_to_tensor(tf.cast(self.up > 0, tf.int32), tf.int32)
-        self.mIoU, _ = tf.metrics.mean_iou(self.target_fine, pred, num_classes=2)
+        self.mIoU, self.conf_mat = tf.metrics.mean_iou(self.target_fine, pred, num_classes=2)
         tf.summary.scalar('mean_IOU', self.mIoU)
         self.merged = tf.summary.merge_all()
