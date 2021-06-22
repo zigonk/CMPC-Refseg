@@ -52,8 +52,6 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
     snapshot_loader = tf.train.Saver(load_var)
     snapshot_saver = tf.train.Saver(max_to_keep=4)
 
-    # Log tensorboard
-    train_writer = tf.summary.FileWriter(args.log_dir + '/train')
 
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
@@ -61,6 +59,8 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
     sess.run(tf.global_variables_initializer())
     sess.run(tf.local_variables_initializer())
     snapshot_loader.restore(sess, weights)
+    # Log tensorboard
+    train_writer = tf.summary.FileWriter(args.log_dir + '/train', sess.graph)
 
     im_h, im_w, num_steps = model.H, model.W, model.num_steps
     text_batch = np.zeros((bs, num_steps), dtype=np.float32)

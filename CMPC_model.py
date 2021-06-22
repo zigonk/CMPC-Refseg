@@ -487,7 +487,8 @@ class LSTM_model(object):
                           grads_and_vars]
 
         # training step
-        self.train_step = optimizer.apply_gradients(grads_and_vars, global_step=lr)
+        optimizer.apply_gradients(grads_and_vars, global_step=lr)
+        self.train_step = lr
 
         # Summary in tensorboard
         tf.summary.scalar('loss_all', self.cls_loss_all)
