@@ -338,7 +338,7 @@ if __name__ == "__main__":
     parser.add_argument('-embdir', type=str, default='')  # whether or not use Pretrained Embeddings
     parser.add_argument('-n', type=str, default='')  # select model
     parser.add_argument('-conv5', default=False, action='store_true')  # finetune conv layers
-    parser.add_argument('-logdir', default='./logdir')
+    parser.add_argument('-log_dir', default='./logdir')
 
     args = parser.parse_args()
     # os.environ['CUDA_VISIBLE_DEVICES'] = args.g
