@@ -53,7 +53,7 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
     snapshot_saver = tf.train.Saver(max_to_keep=4)
 
     # Log tensorboard
-    train_writer = tf.summary.FileWriter(agrs.log_dir + '/train')
+    train_writer = tf.summary.FileWriter(args.log_dir + '/train')
 
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
