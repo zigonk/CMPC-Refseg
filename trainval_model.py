@@ -11,7 +11,7 @@ import time
 from get_model import get_segmentation_model
 from pydensecrf import densecrf
 
-from util import data_reader
+from util import data_reader_refvos
 from util.processing_tools import *
 from util import im_processing, eval_tools, MovingAverage
 
@@ -68,7 +68,7 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
     mask_batch = np.zeros((bs, im_h, im_w, 1), dtype=np.float32)
     valid_idx_batch = np.zeros((bs, 1), dtype=np.int32)
 
-    reader = data_reader.DataReader(data_folder, data_prefix)
+    reader = data_reader_refvos.DataReader(im_dir=args.im_dir, mask_dir=args.mask_dir, train_metadata=args.meta)
 
     # for time calculate
     last_time = time.time()
@@ -125,8 +125,6 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
         cur_time = time.time()
         elapsed = cur_time - last_time
         last_time = cur_time
-        print(train_step)
-        print(meanIoU)
         train_writer.add_summary(summary, train_step)
         # if n_iter % iters_per_log == 0:
         #     print('iter = %d, loss (cur) = %f, loss (avg) = %f, lr = %f'
@@ -345,7 +343,10 @@ if __name__ == "__main__":
     parser.add_argument('-embdir', type=str, default='')  # whether or not use Pretrained Embeddings
     parser.add_argument('-n', type=str, default='')  # select model
     parser.add_argument('-conv5', default=False, action='store_true')  # finetune conv layers
-    parser.add_argument('-log_dir', default='./logdir')
+    parser.add_argument('-log_dir', type=str, default='./logdir')
+    parser.add_argument('-im_dir', type=str, default='')
+    parser.add_argument('-mask_dir', type=str, default='')
+    parser.add_argument('-meta', type=str, default='./train_meta.json')
 
     args = parser.parse_args()
     # os.environ['CUDA_VISIBLE_DEVICES'] = args.g

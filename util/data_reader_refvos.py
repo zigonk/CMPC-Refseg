@@ -7,6 +7,7 @@ import skimage
 import skimage.io
 import queue as queue
 import im_processing, text_processing
+import json
 
 object_color = {
     '1': [236, 95, 103],
@@ -21,7 +22,8 @@ T = 20
 input_H = 320
 input_W = 320
 
-vocab_file = '../data/vocabulary_Gref.txt'
+vocab_file = './data/vocabulary_Gref.txt'
+vocab_dict = text_processing.load_vocab_dict_from_file(vocab_file)
 
 def preprocess_data(im, mask, sent, obj_id):
     mask_color = object_color[obj_id]
@@ -81,7 +83,7 @@ class DataReader:
         # Start prefetching thread
         self.prefetch_queue = queue.Queue(maxsize=prefetch_num)
         self.prefetch_thread = threading.Thread(target=run_prefetch,
-            args=(self.prefetch_queue, self.im_dir, self.mask_dir, self.metadata
+            args=(self.prefetch_queue, self.im_dir, self.mask_dir, self.metadata,
                   self.num_batch, self.shuffle))
         self.prefetch_thread.daemon = True
         self.prefetch_thread.start()
