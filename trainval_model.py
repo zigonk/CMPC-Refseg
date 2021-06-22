@@ -93,11 +93,12 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
                 if text[idx] != 0:
                     valid_idx_batch[n_batch, :] = idx
                     break
-        _, train_step, cls_loss_val, lr_val, scores_val, summary = sess.run([model.train,
+        _, train_step, cls_loss_val, lr_val, scores_val, meanIoU, summary = sess.run([model.train,
                                                                             model.train_step,
                                                                             model.cls_loss,
                                                                             model.learning_rate,
                                                                             model.up,
+                                                                            model.mIoU
                                                                             model.merged],
                                                                             feed_dict={
                                                                                 model.words: text_batch,
@@ -122,6 +123,7 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
         elapsed = cur_time - last_time
         last_time = cur_time
         print(train_step)
+        print(meanIoU)
         train_writer.add_summary(summary, train_step)
         # if n_iter % iters_per_log == 0:
         #     print('iter = %d, loss (cur) = %f, loss (avg) = %f, lr = %f'
