@@ -98,7 +98,7 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
                                                                             model.cls_loss,
                                                                             model.learning_rate,
                                                                             model.up,
-                                                                            model.mIoU
+                                                                            model.mIoU,
                                                                             model.merged],
                                                                             feed_dict={
                                                                                 model.words: text_batch,
