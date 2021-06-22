@@ -98,8 +98,10 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
                                                                             model.cls_loss,
                                                                             model.learning_rate,
                                                                             model.up,
-                                                                            model.conf_mat # calculate iou
+                                                                            # calculate iou
+                                                                            model.conf_mat, 
                                                                             model.mIoU,
+                                                                            # export summary
                                                                             model.merged],
                                                                             feed_dict={
                                                                                 model.words: text_batch,
