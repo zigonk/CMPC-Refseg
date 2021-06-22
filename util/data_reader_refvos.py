@@ -34,8 +34,8 @@ def preprocess_data(im, mask, sent, obj_id):
 
     text = text_processing.preprocess_sentence(sent, vocab_dict, T)
     return {
-        'text_batch': text,
-        'im_batch': im,
+        'text_batch': np.asarray(text),
+        'im_batch': np.asarray(im),
         'mask_batch': (mask > 0),
         'sent_batch': [sent]
     }
