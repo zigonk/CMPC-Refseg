@@ -93,7 +93,8 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
                 if text[idx] != 0:
                     valid_idx_batch[n_batch, :] = idx
                     break
-        train_step, cls_loss_val, lr_val, scores_val, summary = sess.run([model.train_step,
+        _, train_step, cls_loss_val, lr_val, scores_val, summary = sess.run([model.train,
+                                                                            model.train_step,
                                                                             model.cls_loss,
                                                                             model.learning_rate,
                                                                             model.up,
