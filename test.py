@@ -401,6 +401,6 @@ if __name__ == "__main__":
              setname=args.t,
              dcrf=args.c,
              mu=mu,
-             tfmodel_folder=args.f,
+             tfmodel_path=args.f,
              model_name=args.n,
              pre_emb=args.emb)
