@@ -140,8 +140,11 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
         #     print('iter = %d, cur time = %.5f, avg time = %.5f, model_name: %s' % (n_iter, elapsed, time_avg.get_avg(), model_name))
 
         # Save snapshot
+        if ((n_iter + 1) % reader.num_batch == 0)
+            snapshot_saver.save(sess, snapshot_file, global_step=train_step)
+            print('snapshot saved to ' + snapshot_file % (n_iter + 1))
         if (n_iter + 1) % snapshot == 0 or (n_iter + 1) >= max_iter:
-            snapshot_saver.save(sess, snapshot_file, global_step= train_step)
+            snapshot_saver.save(sess, snapshot_file, global_step=train_step)
             print('snapshot saved to ' + snapshot_file % (n_iter + 1))
         if (n_iter + 1) >= stop_iter:
             print('stop training at iter ' + str(stop_iter))
