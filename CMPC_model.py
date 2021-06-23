@@ -496,7 +496,7 @@ class LSTM_model(object):
         tf.summary.scalar('loss_c5', self.cls_loss_c5)
         tf.summary.scalar('loss_last', self.cls_loss)
         pred = tf.convert_to_tensor(tf.cast(self.up > 0, tf.int32), tf.int32)
-        labl = tf.constant(self.target_fine)
+        labl = self.target_fine
         intersect = tf.reduce_sum(tf.cast(tf.logical_and(tf.cast(pred, tf.bool), tf.cast(labl, tf.bool)), tf.int32), axis=(1, 2, 3))
         union = tf.reduce_sum(tf.cast(tf.logical_or(tf.cast(pred, tf.bool), tf.cast(labl, tf.bool)), tf.int32), axis=(1, 2, 3))
         self.mIoU = tf.reduce_mean(tf.divide(intersect, union))
