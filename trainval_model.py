@@ -74,7 +74,8 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
     last_time = time.time()
     time_avg = MovingAverage()
     meanIoU = 0
-    for n_iter in range(max_iter):
+    last_epoch = (last_iter * bs) // reader.num_batch
+    for n_iter in range(last_iter + 1, max_iter):
         for n_batch in range(bs):
             batch = reader.read_batch(is_log=(n_batch == 0 and n_iter % iters_per_log == 0))
             text = batch['text_batch']
@@ -137,9 +138,13 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
         #     print('iter = %d, cur time = %.5f, avg time = %.5f, model_name: %s' % (n_iter, elapsed, time_avg.get_avg(), model_name))
 
         # Save snapshot
+        if (n_iter * bs // reader.num_batch > last_epoch)
+            last_epoch += 1
+            snapshot_saver.save(sess, snapshot_file, global_step=train_step)
+            print('snapshot saved at iteration {}'.format(n_iter))
         if (n_iter + 1) % snapshot == 0 or (n_iter + 1) >= max_iter:
             snapshot_saver.save(sess, snapshot_file, global_step=train_step)
-            print('snapshot saved to ' + snapshot_file % (n_iter + 1))
+            print('snapshot saved at iteration {}'.format(n_iter))
         if (n_iter + 1) >= stop_iter:
             print('stop training at iter ' + str(stop_iter))
             break
@@ -323,7 +328,7 @@ if __name__ == "__main__":
     parser.add_argument('-g', type=str, default='0')
     parser.add_argument('-i', type=int, default=800000)
     parser.add_argument('-s', type=int, default=100000)
-    parser.add_argument('-lastiter', type=int, default=700000) #last iter for continue training
+    parser.add_argument('-lastiter', type=int, default=0) #last iter for continue training
     parser.add_argument('-st', type=int, default=700000)  # stop training when get st iters
     parser.add_argument('-m', type=str)  # 'train' 'test'
     parser.add_argument('-d', type=str, default='referit')  # 'Gref' 'unc' 'unc+' 'referit'
