@@ -204,6 +204,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
     #     if (vid_ind not in sorted_video_key):
     #         continue
     for vid in sorted_video_key:
+        print("Processing video {}".format(vid))
         expressions = videos[vid]['expressions']
         # instance_ids = [expression['obj_id'] for expression_id in videos[vid]['expressions']]
         frame_ids = videos[vid]['frames']
@@ -228,8 +229,8 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
             for fid in frame_ids:
                 vis_path = os.path.join(vis_dir, str('{}.png'.format(fid)))
                 mask_path = os.path.join(mask_dir, str('{}.npy'.format(fid)))
-                if os.path.exists(vis_path):
-                    continue
+#                 if os.path.exists(vis_path):
+#                     continue
                 frame = load_frame_from_id(vid, fid)
                 if frame is None:
                     continue
@@ -251,7 +252,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 # scores_val = np.squeeze(scores_val)
                 # pred_raw = (scores_val >= score_thresh).astype(np.float32)
                 up_val = np.squeeze(up_val)
-                pred_raw = (up_val >= score_thresh).astype(np.float32)
+                pred_raw = (up_val >= score_thresh).astype('uint8') * 255
 #                 predicts = im_processing.resize_and_crop(pred_raw, mask.shape[0], mask.shape[1])
                 if dcrf:
                     # Dense CRF post-processing
@@ -275,6 +276,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
 #                         visualize_seg(vis_path, im, exp, predicts_dcrf)
                     else:
                         cv2.imwrite(vis_path, pred_raw)
+                        print("Finish video {}".format(vid))
 #                         visualize_seg(vis_path, im, exp, predicts)
 #                         np.save(mask_path, np.array(pred_raw))
     # I, U = eval_tools.compute_mask_IU(predicts, mask)
