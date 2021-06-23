@@ -138,7 +138,7 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
         #     print('iter = %d, cur time = %.5f, avg time = %.5f, model_name: %s' % (n_iter, elapsed, time_avg.get_avg(), model_name))
 
         # Save snapshot
-        if (n_iter * bs // reader.num_batch > last_epoch)
+        if (n_iter * bs // reader.num_batch > last_epoch):
             last_epoch += 1
             snapshot_saver.save(sess, snapshot_file, global_step=train_step)
             print('snapshot saved at iteration {}'.format(n_iter))
