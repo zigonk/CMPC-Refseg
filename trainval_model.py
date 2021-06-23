@@ -42,16 +42,16 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
                                        vocab_size=vocab_size, start_lr=lr,
                                        batch_size=bs, conv5=conv5)
     if finetune:
-        weights = os.path.join(pretrain_folder, dataset + '_iter_' + str(last_iter) + '.tfmodel')
+        weights = os.path.join(pretrain_folder, dataset + '_finetune-' + str(last_iter))
+        snapshot_loader = tf.train.Saver()
     else:
         weights = './data/weights/deeplab_resnet_init.ckpt'
-    print("Loading pretrained weights from {}".format(weights))
-    load_var = {var.op.name: var for var in tf.global_variables()
-                if var.name.startswith('res') or var.name.startswith('bn') or var.name.startswith('conv1') or var.name.startswith('Adam')}
-
-    snapshot_loader = tf.train.Saver(load_var)
+        print("Loading pretrained weights from {}".format(weights))
+        load_var = {var.op.name: var for var in tf.global_variables()
+                    if var.name.startswith('res') or var.name.startswith('bn') or var.name.startswith('conv1') or var.name.startswith('Adam')}
+        snapshot_loader = tf.train.Saver(load_var)
+    
     snapshot_saver = tf.train.Saver(max_to_keep=4)
-
 
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
