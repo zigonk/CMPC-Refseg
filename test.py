@@ -145,14 +145,14 @@ def load_frame_from_id(vid, frame_id):
     frame_path = os.path.join(args.imdir, str('{}/{}.jpg'.format(vid, frame_id)))
     return load_image(frame_path)
 
-def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name, pre_emb=False):
+def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, pre_emb=False):
     data_folder = './' + dataset + '/' + setname + '_batch/'
     data_prefix = dataset + '_' + setname
     if visualize:
         save_dir = './' + dataset + '/visualization/' + str(iter) + '/'
         if not os.path.isdir(save_dir):
             os.makedirs(save_dir)
-    weights = os.path.join(tfmodel_folder, dataset + '_iter_' + str(iter) + '.tfmodel')
+    weights = os.path.join(tfmodel_path)
     print("Loading trained weights from {}".format(weights))
 
     score_thresh = 1e-9
