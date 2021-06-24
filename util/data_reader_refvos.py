@@ -28,7 +28,7 @@ vocab_dict = text_processing.load_vocab_dict_from_file(vocab_file)
 def preprocess_data(im, mask, sent, obj_id):
     mask_color = object_color[obj_id]
     mask_obj = np.asarray(((mask == mask_color)[:,:,0]))
-    im = im_processing.resize_and_pad(im, input_H, input_W)
+    im = skimage.img_as_ubyte(im_processing.resize_and_pad(im, input_H, input_W))
     mask = im_processing.resize_and_pad(mask_obj, input_H, input_W)
 
     text = text_processing.preprocess_sentence(sent, vocab_dict, T)
