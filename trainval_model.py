@@ -17,7 +17,7 @@ from util import im_processing, eval_tools, MovingAverage
 
 
 def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_folder,
-          conv5, model_name, stop_iter, last_iter, pre_emb=False, finetune=False, pretrain_folder = '', emb_dir=''):
+          conv5, model_name, stop_iter, last_iter, pre_emb=False, finetune=False, pretrain_path = '', emb_dir=''):
     global args
     iters_per_log = 100
     data_folder = os.path.join(data_dir, dataset + '/' + setname + '_batch/')
@@ -42,7 +42,7 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
                                        vocab_size=vocab_size, start_lr=lr,
                                        batch_size=bs, conv5=conv5)
     if finetune:
-        weights = os.path.join(pretrain_folder, dataset + '_finetune-' + str(last_iter))
+        weights = os.path.join(pretrain_path)
         snapshot_loader = tf.train.Saver()
     else:
         weights = './data/weights/deeplab_resnet_init.ckpt'
@@ -354,10 +354,6 @@ if __name__ == "__main__":
     # os.environ['CUDA_VISIBLE_DEVICES'] = args.g
     mu = np.array((104.00698793, 116.66876762, 122.67891434))
 
-    pretrain_folder = args.pretrain
-    if (pretrain_folder == ''):
-        pretrain_folder = args.f
-
     if args.m == 'train':
         train(max_iter=args.i,
               snapshot=args.s,
@@ -374,7 +370,7 @@ if __name__ == "__main__":
               pre_emb=args.emb,
               finetune=args.finetune,
               last_iter=args.lastiter,
-              pretrain_folder=pretrain_folder,
+              pretrain_path=args.pretrain,
               emb_dir=args.embdir)
     elif args.m == 'test':
         test(iter=args.i,
