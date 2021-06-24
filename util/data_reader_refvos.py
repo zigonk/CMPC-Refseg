@@ -67,7 +67,7 @@ def run_prefetch(prefetch_queue, im_dir, mask_dir, metadata, num_batch, shuffle)
         n_batch_prefetch = (n_batch_prefetch + 1) % num_batch
 
 class DataReader:
-    def __init__(self, im_dir, mask_dir, train_metadata, shuffle=True, prefetch_num=4):
+    def __init__(self, im_dir, mask_dir, train_metadata, shuffle=True, prefetch_num=8):
         self.im_dir = im_dir
         self.mask_dir = mask_dir
         self.metadata = json.load(open(train_metadata))
