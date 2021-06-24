@@ -148,14 +148,14 @@ def load_frame_from_id(vid, frame_id):
 def sigmoid(z):
     return 1/(1 + np.exp(-z))
 
-def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name, pre_emb=False):
+def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, pre_emb=False):
     data_folder = './' + dataset + '/' + setname + '_batch/'
     data_prefix = dataset + '_' + setname
     if visualize:
         save_dir = './' + dataset + '/visualization/' + str(iter) + '/'
         if not os.path.isdir(save_dir):
             os.makedirs(save_dir)
-    weights = os.path.join(tfmodel_folder, dataset + '_iter_' + str(iter) + '.tfmodel')
+    weights = os.path.join(tfmodel_path)
     print("Loading trained weights from {}".format(weights))
 
     score_thresh = 1e-9
@@ -417,6 +417,6 @@ if __name__ == "__main__":
              setname=args.t,
              dcrf=args.c,
              mu=mu,
-             tfmodel_folder=args.f,
+             tfmodel_path=args.f,
              model_name=args.n,
              pre_emb=args.emb)
