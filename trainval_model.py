@@ -50,7 +50,7 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
     load_var = {var.op.name: var for var in tf.global_variables()
             if var.name.startswith('res') or var.name.startswith('bn') or var.name.startswith('conv1') or var.name.startswith('Adam')}
     print(load_var)
-    break
+    return
     snapshot_loader = tf.train.Saver(load_var)
     
     snapshot_saver = tf.train.Saver(max_to_keep=4)
