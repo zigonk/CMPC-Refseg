@@ -282,7 +282,7 @@ class LSTM_model(object):
         feat_exg = feat + feat1
         return feat_exg
 
-    def gated_exchange_fusion_lstm_2times(self, feat3, feat4, feat5, lang_feat):
+    def gated_exchange_fusion_lstm_2times(self, feat4, feat5, lang_feat):
         '''
         Fuse exchanged features of level3, level4, level5
         LSTM is used to fuse the exchanged features
