@@ -492,7 +492,7 @@ class LSTM_model(object):
 
         # Summary in tensorboard
         tf.summary.scalar('loss_all', self.cls_loss_all)
-        tf.summary.scalar('loss_c3', self.cls_loss_c3)
+#         tf.summary.scalar('loss_c3', self.cls_loss_c3)
         tf.summary.scalar('loss_c4', self.cls_loss_c4)
         tf.summary.scalar('loss_c5', self.cls_loss_c5)
         tf.summary.scalar('loss_last', self.cls_loss)
