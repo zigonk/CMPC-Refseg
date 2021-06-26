@@ -63,7 +63,7 @@ class LSTM_model(object):
         self.weight_decay = weight_decay
         self.mode = mode
         self.conv5 = conv5
-        self.up_c3 = 0
+        self.up_c3 = tf.constant(0)
 
         self.words = tf.placeholder(tf.int32, [self.batch_size, self.num_steps])
         self.im = tf.placeholder(tf.float32, [self.batch_size, self.H, self.W, 3])
