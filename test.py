@@ -361,6 +361,7 @@ if __name__ == "__main__":
     parser.add_argument('-startvid', type=int, default=0)
     parser.add_argument('-endvid', type=int, default=1000000)
     parser.add_argument('-st', type=int, default=700000)  # stop training when get st iters
+    parser.add_argument('-threshold', type=float, default='0.5')  # mask threshold
     parser.add_argument('-m', type=str)  # 'train' 'test'
     parser.add_argument('-imdir', type=str)
     parser.add_argument('-visdir', type=str)
