@@ -267,9 +267,9 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                     d.addPairwiseGaussian(sxy=3, compat=3)
                     d.addPairwiseBilateral(sxy=20, srgb=3, rgbim=proc_im, compat=10)
                     Q = d.inference(5)
-                    pred_raw_dcrf = np.argmax(Q, axis=0).reshape((H, W)).astype('uint8') * 255
-#                     pred_raw_dcrf = np.argmax(Q, axis=0).reshape((H, W)).astype(np.float32)
-                    predicts_dcrf = im_processing.resize_and_crop(pred_raw_dcrf, mask.shape[0]//2, mask.shape[1]//2)
+#                     pred_raw_dcrf = np.argmax(Q, axis=0).reshape((H, W)).astype('uint8') * 255
+                    pred_raw_dcrf = np.argmax(Q, axis=0).reshape((H, W)).astype(np.float32)
+                    predicts_dcrf = im_processing.resize_and_crop(pred_raw_dcrf, mask.shape[0]//2, mask.shape[1]//2).astype('uint8') * 255
                 if visualize:
                     if dcrf:
                         cv2.imwrite(vis_path, predicts_dcrf)
