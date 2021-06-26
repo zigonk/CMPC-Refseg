@@ -238,7 +238,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 last_time = time.time()
 #                 im = frame.copy()
                 im = frame
-#                 mask = np.array(frame, dtype=np.float32)
+                mask = np.array(frame, dtype=np.float32)
 
                 proc_im = skimage.img_as_ubyte(im_processing.resize_and_pad(im, H, W))
                 proc_im_ = proc_im.astype(np.float32)
