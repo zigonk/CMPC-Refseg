@@ -146,6 +146,7 @@ def load_frame_from_id(vid, frame_id):
     return load_image(frame_path)
 
 def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, pre_emb=False):
+    global args
     data_folder = './' + dataset + '/' + setname + '_batch/'
     data_prefix = dataset + '_' + setname
     if visualize:
@@ -252,11 +253,11 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 # scores_val = np.squeeze(scores_val)
                 # pred_raw = (scores_val >= score_thresh).astype(np.float32)
                 up_val = np.squeeze(up_val)
-                pred_raw = (up_val >= score_thresh).astype('uint8') * 255
+                sigm_val = np.squeeze(sigm_val) + 1e-9
+                pred_raw = (sigm_val >= args.threshold).astype('uint8') * 255
 #                 predicts = im_processing.resize_and_crop(pred_raw, mask.shape[0], mask.shape[1])
                 if dcrf:
                     # Dense CRF post-processing
-                    sigm_val = np.squeeze(sigm_val) + 1e-9
                     d = densecrf.DenseCRF2D(W, H, 2)
                     U = np.expand_dims(-np.log(sigm_val), axis=0)
                     U_ = np.expand_dims(-np.log(1 - sigm_val), axis=0)
