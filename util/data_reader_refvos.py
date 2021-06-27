@@ -22,7 +22,7 @@ T = 20
 input_H = 320
 input_W = 320
 
-vocab_file = './data/vocabulary_Gref.txt'
+vocab_file = './data/vocabulary_glove.txt'
 vocab_dict = text_processing.load_vocab_dict_from_file(vocab_file)
 
 def preprocess_data(im, mask, sent, obj_id):
