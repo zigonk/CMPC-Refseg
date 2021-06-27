@@ -30,7 +30,7 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
     avg_accuracy_all, avg_accuracy_pos, avg_accuracy_neg = 0, 0, 0
     decay = 0.99
     vocab_size = 8803 if dataset == 'referit' else 1917498
-    emb_name = 'referit' if dataset == 'referit' else 'glove'
+    emb_name = 'referit' if dataset == 'referit' else 'refvos'
 
     if pre_emb:
         print("Use pretrained Embeddings.")
