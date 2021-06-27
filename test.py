@@ -230,8 +230,8 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
             for fid in frame_ids:
                 vis_path = os.path.join(vis_dir, str('{}.png'.format(fid)))
                 mask_path = os.path.join(mask_dir, str('{}.npy'.format(fid)))
-#                 if os.path.exists(vis_path):
-#                     continue
+                if os.path.exists(vis_path):
+                    continue
                 frame = load_frame_from_id(vid, fid)
                 if frame is None:
                     continue
