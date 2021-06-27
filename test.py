@@ -214,9 +214,9 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
             index = int(eid)
             vis_dir = os.path.join(args.visdir, str('{}/{}/'.format(vid, index)))
             mask_dir = os.path.join(args.maskdir, str('{}/{}/'.format(vid, index)))
-            if not os.path.exists(vis_dir) and args.skip:
+            if not os.path.exists(vis_dir):
                 os.makedirs(vis_dir)
-            if not os.path.exists(mask_dir) and args.skip:
+            if not os.path.exists(mask_dir):
                 os.makedirs(mask_dir)
             avg_time = 0
             total_frame = 0
@@ -230,7 +230,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
             for fid in frame_ids:
                 vis_path = os.path.join(vis_dir, str('{}.png'.format(fid)))
                 mask_path = os.path.join(mask_dir, str('{}.npy'.format(fid)))
-                if os.path.exists(vis_path):
+                if os.path.exists(vis_path) and args.skip:
                     continue
                 frame = load_frame_from_id(vid, fid)
                 if frame is None:
