@@ -214,9 +214,9 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
             index = int(eid)
             vis_dir = os.path.join(args.visdir, str('{}/{}/'.format(vid, index)))
             mask_dir = os.path.join(args.maskdir, str('{}/{}/'.format(vid, index)))
-            if not os.path.exists(vis_dir):
+            if not os.path.exists(vis_dir) and args.skip:
                 os.makedirs(vis_dir)
-            if not os.path.exists(mask_dir):
+            if not os.path.exists(mask_dir) and args.skip:
                 os.makedirs(mask_dir)
             avg_time = 0
             total_frame = 0
@@ -379,6 +379,7 @@ if __name__ == "__main__":
     parser.add_argument('-emb', default=False, action='store_true')  # whether or not use Pretrained Embeddings
     parser.add_argument('-n', type=str, default='')  # select model
     parser.add_argument('-conv5', default=False, action='store_true')  # finetune conv layers
+    parser.add_argument('-skip', default=False, action='store_true')  # Skip exists result
     global args
     args = parser.parse_args()
     # os.environ['CUDA_VISIBLE_DEVICES'] = args.g
