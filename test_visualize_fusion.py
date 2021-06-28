@@ -239,7 +239,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
 
                 proc_im = skimage.img_as_ubyte(im_processing.resize_and_pad(im, H, W))
                 proc_im_ = proc_im.astype(np.float32)
-                # proc_im_ = proc_im_[:, :, ::-1]
+                proc_im_ = proc_im_[:, :, ::-1]
                 proc_im_ -= mu
                 scores_val, up_val, sigm_val, up_c3, up_c4, up_c5 = sess.run([model.pred, model.up, model.sigm, model.up_c3, model.up_c4, model.up_c5],
                                                         feed_dict={
