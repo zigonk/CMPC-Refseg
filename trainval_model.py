@@ -195,7 +195,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
     sess.run(tf.global_variables_initializer())
     snapshot_restorer.restore(sess, weights)
     reader = data_reader.DataReader(data_folder, data_prefix, shuffle=False)
-
+    processing_time = 0
     NN = reader.num_batch
     for n_iter in range(reader.num_batch):
 
@@ -220,7 +220,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
         proc_im_ = proc_im.astype(np.float32)
         proc_im_ = proc_im_[:, :, ::-1]
         proc_im_ -= mu
-
+        current_time = time.time()
         scores_val, up_val, sigm_val = sess.run([model.pred, model.up, model.sigm],
                                                 feed_dict={
                                                     model.words: np.expand_dims(text, axis=0),
@@ -247,7 +247,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
             Q = d.inference(5)
             pred_raw_dcrf = np.argmax(Q, axis=0).reshape((H, W)).astype(np.float32)
             predicts_dcrf = im_processing.resize_and_crop(pred_raw_dcrf, mask.shape[0], mask.shape[1])
-
+        processing_time += time.time() - current_time
         if visualize:
             sent = batch['sent_batch'][0]
             visualize_seg(im, mask, predicts, sent)
@@ -274,7 +274,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
                 seg_correct_dcrf[n_eval_iou] += (I_dcrf / U_dcrf >= eval_seg_iou)
         # print(msg)
         seg_total += 1
-
+    print('Avg time: {}'.format(processing_time / seg_total))
     # Print results
     print('Segmentation evaluation (without DenseCRF):')
     result_str = ''
