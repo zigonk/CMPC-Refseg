@@ -11,7 +11,7 @@ import time
 from get_model import get_segmentation_model
 from pydensecrf import densecrf
 
-from util import data_reader_refvos
+from util import data_reader_refvos, data_reader
 from util.processing_tools import *
 from util import im_processing, eval_tools, MovingAverage
 
@@ -30,7 +30,7 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
     avg_accuracy_all, avg_accuracy_pos, avg_accuracy_neg = 0, 0, 0
     decay = 0.99
     vocab_size = 8803 if dataset == 'referit' else 1917498
-    emb_name = 'referit' if dataset == 'referit' else 'refvos'
+    emb_name = dataset
 
     if pre_emb:
         print("Use pretrained Embeddings.")
@@ -68,7 +68,8 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
     mask_batch = np.zeros((bs, im_h, im_w, 1), dtype=np.float32)
     valid_idx_batch = np.zeros((bs, 1), dtype=np.int32)
 
-    reader = data_reader_refvos.DataReader(im_dir=args.im_dir, mask_dir=args.mask_dir, train_metadata=args.meta)
+    if dataset == 'refvos':
+        reader = data_reader_refvos.DataReader(im_dir=args.im_dir, mask_dir=args.mask_dir, train_metadata=args.meta)
 
     # for time calculate
     last_time = time.time()
@@ -159,7 +160,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
         save_dir = './' + dataset + '/visualization/' + str(iter) + '/'
         if not os.path.isdir(save_dir):
             os.makedirs(save_dir)
-    weights = os.path.join(tfmodel_folder, dataset + '_iter_' + str(iter) + '.tfmodel')
+    weights = tfmodel_folder
     print("Loading trained weights from {}".format(weights))
 
     score_thresh = 1e-9
