@@ -168,8 +168,8 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
     T = 20 # truncated long sentence
     H, W = 320, 320
     vocab_size = 8803 if dataset == 'referit' else 12112
-    emb_name = 'referit' if dataset == 'referit' else 'Gref'
-    vocab_file = './data/vocabulary_Gref.txt'
+    emb_name = dataset
+    vocab_file = './data/vocabulary_{}.txt'.format(dataset)
     vocab_dict = text_processing.load_vocab_dict_from_file(vocab_file)
     IU_result = list()
 
