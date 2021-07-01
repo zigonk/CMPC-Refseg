@@ -193,7 +193,7 @@ class LSTM_model(object):
         seg_feats = tf.concat([fused_feats, self.visual_feat_c3], axis = -1)
         is_training = (self.mode != 'eval')
         aspp = self.atrous_spatial_pyramid_pooling(seg_feats, 16, self.batch_norm_decay, is_training)
-        score = self._conv("score", aspp, 1, self.mlp_dim, 1, [1, 1, 1, 1])
+        score = self._conv("score", aspp, 1, 256, 1, [1, 1, 1, 1])
 
         self.pred = score
         self.up = tf.image.resize_bilinear(self.pred, [self.H, self.W])
