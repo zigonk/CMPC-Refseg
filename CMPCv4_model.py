@@ -191,7 +191,7 @@ class LSTM_model(object):
 #                                                              fusion_c4, fusion_c5, valid_lang)
         fused_feats = self.gated_exchange_fusion_lstm_2times(fusion_c4, fusion_c5, valid_lang)
         seg_feats = tf.concat([fused_feats, self.visual_feat_c3], axis = -1)
-        is_training = (self.mode != 'eval)
+        is_training = (self.mode != 'eval')
         aspp = self.atrous_spatial_pyramid_pooling(seg_feats, 16, self.batch_norm_decay, is_training)
         score = self._conv("score", aspp, 1, self.mlp_dim, 1, [1, 1, 1, 1])
 
