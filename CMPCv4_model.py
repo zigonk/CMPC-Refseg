@@ -199,7 +199,7 @@ class LSTM_model(object):
         self.up = tf.image.resize_bilinear(self.pred, [self.H, self.W])
         self.sigm = tf.sigmoid(self.up)
 
-    def atrous_spatial_pyramid_pooling(inputs, output_stride, batch_norm_decay, is_training, depth=256):
+    def atrous_spatial_pyramid_pooling(self, inputs, output_stride, batch_norm_decay, is_training, depth=256):
       """Atrous Spatial Pyramid Pooling.
       Args:
         inputs: A tensor of size [batch, height, width, channels].
