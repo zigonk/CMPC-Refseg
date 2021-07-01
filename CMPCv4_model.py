@@ -39,7 +39,7 @@ class LSTM_model(object):
                  num_rnn_layers=1,
                  optimizer='adam',
                  weight_decay=0.0005,
-                 batch_norm_decay = 0.9997
+                 batch_norm_decay = 0.9997,
                  mode='eval',
                  conv5=False,
                  glove_dim=300,
