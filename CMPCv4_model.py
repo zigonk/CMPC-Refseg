@@ -83,7 +83,7 @@ class LSTM_model(object):
         resmodel = deeplab101.DeepLabResNetModel({'data': self.im}, is_training=False)
         self.visual_feat_c5 = resmodel.layers['res5c_relu']
         self.visual_feat_c4 = resmodel.layers['res4b22_relu']
-        self.visual_feat_c3 = resmodel.layers['res3b3_relu']
+        self.visual_feat_c2 = resmodel.layers['res2b_relu']
 
         # GloVe Embedding
         glove_np = np.load('{}/{}_emb.npy'.format(emb_dir, self.emb_name))
@@ -192,15 +192,32 @@ class LSTM_model(object):
 #         fused_feats = self.gated_exchange_fusion_lstm_2times(fusion_c3,
 #                                                              fusion_c4, fusion_c5, valid_lang)
         fused_feats = self.gated_exchange_fusion_lstm_2times(fusion_c4, fusion_c5, valid_lang)
-        seg_feats = tf.concat([fused_feats, self.visual_feat_c3], axis = -1)
-        aspp = self.atrous_spatial_pyramid_pooling(seg_feats, 16, self.batch_norm_decay, (not self.freeze_batch_norm))
-        score = self._conv("score", aspp, 1, 256, 1, [1, 1, 1, 1])
-
+        seg_feats = tf.concat(fused_feats, axis = -1)
+        encoder_output = self.atrous_spatial_pyramid_pooling(seg_feats, 16, self.batch_norm_decay)
+        score = self.decoder(encoder_output, self.batch_norm_decay)
         self.pred = score
         self.up = tf.image.resize_bilinear(self.pred, [self.H, self.W])
         self.sigm = tf.sigmoid(self.up)
+    def decoder(self, encoder_output, batch_norm_decay, is_training = True):
+        with tf.variable_scope("decoder"):
+          with tf.contrib.slim.arg_scope(resnet_v2.resnet_arg_scope(batch_norm_decay=batch_norm_decay)):
+            with arg_scope([layers.batch_norm], is_training=is_training):
+              with tf.variable_scope("low_level_features"):
+                low_level_features = self.visual_feat_c2
+                low_level_features = layers_lib.conv2d(low_level_features, 48,
+                                                       [1, 1], stride=1, scope='conv_1x1')
+                low_level_features_size = tf.shape(low_level_features)[1:3]
 
-    def atrous_spatial_pyramid_pooling(self, inputs, output_stride, batch_norm_decay, is_training, depth=256):
+              with tf.variable_scope("upsampling_logits"):
+                net = tf.image.resize_bilinear(encoder_output, low_level_features_size, name='upsample_1')
+                net = tf.concat([net, low_level_features], axis=3, name='concat')
+                net = layers_lib.conv2d(net, 256, [3, 3], stride=1, scope='conv_3x3_1')
+                net = layers_lib.conv2d(net, 256, [3, 3], stride=1, scope='conv_3x3_2')
+                net = layers_lib.conv2d(net, num_classes, [1, 1], activation_fn=None, normalizer_fn=None, scope='conv_1x1')
+                logits = tf.image.resize_bilinear(net, inputs_size, name='upsample_2')
+        return logits
+
+    def atrous_spatial_pyramid_pooling(self, inputs, output_stride, batch_norm_decay, is_training=True, depth=256):
       """Atrous Spatial Pyramid Pooling.
       Args:
         inputs: A tensor of size [batch, height, width, channels].
@@ -368,7 +385,7 @@ class LSTM_model(object):
         # Convolutional LSTM Fuse
         convlstm_cell = ConvLSTMCell([self.vf_h, self.vf_w], self.mlp_dim, [1, 1])
         convlstm_outputs, states = tf.nn.dynamic_rnn(convlstm_cell, tf.convert_to_tensor(
-            tf.stack((feat_exg5_2, feat_exg4_2), axis=1)), dtype=tf.float32)
+            tf.stack((feat_exg4_2, feat_exg5_2), axis=1)), dtype=tf.float32)
         fused_feat = convlstm_outputs[:,-1]
         print("Build Gated Fusion with ConvLSTM two times.")
 
