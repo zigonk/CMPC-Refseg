@@ -44,6 +44,7 @@ class LSTM_model(object):
                  conv5=False,
                  glove_dim=300,
                  emb_name='Gref',
+                 freeze_batch_norm=False,
                  emb_dir='data'):
         self.batch_size = batch_size
         self.num_steps = num_steps
@@ -72,6 +73,7 @@ class LSTM_model(object):
         self.conv5 = conv5
         self.up_c3 = tf.convert_to_tensor(np.zeros((1,320,320)))
         self.batch_norm_decay = batch_norm_decay
+        self.freeze_batch_norm = freeze_batch_norm
 
         self.words = tf.placeholder(tf.int32, [self.batch_size, self.num_steps])
         self.im = tf.placeholder(tf.float32, [self.batch_size, self.H, self.W, 3])
@@ -191,8 +193,7 @@ class LSTM_model(object):
 #                                                              fusion_c4, fusion_c5, valid_lang)
         fused_feats = self.gated_exchange_fusion_lstm_2times(fusion_c4, fusion_c5, valid_lang)
         seg_feats = tf.concat([fused_feats, self.visual_feat_c3], axis = -1)
-        is_training = (self.mode != 'eval')
-        aspp = self.atrous_spatial_pyramid_pooling(seg_feats, 16, self.batch_norm_decay, is_training)
+        aspp = self.atrous_spatial_pyramid_pooling(seg_feats, 16, self.batch_norm_decay, self.freeze_batch_norm)
         score = self._conv("score", aspp, 1, 256, 1, [1, 1, 1, 1])
 
         self.pred = score
