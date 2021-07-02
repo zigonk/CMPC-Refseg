@@ -214,8 +214,7 @@ class LSTM_model(object):
                 net = layers_lib.conv2d(net, 256, [3, 3], stride=1, scope='conv_3x3_1')
                 net = layers_lib.conv2d(net, 256, [3, 3], stride=1, scope='conv_3x3_2')
                 net = layers_lib.conv2d(net, num_classes, [1, 1], activation_fn=None, normalizer_fn=None, scope='conv_1x1')
-                logits = tf.image.resize_bilinear(net, inputs_size, name='upsample_2')
-        return logits
+        return net
 
     def atrous_spatial_pyramid_pooling(self, inputs, output_stride, batch_norm_decay, is_training=True, depth=256):
       """Atrous Spatial Pyramid Pooling.
