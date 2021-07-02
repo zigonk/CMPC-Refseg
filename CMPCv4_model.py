@@ -213,7 +213,7 @@ class LSTM_model(object):
                 net = tf.concat([net, low_level_features], axis=3, name='concat')
                 net = layers_lib.conv2d(net, 256, [3, 3], stride=1, scope='conv_3x3_1')
                 net = layers_lib.conv2d(net, 256, [3, 3], stride=1, scope='conv_3x3_2')
-                net = layers_lib.conv2d(net, num_classes, [1, 1], activation_fn=None, normalizer_fn=None, scope='conv_1x1')
+                net = layers_lib.conv2d(net, 1, [1, 1], activation_fn=None, normalizer_fn=None, scope='conv_1x1')
         return net
 
     def atrous_spatial_pyramid_pooling(self, inputs, output_stride, batch_norm_decay, is_training=True, depth=256):
