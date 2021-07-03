@@ -3,6 +3,7 @@ from __future__ import division
 import sys
 import os
 import argparse
+from typing import DefaultDict
 import tensorflow as tf
 import skimage
 from skimage import io as sio
@@ -145,6 +146,44 @@ def load_frame_from_id(vid, frame_id):
     frame_path = os.path.join(args.imdir, str('{}/{}.jpg'.format(vid, frame_id)))
     return load_image(frame_path)
 
+def find_pivot_frames(frames_feature, num_propagate = 2):
+    """Find pivot frames for propagate
+
+
+    Args:
+        frames_feature ([float]): global feature of each frame = (mask * visual_feature)
+        num_propagate (int, optional): The number of frames propgated from pivot. Defaults to 2.
+
+    Returns:
+        [int]: frame index (0-index) => Used to retrieve frame id from frame_ids
+    """
+    avail_frame = [True] * frames_feature.shape[0]
+    selected_frame_ids = []
+
+    frames_feature = np.array(frames_feature)
+    # Calculate cosine similarity
+    frames_feature_norm = frames_feature / np.linalg.norm(frames_feature, axis = 1)
+    distance_matrix = np.dot(frames_feature_norm, frames_feature_norm.T) 
+    # Aggregate distance from one frame to others
+    frames_total_distance = np.sum(distance_matrix, axis = 0)
+    # Choose the frames has highest similarity
+    first_pivot = np.argmax(frames_total_distance)
+    frames_distance_to_pivot = np.dot(frames_feature_norm[first_pivot], frames_feature_norm.T)
+    sorted_frameid_by_distance = np.argsort(frames_distance_to_pivot)
+    for fid in sorted_frameid_by_distance:
+        if (avail_frame[fid]):
+            selected_frame_ids.append(fid)
+            # Mark frame is propagated to unavailable
+            left_propagate_id = max(fid - num_propagate, 0)
+            right_propagate_id = min(fid + num_propagate + 1, len(avail_frame))
+            avail_frame[left_propagate_id:right_propagate_id] = False
+    return selected_frame_ids
+                
+    
+    
+
+
+
 def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, pre_emb=False):
     global args
     data_folder = './' + dataset + '/' + setname + '_batch/'
@@ -204,6 +243,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
     #         break
     #     if (vid_ind not in sorted_video_key):
     #         continue
+    meta_pivot_frames = DefaultDict(lambda: DefaultDict())
     for vid in sorted_video_key:
         print("Processing video {}".format(vid))
         expressions = videos[vid]['expressions']
@@ -227,6 +267,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 if text[idx] != 0:
                     valid_idx[0] = idx
                     break
+            frames_feature = []
             for fid in frame_ids:
                 vis_path = os.path.join(vis_dir, str('{}.png'.format(fid)))
                 mask_path = os.path.join(mask_dir, str('{}.npy'.format(fid)))
@@ -244,7 +285,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 proc_im_ = proc_im.astype(np.float32)
                 proc_im_ = proc_im_[:, :, ::-1]
                 proc_im_ -= mu
-                scores_val, up_val, sigm_val = sess.run([model.pred, model.up, model.sigm],
+                scores_val, up_val, sigm_val, visual_feat = sess.run([model.pred, model.up, model.sigm, model.visual_feat_c4],
                                                         feed_dict={
                                                             model.words: np.expand_dims(text, axis=0),
                                                             model.im: np.expand_dims(proc_im_, axis=0),
@@ -253,7 +294,12 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 # scores_val = np.squeeze(scores_val)
                 # pred_raw = (scores_val >= score_thresh).astype(np.float32)
                 up_val = np.squeeze(up_val)
-                sigm_val = np.squeeze(sigm_val) + 1e-9
+                sigm_val = np.squeeze(sigm_val)
+                visual_feat = np.squeeze(visual_feat)
+                print(visual_feat.shape)
+                print(sigm_val.shape)
+                # Preprocess shape (TODO)
+                frames_feature.append(np.sum(sigm_val * visual_feat), axis=1)
                 pred_raw = (sigm_val >= args.threshold).astype(np.float32) 
                 predicts = im_processing.resize_and_crop(pred_raw, mask.shape[0], mask.shape[1]).astype('uint8') * 255
                 if dcrf:
@@ -277,6 +323,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
 #                         visualize_seg(vis_path, im, exp, predicts_dcrf)
                     else:
                         cv2.imwrite(vis_path, predicts)
+            meta_pivot_frames[vid][eid] = find_pivot_frames(frames_feature)
 #                         visualize_seg(vis_path, im, exp, predicts)
 #                         np.save(mask_path, np.array(pred_raw))
     # I, U = eval_tools.compute_mask_IU(predicts, mask)
