@@ -299,7 +299,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 print(visual_feat.shape)
                 print(sigm_val.shape)
                 # Preprocess shape (TODO)
-                frames_feature.append(np.sum(sigm_val * visual_feat), axis=1)
+                # frames_feature.append(np.sum(sigm_val * visual_feat), axis=1)
                 pred_raw = (sigm_val >= args.threshold).astype(np.float32) 
                 predicts = im_processing.resize_and_crop(pred_raw, mask.shape[0], mask.shape[1]).astype('uint8') * 255
                 if dcrf:
@@ -323,7 +323,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
 #                         visualize_seg(vis_path, im, exp, predicts_dcrf)
                     else:
                         cv2.imwrite(vis_path, predicts)
-            meta_pivot_frames[vid][eid] = find_pivot_frames(frames_feature)
+            # meta_pivot_frames[vid][eid] = find_pivot_frames(frames_feature)
 #                         visualize_seg(vis_path, im, exp, predicts)
 #                         np.save(mask_path, np.array(pred_raw))
     # I, U = eval_tools.compute_mask_IU(predicts, mask)
