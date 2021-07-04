@@ -191,7 +191,7 @@ class LSTM_model(object):
         valid_lang = self.nec_lang(words_parse, words_feat)
 #         fused_feats = self.gated_exchange_fusion_lstm_2times(fusion_c3,
 #                                                              fusion_c4, fusion_c5, valid_lang)
-        fused_feats = tf.cond((tf.math.is_nan(self.consitency_score) or self.consitency_score > 0.5),
+        fused_feats = tf.cond((self.consitency_score > 0.5),
                                 lambda: self.gated_exchange_fusion_lstm_2times(fusion_c4, fusion_c5, valid_lang),
                                 lambda: self.gated_exchange_fusion_lstm_2times(fusion_c4, fusion_c4, valid_lang))
         seg_feats = tf.concat(fused_feats, axis = -1)
