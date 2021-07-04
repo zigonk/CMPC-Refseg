@@ -13,6 +13,7 @@ from PIL import Image
 import matplotlib.pyplot as plt
 from get_model import get_segmentation_model
 from pydensecrf import densecrf
+import math
 
 from util import data_reader
 from util.processing_tools import *
@@ -225,9 +226,9 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                     valid_idx[0] = idx
                     break
             for fid in frame_ids:
-                frame_id = int(fid)
-                if (frame_id % 20 != 0):
-                    continue
+                # frame_id = int(fid)
+                # if (frame_id % 20 != 0):
+                #     continue
                 vis_path = os.path.join(vis_dir, str('{}_{}_{}.png'.format(vid,eid,fid)))
                 frame = load_frame_from_id(vid, fid)
                 if frame is None:
@@ -241,12 +242,19 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 proc_im_ = proc_im.astype(np.float32)
                 proc_im_ = proc_im_[:, :, ::-1]
                 proc_im_ -= mu
-                scores_val, up_val, sigm_val, up_c3, up_c4, up_c5 = sess.run([model.pred, model.up, model.sigm, model.up_c3, model.up_c4, model.up_c5],
-                                                        feed_dict={
-                                                            model.words: np.expand_dims(text, axis=0),
-                                                            model.im: np.expand_dims(proc_im_, axis=0),
-                                                            model.valid_idx: np.expand_dims(valid_idx, axis=0)
-                                                        })
+                scores_val, up_val, sigm_val, up_c3, up_c4, up_c5, consitency_score = sess.run([model.pred, 
+                                                                                                model.up, 
+                                                                                                model.sigm, 
+                                                                                                model.up_c3, 
+                                                                                                model.up_c4, 
+                                                                                                model.up_c5,
+                                                                                                model.consitency_score
+                                                                                                ],
+                                                                                                feed_dict={
+                                                                                                    model.words: np.expand_dims(text, axis=0),
+                                                                                                    model.im: np.expand_dims(proc_im_, axis=0),
+                                                                                                    model.valid_idx: np.expand_dims(valid_idx, axis=0)
+                                                                                                })
                 # scores_val = np.squeeze(scores_val)
                 # pred_raw = (scores_val >= score_thresh).astype(np.float32)
                 up_c3 = im_processing.resize_and_crop(sigmoid(np.squeeze(up_c3)), frame.shape[0], frame.shape[1])
@@ -254,19 +262,20 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 up_c5 = im_processing.resize_and_crop(sigmoid(np.squeeze(up_c5)), frame.shape[0], frame.shape[1])
                 sigm_val = im_processing.resize_and_crop(sigmoid(np.squeeze(sigm_val)), frame.shape[0], frame.shape[1])
                 up_val = np.squeeze(up_val)
-                plt.clf()
-                plt.subplot(1, 5, 1)
-                plt.imshow(frame)
-                plt.text(-0.5, -0.5, exp)
-                plt.subplot(1, 5, 2)
-                plt.imshow(up_c3)
-                plt.subplot(1, 5, 3)
-                plt.imshow(up_c4)
-                plt.subplot(1, 5, 4)
-                plt.imshow(up_c5)
-                plt.subplot(1, 5, 5)
-                plt.imshow(sigm_val)
-                plt.savefig(vis_path)
+                if (not math.isnan(consitency_score) and consitency_score < 0.5):
+                    plt.clf()
+                    plt.subplot(1, 5, 1)
+                    plt.imshow(frame)
+                    plt.text(-0.7, -0.7, exp + consitency_score)
+                    plt.subplot(1, 5, 2)
+                    plt.imshow(up_c3)
+                    plt.subplot(1, 5, 3)
+                    plt.imshow(up_c4)
+                    plt.subplot(1, 5, 4)
+                    plt.imshow(up_c5)
+                    plt.subplot(1, 5, 5)
+                    plt.imshow(sigm_val)
+                    plt.savefig(vis_path)
 #                 pred_raw = (up_val >= score_thresh).astype('uint8') * 255
 #                 pred_raw = (up_val >= score_thresh).astype(np.float32)
 #                 predicts = im_processing.resize_and_crop(pred_raw, mask.shape[0], mask.shape[1])
