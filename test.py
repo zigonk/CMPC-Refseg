@@ -285,7 +285,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 proc_im_ = proc_im.astype(np.float32)
                 proc_im_ = proc_im_[:, :, ::-1]
                 proc_im_ -= mu
-                scores_val, up_val, sigm_val, visual_feat = sess.run([model.pred, model.up, model.sigm, model.visual_feat_c4],
+                scores_val, up_val, sigm_val, consitency_score = sess.run([model.pred, model.up, model.sigm, model.consitency_score],
                                                         feed_dict={
                                                             model.words: np.expand_dims(text, axis=0),
                                                             model.im: np.expand_dims(proc_im_, axis=0),
@@ -296,8 +296,10 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 up_val = np.squeeze(up_val)
                 sigm_val = np.squeeze(sigm_val)
                 visual_feat = np.squeeze(visual_feat)
+                print(consitency_score, vid, eid, fid)
                 print(visual_feat.shape)
                 print(sigm_val.shape)
+                break
                 # Preprocess shape (TODO)
                 # frames_feature.append(np.sum(sigm_val * visual_feat), axis=1)
                 pred_raw = (sigm_val >= args.threshold).astype(np.float32) 
