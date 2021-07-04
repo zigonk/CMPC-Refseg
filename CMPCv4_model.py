@@ -187,7 +187,7 @@ class LSTM_model(object):
         self.up_c4 = tf.image.resize_bilinear(score_c4, [self.H, self.W])
 #         score_c3 = self._conv("score_c3", fusion_c3, 3, self.mlp_dim, 1, [1, 1, 1, 1])
 #         self.up_c3 = tf.image.resize_bilinear(score_c3, [self.H, self.W])
-        self.consitency_score = loss.iou_with_threshold(tf.sigmoid(score_c4), tf.sigmoid(score_c5), 0.2)
+        self.consitency_score = loss.iou_with_threshold(tf.sigmoid(score_c4), tf.sigmoid(score_c5), 0.5)
         valid_lang = self.nec_lang(words_parse, words_feat)
 #         fused_feats = self.gated_exchange_fusion_lstm_2times(fusion_c3,
 #                                                              fusion_c4, fusion_c5, valid_lang)
