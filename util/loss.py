@@ -63,8 +63,8 @@ def iou_with_threshold(scores_a, scores_b, threshold = 0.5):
     mask_b = tf.cast(scores_b > threshold, tf.int32)
     inter = tf.reduce_sum(tf.multiply(mask_a, mask_b), [1, 2, 3])
     union = tf.add(tf.reduce_sum(mask_b, [1, 2, 3]), tf.reduce_sum(mask_b, [1, 2, 3]))
-    union = tf.subtract(union, inter)
-    iou_score = tf.reduce_mean(tf.subtract(1., tf.div(inter, union)))
+    union = union - inter
+    iou_score = tf.reduce_mean(1. - tf.div(inter, union))
     return iou_score
 
 
