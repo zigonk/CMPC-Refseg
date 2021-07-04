@@ -368,6 +368,9 @@ class LSTM_model(object):
         '''
 #         feat_exg3 = self.gated_exchange_module(feat3, feat4, feat5, lang_feat, 'c3')
 #         feat_exg3 = tf.nn.l2_normalize(feat_exg3, 3)
+        feat5 = tf.cond(self.consitency_score > threshold, 
+                            lambda: feat5, 
+                            lambda: tf.identity(feat4))
         feat_exg4 = self.gated_exchange_module(feat4, feat5, lang_feat, 'c4')
         feat_exg4 = tf.nn.l2_normalize(feat_exg4, 3)
         feat_exg5 = self.gated_exchange_module(feat5, feat4, lang_feat, 'c5')
@@ -383,9 +386,10 @@ class LSTM_model(object):
         
         # Convolutional LSTM Fuse
         convlstm_cell = ConvLSTMCell([self.vf_h, self.vf_w], self.mlp_dim, [1, 1])
-        convlstm_input = tf.cond(self.consitency_score > threshold, 
-                                    lambda: tf.stack((feat_exg4_2, feat_exg5_2), axis=1), 
-                                    lambda: tf.stack((feat_exg4_2, feat_exg4_2), axis=1))
+        convlstm_input = tf.stack((feat_exg4_2, feat_exg5_2), axis=1)
+        # convlstm_input = tf.cond(self.consitency_score > threshold, 
+        #                             lambda: tf.stack((feat_exg4_2, feat_exg5_2), axis=1), 
+        #                             lambda: tf.stack((feat_exg4_2, feat_exg4_2), axis=1))
         convlstm_outputs, states = tf.nn.dynamic_rnn(convlstm_cell, tf.convert_to_tensor(
             convlstm_input), dtype=tf.float32)
         fused_feat = convlstm_outputs[:,-1]
