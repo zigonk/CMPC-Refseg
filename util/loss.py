@@ -48,6 +48,27 @@ def iou_loss(scores, labels):
 
     return iou_loss
 
+def iou_with_threshold(scores_a, scores_b, threshold = 0.5):
+    """Calculate IOU of scores_a and scores_b after thresholding
+
+    Args:
+        scores_a ([type]): [Sigmoid value of mask a]
+        scores_b ([type]): [Sigmoid value of mask b]
+        threshold (float, optional): [Mask threshold]. Defaults to 0.5.
+
+    Returns:
+        iou_score (float): IoU score
+    """
+    mask_a = tf.cast(scores_a > threshold, tf.int32)
+    mask_b = tf.cast(scores_b > threshold, tf.int32)
+    inter = tf.reduce_sum(tf.multiply(mask_a, mask_b), [1, 2, 3])
+    union = tf.add(tf.reduce_sum(mask_b, [1, 2, 3]), tf.reduce_sum(mask_b, [1, 2, 3]))
+    union = tf.sub(union, inter)
+    iou_score = tf.reduce_mean(tf.sub(1., tf.div(inter, union)))
+    return iou_score
+
+
+
 def smooth_l1_loss(scores, labels, ld=1.0):
     box_diff = scores - labels
     abs_box_diff = tf.abs(box_diff)
