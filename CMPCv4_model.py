@@ -191,7 +191,7 @@ class LSTM_model(object):
         valid_lang = self.nec_lang(words_parse, words_feat)
 #         fused_feats = self.gated_exchange_fusion_lstm_2times(fusion_c3,
 #                                                              fusion_c4, fusion_c5, valid_lang)
-        fused_feats = self.gated_exchange_fusion_lstm_2times(fusion_c4, fusion_c5, valid_lang)
+        fused_feats = self.gated_exchange_fusion_lstm_2times(fusion_c4, fusion_c5, valid_lang, 0.3)
         seg_feats = tf.concat(fused_feats, axis = -1)
         encoder_output = self.atrous_spatial_pyramid_pooling(seg_feats, 16, self.batch_norm_decay)
         score = self.decoder(encoder_output, self.batch_norm_decay)
