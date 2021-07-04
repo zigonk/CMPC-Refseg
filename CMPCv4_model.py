@@ -187,11 +187,11 @@ class LSTM_model(object):
         self.up_c4 = tf.image.resize_bilinear(score_c4, [self.H, self.W])
 #         score_c3 = self._conv("score_c3", fusion_c3, 3, self.mlp_dim, 1, [1, 1, 1, 1])
 #         self.up_c3 = tf.image.resize_bilinear(score_c3, [self.H, self.W])
-        self.consitency_score = loss.iou_with_threshold(tf.sigmoid(score_c4), tf.sigmoid(score_c5), 0.3)
+        self.consitency_score = loss.iou_with_threshold(tf.sigmoid(score_c4), tf.sigmoid(score_c5))
         valid_lang = self.nec_lang(words_parse, words_feat)
 #         fused_feats = self.gated_exchange_fusion_lstm_2times(fusion_c3,
 #                                                              fusion_c4, fusion_c5, valid_lang)
-        fused_feats = self.gated_exchange_fusion_lstm_2times(fusion_c4, fusion_c5, valid_lang, 0.3)
+        fused_feats = self.gated_exchange_fusion_lstm_2times(fusion_c4, fusion_c5, valid_lang)
         seg_feats = tf.concat(fused_feats, axis = -1)
         encoder_output = self.atrous_spatial_pyramid_pooling(seg_feats, 16, self.batch_norm_decay)
         score = self.decoder(encoder_output, self.batch_norm_decay)
@@ -385,7 +385,7 @@ class LSTM_model(object):
         convlstm_cell = ConvLSTMCell([self.vf_h, self.vf_w], self.mlp_dim, [1, 1])
         convlstm_input = tf.cond(self.consitency_score > threshold, 
                                     lambda: tf.stack((feat_exg4_2, feat_exg5_2), axis=1), 
-                                    lambda:tf.stack((feat_exg4_2, feat_exg4_2), axis=1))
+                                    lambda: tf.stack((feat_exg4_2, feat_exg4_2), axis=1))
         convlstm_outputs, states = tf.nn.dynamic_rnn(convlstm_cell, tf.convert_to_tensor(
             convlstm_input), dtype=tf.float32)
         fused_feat = convlstm_outputs[:,-1]

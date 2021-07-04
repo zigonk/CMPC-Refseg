@@ -262,7 +262,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 up_c5 = im_processing.resize_and_crop(sigmoid(np.squeeze(up_c5)), frame.shape[0], frame.shape[1])
                 sigm_val = im_processing.resize_and_crop(sigmoid(np.squeeze(sigm_val)), frame.shape[0], frame.shape[1])
                 up_val = np.squeeze(up_val)
-                if (not math.isnan(consitency_score) and consitency_score < 0.5):
+                if (not math.isnan(consitency_score) and consitency_score < 0.3):
                     plt.clf()
                     plt.subplot(1, 5, 1)
                     plt.imshow(frame)
