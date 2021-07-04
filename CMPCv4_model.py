@@ -191,9 +191,7 @@ class LSTM_model(object):
         valid_lang = self.nec_lang(words_parse, words_feat)
 #         fused_feats = self.gated_exchange_fusion_lstm_2times(fusion_c3,
 #                                                              fusion_c4, fusion_c5, valid_lang)
-        fused_feats = tf.cond((self.consitency_score > 0.5),
-                                lambda: self.gated_exchange_fusion_lstm_2times(fusion_c4, fusion_c5, valid_lang),
-                                lambda: self.gated_exchange_fusion_lstm_2times(fusion_c4, fusion_c4, valid_lang))
+        fused_feats = self.gated_exchange_fusion_lstm_2times(fusion_c4, fusion_c5, valid_lang)
         seg_feats = tf.concat(fused_feats, axis = -1)
         encoder_output = self.atrous_spatial_pyramid_pooling(seg_feats, 16, self.batch_norm_decay)
         score = self.decoder(encoder_output, self.batch_norm_decay)
@@ -385,8 +383,11 @@ class LSTM_model(object):
         
         # Convolutional LSTM Fuse
         convlstm_cell = ConvLSTMCell([self.vf_h, self.vf_w], self.mlp_dim, [1, 1])
+        convlstm_input = tf.cond(self.consitency_score > 0.5, 
+                                    lambda: tf.stack((feat_exg4_2, feat_exg5_2), axis=1), 
+                                    lambda:tf.stack((feat_exg4_2, feat_exg4_2), axis=1))
         convlstm_outputs, states = tf.nn.dynamic_rnn(convlstm_cell, tf.convert_to_tensor(
-            tf.stack((feat_exg4_2, feat_exg5_2), axis=1)), dtype=tf.float32)
+            convlstm_input), dtype=tf.float32)
         fused_feat = convlstm_outputs[:,-1]
         print("Build Gated Fusion with ConvLSTM two times.")
 
