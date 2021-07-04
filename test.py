@@ -302,6 +302,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 up_val = np.squeeze(up_val)
                 sigm_val = np.squeeze(sigm_val)
                 if (not math.isnan(consitency_score) and consitency_score < 0.5):
+                    print(consitency_score)
                     print(vid, eid, fid)
                     inconsistent_frames.append((vid, eid, fid))
                 # visual_feat_c4 = np.squeeze(visual_feat_c4)
