@@ -4,6 +4,7 @@ import sys
 import os
 import argparse
 from typing import DefaultDict
+import math
 import tensorflow as tf
 import skimage
 from skimage import io as sio
@@ -244,6 +245,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
     #     if (vid_ind not in sorted_video_key):
     #         continue
     meta_pivot_frames = DefaultDict(lambda: DefaultDict())
+    inconsistent_frames = []
     for vid in sorted_video_key:
         print("Processing video {}".format(vid))
         expressions = videos[vid]['expressions']
@@ -299,11 +301,11 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 # pred_raw = (scores_val >= score_thresh).astype(np.float32)
                 up_val = np.squeeze(up_val)
                 sigm_val = np.squeeze(sigm_val)
-                visual_feat_c4 = np.squeeze(visual_feat_c4)
-                print(consitency_score, vid, eid, fid)
-                print(visual_feat_c4.shape)
-                print(sigm_val.shape)
-                break
+                if (not math.isnan(consitency_score) and consitency_score < 0.5):
+                    print(vid, eid, fid)
+                    inconsistent_frames.append((vid, eid, fid))
+                # visual_feat_c4 = np.squeeze(visual_feat_c4)
+                # break
                 # Preprocess shape (TODO)
                 # frames_feature.append(np.sum(sigm_val * visual_feat), axis=1)
                 pred_raw = (sigm_val >= args.threshold).astype(np.float32) 
@@ -352,6 +354,8 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
     #         seg_correct_dcrf[n_eval_iou] += (I_dcrf / U_dcrf >= eval_seg_iou)
     # print(msg)
     seg_total += 1
+    with open('inconsitent_frames.json', 'w') as f:
+        json.dump(inconsistent_frames, f)
 
     # Print results
     # print('Segmentation evaluation (without DenseCRF):')
