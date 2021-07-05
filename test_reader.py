@@ -5,4 +5,4 @@ mask_dir = '/content/train/Annotations'
 metadata = './train_meta.json'
 
 reader = data_reader_refvos.DataReader(im_dir, mask_dir, metadata)
-print(reader.read_batch())
+print(reader.read_batch()['label_bbox'], reader.read_batch()['true_bbox'])
