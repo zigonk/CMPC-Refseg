@@ -556,7 +556,7 @@ class LSTM_model(object):
         xy_grid = tf.cast(xy_grid, tf.float32)
 
         pred_xy = (tf.sigmoid(conv_raw_dxdy) + xy_grid) * stride
-        pred_wh = (tf.exp(conv_raw_dwdh) * anchors) * stride
+        pred_wh = (tf.exp(conv_raw_dwdh) * self.anchors) * stride
         pred_xywh = tf.concat([pred_xy, pred_wh], axis=-1)
 
         pred_conf = tf.sigmoid(conv_raw_conf)
