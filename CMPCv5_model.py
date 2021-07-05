@@ -78,6 +78,7 @@ class LSTM_model(object):
         self.freeze_batch_norm = freeze_batch_norm
         self.stride = stride
         self.anchors = io.read_anchors('./data/anchors.txt')
+        self.iou_loss_thresh = 0.5
 
         self.words = tf.placeholder(tf.int32, [self.batch_size, self.num_steps])
         self.im = tf.placeholder(tf.float32, [self.batch_size, self.H, self.W, 3])
