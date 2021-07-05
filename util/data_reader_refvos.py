@@ -58,7 +58,8 @@ def run_prefetch(prefetch_queue, im_dir, mask_dir, metadata, num_batch, shuffle)
         im_name, mask_name, sent, obj_id = metadata[batch_id]
         # Load image
         im_name = os.path.join(im_dir, im_name)
-        im = skimage.io.imread(im_name)
+        im = None
+        # im = skimage.io.imread(im_name)
         # Load mask
         mask_name = os.path.join(mask_dir, mask_name)
         mask = skimage.io.imread(mask_name)[:,:,:3]
