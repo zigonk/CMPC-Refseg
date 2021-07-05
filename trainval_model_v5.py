@@ -31,7 +31,7 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
     decay = 0.99
     vocab_size = 8803 if dataset == 'referit' else 1917498
     emb_name = dataset
-    stride = 3
+    stride = 8
     anchors = io.read_anchors('./data/anchors.txt')
     anchors_size = anchors.shape[0]
 
