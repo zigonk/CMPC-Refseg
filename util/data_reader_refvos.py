@@ -44,7 +44,7 @@ def preprocess_data(im, mask, sent, obj_id):
     im = skimage.img_as_ubyte(im_processing.resize_and_pad(im, input_H, input_W))
     mask = im_processing.resize_and_pad(mask_obj, input_H, input_W)
     non_zero_points = cv2.findNonZero(mask)
-    bbox = cv2.boudingRect(non_zero_points)
+    bbox = cv2.boundingRect(non_zero_points)
     label_bbox, true_bbox = processing_tools.preprocess_true_boxes(bbox, input_H, anchors)
     text = text_processing.preprocess_sentence(sent, vocab_dict, T)
     return {
