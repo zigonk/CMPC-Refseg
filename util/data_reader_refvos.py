@@ -7,7 +7,7 @@ import threading
 import skimage
 import skimage.io
 import queue as queue
-import im_processing, text_processing
+from util import im_processing, text_processing
 import json
 import cv2
 
