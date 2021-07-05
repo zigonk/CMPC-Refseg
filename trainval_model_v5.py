@@ -31,12 +31,15 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
     decay = 0.99
     vocab_size = 8803 if dataset == 'referit' else 1917498
     emb_name = dataset
+    stride = 3
+    anchors = io.read_anchors('./data/anchors.txt')
+    anchors_size = anchors.shape[0]
 
     if pre_emb:
         print("Use pretrained Embeddings.")
         model = get_segmentation_model(model_name, mode='train',
                                        vocab_size=vocab_size, start_lr=lr,
-                                       batch_size=bs, conv5=conv5, emb_name=emb_name, emb_dir=emb_dir)
+                                       batch_size=bs, conv5=conv5, emb_name=emb_name, emb_dir=emb_dir, anchors=anchors)
     else:
         model = get_segmentation_model(model_name, mode='train',
                                        vocab_size=vocab_size, start_lr=lr,
@@ -67,12 +70,9 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
     image_batch = np.zeros((bs, im_h, im_w, 3), dtype=np.float32)
     mask_batch = np.zeros((bs, im_h, im_w, 1), dtype=np.float32)
     valid_idx_batch = np.zeros((bs, 1), dtype=np.int32)
-    stride = 3
-    anchors = io.read_anchors('./data/anchors.txt')
-    anchors_size = anchors.shape[0]
     train_output_size = model.H // stride
     label_bbox_batch = np.zeros((bs, train_output_size, train_output_size, 5), dtype=np.float32)
-    true_bbox_batch = np.zeros((bs, anchors_size, 4), dtype=np.float32)
+    true_bbox_batch = np.zeros((bs, anchors_size, 1), dtype=np.float32)
 
     if dataset == 'refvos':
         reader = data_reader_refvos.DataReader(im_dir=args.im_dir, mask_dir=args.mask_dir, train_metadata=args.meta)

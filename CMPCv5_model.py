@@ -188,8 +188,8 @@ class LSTM_model(object):
 
         # For multi-level losses
         anchors_per_scale = self.anchors.shape[0]
-        bboxes_c5 = self._conv("bbox_c5", fusion_c5, 1, self.mlp_dim, 5 * anchors_per_scale, [1, 1, 1, 1])
-        self.pred_bbox = self.decode_bbox(bboxes_c5)
+        self.conv_bbox = self._conv("bbox_c5", fusion_c5, 1, self.mlp_dim, 5 * anchors_per_scale, [1, 1, 1, 1])
+        self.pred_bbox = self.decode_bbox(self.conv_bbox)
         
         score_c4 = self._conv("score_c4", fusion_c4, 3, self.mlp_dim, 1, [1, 1, 1, 1])
         self.up_c4 = tf.image.resize_bilinear(score_c4, [self.H, self.W])
@@ -665,7 +665,7 @@ class LSTM_model(object):
     def compute_loss_bbox(self, label_bbox, true_bbox):
 
         with tf.name_scope('box_loss'):
-            loss_bbox = self.loss_layer(self.conv_mbbox, self.pred_bbox, label_bbox, true_bbox,
+            loss_bbox = self.loss_layer(self.conv_bbox, self.pred_bbox, label_bbox, true_bbox,
                                          anchors = self.anchors, stride = self.strides)
 
         with tf.name_scope('giou_loss'):
