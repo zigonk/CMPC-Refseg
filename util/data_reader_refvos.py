@@ -1,4 +1,5 @@
 from __future__ import print_function
+from util import processing_tools
 
 import numpy as np
 import os
@@ -8,6 +9,7 @@ import skimage.io
 import queue as queue
 import im_processing, text_processing
 import json
+import cv2
 
 object_color = {
     '1': [236, 95, 103],
@@ -30,13 +32,18 @@ def preprocess_data(im, mask, sent, obj_id):
     mask_obj = np.asarray(((mask == mask_color)[:,:,0]))
     im = skimage.img_as_ubyte(im_processing.resize_and_pad(im, input_H, input_W))
     mask = im_processing.resize_and_pad(mask_obj, input_H, input_W)
-
+    pixelPoints = cv2.findNonZero(mask)
+    bbox = cv2.boundingRect(pixelPoints)
+    # label_bbox, true_bbox = processing_tools.preprocess_true_boxes(bbox, input_H, [])
     text = text_processing.preprocess_sentence(sent, vocab_dict, T)
     return {
         'text_batch': np.asarray(text),
         'im_batch': np.asarray(im),
         'mask_batch': (mask > 0),
-        'sent_batch': [sent]
+        'sent_batch': [sent],
+        'bbox': bbox
+        # 'label_bbox': label_bbox,
+        # 'true_bbox': true_bbox
     }
 
 def run_prefetch(prefetch_queue, im_dir, mask_dir, metadata, num_batch, shuffle):
