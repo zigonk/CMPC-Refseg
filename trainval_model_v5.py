@@ -121,7 +121,7 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
                                                                                 # np.expand_dims(mask, axis=0)
                                                                                 model.valid_idx: valid_idx_batch,
                                                                                 model.label_bbox: label_bbox_batch,
-                                                                                model.true_bbox_batch: true_bbox_batch,
+                                                                                model.true_bbox: true_bbox_batch,
                                                                             })
         # cls_loss_avg = decay * cls_loss_avg + (1 - decay) * cls_loss_val
         # cls_loss_avg 
