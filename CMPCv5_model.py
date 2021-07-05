@@ -536,7 +536,7 @@ class LSTM_model(object):
 
 
 
-    def decode_bbox(self, conv_output, anchors, stride):
+    def decode_bbox(self, conv_output, stride=3):
         conv_shape       = tf.shape(conv_output)
         batch_size       = conv_shape[0]
         output_size      = conv_shape[1]
