@@ -627,7 +627,7 @@ class LSTM_model(object):
         output_size = conv_shape[1]
         input_size  = stride * output_size
         conv = tf.reshape(conv, (batch_size, output_size, output_size,
-                                 self.anchor_per_scale, 5 + self.num_class))
+                                 self.anchor_per_scale, 5))
         conv_raw_conf = conv[:, :, :, :, 4:5]
         
         pred_xywh     = pred[:, :, :, :, 0:4]
