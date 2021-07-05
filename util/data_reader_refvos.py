@@ -9,7 +9,6 @@ import skimage.io
 import queue as queue
 from util import im_processing, text_processing
 import json
-import cv2
 
 object_color = {
     '1': [236, 95, 103],
@@ -30,17 +29,17 @@ vocab_dict = text_processing.load_vocab_dict_from_file(vocab_file)
 def preprocess_data(im, mask, sent, obj_id):
     mask_color = object_color[obj_id]
     mask_obj = np.asarray(((mask == mask_color)[:,:,0]))
-    # im = skimage.img_as_ubyte(im_processing.resize_and_pad(im, input_H, input_W))
+    im = skimage.img_as_ubyte(im_processing.resize_and_pad(im, input_H, input_W))
     mask = im_processing.resize_and_pad(mask_obj, input_H, input_W)
-    # bbox = im_processing.bboxes_from_masks([mask])
+    bbox = im_processing.bboxes_from_masks([mask])
     # label_bbox, true_bbox = processing_tools.preprocess_true_boxes(bbox, input_H, [])
-    # text = text_processing.preprocess_sentence(sent, vocab_dict, T)
+    text = text_processing.preprocess_sentence(sent, vocab_dict, T)
     return {
-        # 'text_batch': np.asarray(text),
-        # 'im_batch': np.asarray(im),
-        # 'mask_batch': (mask > 0),
-        # 'sent_batch': [sent],
-        # 'bbox': bbox
+        'text_batch': np.asarray(text),
+        'im_batch': np.asarray(im),
+        'mask_batch': (mask > 0),
+        'sent_batch': [sent],
+        'bbox': bbox
         # 'label_bbox': label_bbox,
         # 'true_bbox': true_bbox
     }
@@ -58,8 +57,7 @@ def run_prefetch(prefetch_queue, im_dir, mask_dir, metadata, num_batch, shuffle)
         im_name, mask_name, sent, obj_id = metadata[batch_id]
         # Load image
         im_name = os.path.join(im_dir, im_name)
-        im = None
-        # im = skimage.io.imread(im_name)
+        im = skimage.io.imread(im_name)
         # Load mask
         mask_name = os.path.join(mask_dir, mask_name)
         mask = skimage.io.imread(mask_name)[:,:,:3]
