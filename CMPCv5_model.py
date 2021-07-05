@@ -666,7 +666,7 @@ class LSTM_model(object):
 
         with tf.name_scope('box_loss'):
             loss_bbox = self.loss_layer(self.conv_bbox, self.pred_bbox, label_bbox, true_bbox,
-                                         anchors = self.anchors, stride = self.strides)
+                                         anchors = self.anchors, stride = self.stride)
 
         with tf.name_scope('giou_loss'):
             giou_loss = loss_bbox[0]
