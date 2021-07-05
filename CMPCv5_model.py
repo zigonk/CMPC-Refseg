@@ -620,7 +620,7 @@ class LSTM_model(object):
 
         return iou
 
-    def loss_layer(self, conv, pred, label, bboxes, stride):
+    def loss_layer(self, conv, pred, label, bboxes, stride = 3):
         anchor_per_scale = self.anchors.shape[0]
         conv_shape  = tf.shape(conv)
         batch_size  = conv_shape[0]
@@ -665,9 +665,7 @@ class LSTM_model(object):
     def compute_loss_bbox(self, label_bbox, true_bbox):
 
         with tf.name_scope('box_loss'):
-            loss_bbox = self.loss_layer(self.conv_bbox, self.pred_bbox, label_bbox, true_bbox,
-                                         anchors = self.anchors, stride = self.stride)
-
+            loss_bbox = self.loss_layer(self.conv_bbox, self.pred_bbox, label_bbox, true_bbox)
         with tf.name_scope('giou_loss'):
             giou_loss = loss_bbox[0]
 
