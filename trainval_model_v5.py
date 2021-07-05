@@ -72,7 +72,7 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
     valid_idx_batch = np.zeros((bs, 1), dtype=np.int32)
     train_output_size = model.H // stride
     label_bbox_batch = np.zeros((bs, train_output_size, train_output_size, 3, 5), dtype=np.float32)
-    true_bbox_batch = np.zeros((bs, anchors_size, 1), dtype=np.float32)
+    true_bbox_batch = np.zeros((bs, 1, 4), dtype=np.float32)
 
     if dataset == 'refvos':
         reader = data_reader_refvos.DataReader(im_dir=args.im_dir, mask_dir=args.mask_dir, train_metadata=args.meta)
