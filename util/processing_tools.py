@@ -86,8 +86,7 @@ def bbox_iou(boxes1, boxes2):
 
 def preprocess_true_boxes(bboxes, train_input_size, anchors, stride=8, anchor_per_scale=3, max_bbox_per_scale=1):
     train_output_size = train_input_size // stride
-    label = np.zeros((train_output_size, train_output_size, anchor_per_scale,
-                        5))
+    label = np.zeros((train_output_size, train_output_size, anchor_per_scale, 5))
     bboxes_xywh = np.zeros((max_bbox_per_scale, 4))
     bbox_count = 0
 

@@ -71,7 +71,7 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
     mask_batch = np.zeros((bs, im_h, im_w, 1), dtype=np.float32)
     valid_idx_batch = np.zeros((bs, 1), dtype=np.int32)
     train_output_size = model.H // stride
-    label_bbox_batch = np.zeros((bs, train_output_size, train_output_size, 5), dtype=np.float32)
+    label_bbox_batch = np.zeros((bs, train_output_size, train_output_size, 1, 5), dtype=np.float32)
     true_bbox_batch = np.zeros((bs, anchors_size, 1), dtype=np.float32)
 
     if dataset == 'refvos':
@@ -119,7 +119,9 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
                                                                                 # np.expand_dims(im, axis=0),
                                                                                 model.target_fine: mask_batch,
                                                                                 # np.expand_dims(mask, axis=0)
-                                                                                model.valid_idx: valid_idx_batch
+                                                                                model.valid_idx: valid_idx_batch,
+                                                                                model.label_bbox: label_bbox_batch,
+                                                                                model.true_bbox_batch: true_bbox_batch,
                                                                             })
         # cls_loss_avg = decay * cls_loss_avg + (1 - decay) * cls_loss_val
         # cls_loss_avg 
