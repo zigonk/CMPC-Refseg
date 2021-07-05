@@ -92,7 +92,6 @@ def preprocess_true_boxes(bboxes, train_input_size, anchors, stride=8, anchor_pe
 
     for bbox in bboxes:
         bbox_coor = bbox[:4]
-        print(bbox)
         bbox_xywh = np.concatenate([(bbox_coor[2:] + bbox_coor[:2]) * 0.5, bbox_coor[2:] - bbox_coor[:2]], axis=-1)
         bbox_xywh_scaled = 1.0 * bbox_xywh / stride
 
