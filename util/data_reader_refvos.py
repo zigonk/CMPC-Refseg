@@ -34,8 +34,8 @@ def preprocess_data(im, mask, sent, obj_id):
     mask_obj = np.asarray(((mask == mask_color)[:,:,0]))
     im = skimage.img_as_ubyte(im_processing.resize_and_pad(im, input_H, input_W))
     mask = im_processing.resize_and_pad(mask_obj, input_H, input_W)
-    print(mask.shape)
-    non_zero_points = cv2.findNonZero(mask)
+    
+    non_zero_points = cv2.findNonZero(mask[:,:,np.newaxis])
     bbox = np.asarray([cv2.boundingRect(non_zero_points)])
     bbox[:,2:4] += bbox[:,:2]
     label_bbox, true_bbox = processing_tools.preprocess_true_boxes(bbox, input_H, anchors)
