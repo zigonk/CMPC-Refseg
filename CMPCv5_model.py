@@ -620,14 +620,14 @@ class LSTM_model(object):
 
         return iou
 
-    def loss_layer(self, conv, pred, label, bboxes, anchors, stride):
-
+    def loss_layer(self, conv, pred, label, bboxes, stride):
+        anchor_per_scale = self.anchors.shape[0]
         conv_shape  = tf.shape(conv)
         batch_size  = conv_shape[0]
         output_size = conv_shape[1]
         input_size  = stride * output_size
         conv = tf.reshape(conv, (batch_size, output_size, output_size,
-                                 self.anchor_per_scale, 5))
+                                 anchor_per_scale, 5))
         conv_raw_conf = conv[:, :, :, :, 4:5]
         
         pred_xywh     = pred[:, :, :, :, 0:4]
