@@ -2,6 +2,7 @@
 
 import json
 import scipy.io as sio
+import numpy as np
 
 def load_str_list(filename):
     with open(filename, 'r') as f:
@@ -31,3 +32,12 @@ def load_proposal_mask(mask_path):
     mat = sio.loadmat(mask_path)
     mask = mat['mask']
     return mask.transpose((2, 0, 1))
+
+def read_anchors(fname):
+    f = open(fname)
+    lsplit = f.readline().split(' ')
+    anchors = []
+    for anchor in lsplit:
+        anchor_wh = anchor.split(',')
+        anchors.append((anchor_wh[0], anchor_wh[1]))
+    return np.array(anchors)

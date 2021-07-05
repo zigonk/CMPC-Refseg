@@ -8,7 +8,7 @@ import skimage
 import skimage.io
 import queue as queue
 import cv2
-from util import im_processing, text_processing
+from util import im_processing, text_processing, io
 import json
 
 object_color = {
@@ -28,17 +28,8 @@ vocab_file = './data/vocabulary_refvos.txt'
 anchor_file = './data/anchors.txt'
 vocab_dict = text_processing.load_vocab_dict_from_file(vocab_file)
 
-def read_anchors(fname):
-    f = open(fname)
-    lsplit = f.readline().split(' ')
-    anchors = []
-    for anchor in lsplit:
-        anchor_wh = anchor.split(',')
-        anchors.append((anchor_wh[0], anchor_wh[1]))
-    return np.array(anchors)
-
 def preprocess_data(im, mask, sent, obj_id):
-    anchors = read_anchors(anchor_file)
+    anchors = io.read_anchors(anchor_file)
     mask_color = object_color[obj_id]
     mask_obj = np.asarray(((mask == mask_color)[:,:,0]))
     im = skimage.img_as_ubyte(im_processing.resize_and_pad(im, input_H, input_W))

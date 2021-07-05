@@ -4,7 +4,7 @@ import sys
 from deeplab_resnet import model as deeplab101
 from util.cell import ConvLSTMCell
 
-from util import data_reader
+from util import data_reader, io
 from util.processing_tools import *
 from util import im_processing, text_processing, eval_tools
 from util import loss
@@ -18,7 +18,9 @@ from tensorflow.contrib.slim.python.slim.nets import resnet_utils
 
 class LSTM_model(object):
 
-    def __init__(self, batch_size=1,
+    def __init__(self, 
+                 stride=3,
+                 batch_size=1,
                  num_steps=20,
                  vf_h=40,
                  vf_w=40,
@@ -74,6 +76,8 @@ class LSTM_model(object):
         self.up_c3 = tf.convert_to_tensor(np.zeros((1,320,320)))
         self.batch_norm_decay = batch_norm_decay
         self.freeze_batch_norm = freeze_batch_norm
+        self.stride = stride
+        self.anchors = io.read_anchors('./data/anchors.txt')
 
         self.words = tf.placeholder(tf.int32, [self.batch_size, self.num_steps])
         self.im = tf.placeholder(tf.float32, [self.batch_size, self.H, self.W, 3])
@@ -183,7 +187,8 @@ class LSTM_model(object):
 #                                         words_parse, spatial, level="c3")
 
         # For multi-level losses
-        bboxes_c5 = self._conv("bbox_c5", fusion_c5, 1, self.mlp_dim, 5, [1, 1, 1, 1])
+        anchors_per_scale = self.anchors.shape[0]
+        bboxes_c5 = self._conv("bbox_c5", fusion_c5, 1, self.mlp_dim, 5 * anchors_per_scale, [1, 1, 1, 1])
         self.pred_bbox = self.decode_bbox(bboxes_c5)
         
         score_c4 = self._conv("score_c4", fusion_c4, 3, self.mlp_dim, 1, [1, 1, 1, 1])
@@ -197,6 +202,13 @@ class LSTM_model(object):
         self.pred = score
         self.up = tf.image.resize_bilinear(self.pred, [self.H, self.W])
         self.sigm = tf.sigmoid(self.up)
+
+
+
+
+#------------------------------------------------------CMPC Model ----------------------------------------------------------------------------------
+
+
 
     def valid_lang(self, words_parse, words_feat):
         # words_parse: [B, 1, T, 4]
@@ -528,7 +540,7 @@ class LSTM_model(object):
         conv_shape       = tf.shape(conv_output)
         batch_size       = conv_shape[0]
         output_size      = conv_shape[1]
-        anchor_per_scale = len(anchors)
+        anchor_per_scale = self.anchors.shape[0]
 
         conv_output = tf.reshape(conv_output, (batch_size, output_size, output_size, anchor_per_scale, 5))
 
@@ -662,7 +674,7 @@ class LSTM_model(object):
         with tf.name_scope('conf_loss'):
             conf_loss = loss_bbox[1] 
 
-        return giou_loss, conf_loss
+        return giou_loss + conf_loss
 
 
 # -------------------------------------------------------------- TRAIN OP ----------------------------------------------------------------------

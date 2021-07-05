@@ -84,7 +84,7 @@ def bbox_iou(boxes1, boxes2):
     return inter_area / (union_area + 1e-6)
     # added 1e-6 in denominator to avoid generation of inf, which may cause nan loss
 
-def preprocess_true_boxes(bboxes, train_input_size, anchors, stride=8, anchor_per_scale=3, max_bbox_per_scale=3):
+def preprocess_true_boxes(bboxes, train_input_size, anchors, stride=8, anchor_per_scale=3, max_bbox_per_scale=1):
     train_output_size = train_input_size // stride
     label = np.zeros((train_output_size, train_output_size, anchor_per_scale,
                         5))
