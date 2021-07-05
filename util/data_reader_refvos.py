@@ -45,6 +45,7 @@ def preprocess_data(im, mask, sent, obj_id):
     mask = im_processing.resize_and_pad(mask_obj, input_H, input_W)
     non_zero_points = cv2.findNonZero(mask)
     bbox = np.asarray([cv2.boundingRect(non_zero_points)])
+    bbox[:,2:4] += bbox[:,:2]
     label_bbox, true_bbox = processing_tools.preprocess_true_boxes(bbox, input_H, anchors)
     text = text_processing.preprocess_sentence(sent, vocab_dict, T)
     return {
