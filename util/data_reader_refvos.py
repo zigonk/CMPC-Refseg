@@ -7,6 +7,7 @@ import threading
 import skimage
 import skimage.io
 import queue as queue
+import cv2
 from util import im_processing, text_processing
 import json
 
@@ -42,7 +43,8 @@ def preprocess_data(im, mask, sent, obj_id):
     mask_obj = np.asarray(((mask == mask_color)[:,:,0]))
     im = skimage.img_as_ubyte(im_processing.resize_and_pad(im, input_H, input_W))
     mask = im_processing.resize_and_pad(mask_obj, input_H, input_W)
-    bbox = im_processing.bboxes_from_masks([mask])
+    non_zero_points = cv2.findNonZero(mask)
+    bbox = cv2.boudingRect(non_zero_points)
     label_bbox, true_bbox = processing_tools.preprocess_true_boxes(bbox, input_H, anchors)
     text = text_processing.preprocess_sentence(sent, vocab_dict, T)
     return {
