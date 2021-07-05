@@ -24,24 +24,34 @@ input_H = 320
 input_W = 320
 
 vocab_file = './data/vocabulary_refvos.txt'
+anchor_file = './data/anchors.txt'
 vocab_dict = text_processing.load_vocab_dict_from_file(vocab_file)
 
+def read_anchors(fname):
+    f = open(fname)
+    lsplit = f.readline().split(' ')
+    anchors = []
+    for anchor in lsplit:
+        anchor_wh = anchor.split(',')
+        anchors.append((anchor_wh[0], anchor_wh[1]))
+    return np.array(anchors)
+
 def preprocess_data(im, mask, sent, obj_id):
+    anchors = read_anchors(anchor_file)
     mask_color = object_color[obj_id]
     mask_obj = np.asarray(((mask == mask_color)[:,:,0]))
     im = skimage.img_as_ubyte(im_processing.resize_and_pad(im, input_H, input_W))
     mask = im_processing.resize_and_pad(mask_obj, input_H, input_W)
     bbox = im_processing.bboxes_from_masks([mask])
-    # label_bbox, true_bbox = processing_tools.preprocess_true_boxes(bbox, input_H, [])
+    label_bbox, true_bbox = processing_tools.preprocess_true_boxes(bbox, input_H, anchors)
     text = text_processing.preprocess_sentence(sent, vocab_dict, T)
     return {
         'text_batch': np.asarray(text),
         'im_batch': np.asarray(im),
         'mask_batch': (mask > 0),
         'sent_batch': [sent],
-        'bbox': bbox
-        # 'label_bbox': label_bbox,
-        # 'true_bbox': true_bbox
+        'label_bbox': label_bbox,
+        'true_bbox': true_bbox
     }
 
 def run_prefetch(prefetch_queue, im_dir, mask_dir, metadata, num_batch, shuffle):
