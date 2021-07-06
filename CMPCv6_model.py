@@ -19,7 +19,7 @@ from tensorflow.contrib.slim.python.slim.nets import resnet_utils
 class LSTM_model(object):
 
     def __init__(self, 
-                 stride=8,
+                 bbox_stride=8,
                  batch_size=1,
                  num_steps=20,
                  vf_h=40,
@@ -76,7 +76,7 @@ class LSTM_model(object):
         self.up_c3 = tf.convert_to_tensor(np.zeros((1,320,320)))
         self.batch_norm_decay = batch_norm_decay
         self.freeze_batch_norm = freeze_batch_norm
-        self.stride = stride
+        self.bbox_stride = bbox_stride
         self.anchors = io.read_anchors('./data/anchors.txt')
         self.iou_loss_thresh = 0.5
 
@@ -190,7 +190,7 @@ class LSTM_model(object):
         # For multi-level losses
         anchors_per_scale = self.anchors.shape[0]
         self.conv_bbox = self._conv("bbox_c5", fusion_c5, 1, self.mlp_dim, 5 * anchors_per_scale, [1, 1, 1, 1])
-        self.pred_bbox = self.decode_bbox(self.conv_bbox)
+        self.pred_bbox = self.decode_bbox(self.conv_bbox, self.bbox_stride)
         
         score_c4 = self._conv("score_c4", fusion_c4, 3, self.mlp_dim, 1, [1, 1, 1, 1])
         self.up_c4 = tf.image.resize_bilinear(score_c4, [self.H, self.W])
@@ -538,7 +538,7 @@ class LSTM_model(object):
 
 
 
-    def decode_bbox(self, conv_output, stride=3):
+    def decode_bbox(self, conv_output, stride):
         conv_shape       = tf.shape(conv_output)
         batch_size       = conv_shape[0]
         output_size      = conv_shape[1]
@@ -622,7 +622,7 @@ class LSTM_model(object):
 
         return iou
 
-    def loss_layer(self, conv, pred, label, bboxes, stride = 8):
+    def loss_layer(self, conv, pred, label, bboxes, stride):
         anchor_per_scale = self.anchors.shape[0]
         conv_shape  = tf.shape(conv)
         batch_size  = conv_shape[0]
@@ -667,7 +667,7 @@ class LSTM_model(object):
     def compute_loss_bbox(self, label_bbox, true_bbox):
 
         with tf.name_scope('box_loss'):
-            loss_bbox = self.loss_layer(self.conv_bbox, self.pred_bbox, label_bbox, true_bbox, self.stride)
+            loss_bbox = self.loss_layer(self.conv_bbox, self.pred_bbox, label_bbox, true_bbox, self.bbox_stride)
         with tf.name_scope('giou_loss'):
             giou_loss = loss_bbox[0]
 
