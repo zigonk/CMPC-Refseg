@@ -243,7 +243,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 proc_im_ = proc_im.astype(np.float32)
                 proc_im_ = proc_im_[:, :, ::-1]
                 proc_im_ -= mu
-                scores_val, up_val, sigm_val, up_c4, consitency_score = sess.run([model.pred, 
+                scores_val, up_val, sigm_val, up_c4 = sess.run([model.pred, 
                                                                                 model.up, 
                                                                                 model.sigm, 
                                                                                 model.up_c4, 
@@ -263,9 +263,9 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 plt.subplot(1, 3, 1)
                 plt.imshow(frame)
                 plt.text(-0.7, -0.7, exp + str(consitency_score))
-                plt.subplot(1, 5, 3)
+                plt.subplot(1, 3, 2)
                 plt.imshow(up_c4)
-                plt.subplot(1, 5, 5)
+                plt.subplot(1, 3, 3)
                 plt.imshow(sigm_val)
                 plt.savefig(vis_path)
 #                 pred_raw = (up_val >= score_thresh).astype('uint8') * 255
