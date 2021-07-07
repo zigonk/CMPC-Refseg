@@ -212,8 +212,6 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
     vocab_file = './data/vocabulary_{}.txt'.format(dataset)
     vocab_dict = text_processing.load_vocab_dict_from_file(vocab_file)
     IU_result = list()
-    anchors = io.read_anchors('./data/anchors.txt')
-    anchors_size = anchors.shape[0]
     if pre_emb:
         # use pretrained embbeding
         print("Use pretrained Embeddings.")
