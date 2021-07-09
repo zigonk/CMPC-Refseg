@@ -1,6 +1,10 @@
 from __future__ import absolute_import, division, print_function
 
 import re
+import nltk
+
+nltk.download('punkt')
+nltk.download('averaged_perceptron_tagger')
 
 def load_vocab_dict_from_file(dict_file):
     with open(dict_file) as f:
@@ -22,7 +26,21 @@ def sentence2vocab_indices(sentence, vocab_dict):
 
 PAD_IDENTIFIER = '<pad>'
 EOS_IDENTIFIER = '<eos>'
+
+# def sentence2pos(sent):
+#     sent_tokens = nltk.word_tokenize(sent)
+#     pos_tag_list = nltk.pos_tag(sent_tokens)
+#     sent_pos = []
+#     for pos_tag in pos_tag_list:
+#         pos = pos_tag[1]
+#         if pos[0] in ['N', 'J']: #noun and adj
+#             sent_pos.append(1)
+#         elif pos[0] in ['V', 'I']
+
+
+
 def preprocess_sentence(sentence, vocab_dict, T):
+    # word_type = sentence2pos(sentence)
     vocab_indices = sentence2vocab_indices(sentence, vocab_dict)
     # # Append '<eos>' symbol to the end
     # vocab_indices.append(vocab_dict[EOS_IDENTIFIER])
