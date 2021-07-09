@@ -76,7 +76,7 @@ class LSTM_model(object):
         self.freeze_batch_norm = freeze_batch_norm
         self.num_steps = num_steps
 
-        self.words = tf.placeholder(tf.int32)
+        self.words = tf.placeholder(tf.int32, [self.batch_size, self.num_steps])
         self.im = tf.placeholder(tf.float32, [self.batch_size, self.H, self.W, 3])
         self.target_fine = tf.placeholder(tf.float32, [self.batch_size, self.H, self.W, 1])
         self.valid_idx = tf.placeholder(tf.int32, [self.batch_size, 1])
