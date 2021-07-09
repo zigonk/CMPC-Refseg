@@ -257,6 +257,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                                                                                                     model.im: np.expand_dims(proc_im_, axis=0),
                                                                                                     model.valid_idx: np.expand_dims(valid_idx, axis=0)
                                                                                                 })
+                print(exp)
                 print(words_type)
                 break
                 # scores_val = np.squeeze(scores_val)
