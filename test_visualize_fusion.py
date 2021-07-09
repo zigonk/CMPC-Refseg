@@ -259,6 +259,8 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                                                                                                 })
                 exp_split = exp.split(' ')
                 words_type = words_type[0][0][20 - len(exp_split):]
+                print(exp)
+                print(words_type)
                 for i, word in enumerate(exp_split):
                     print(word, words_type[i])
                 print('---------------------')
