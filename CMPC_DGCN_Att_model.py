@@ -393,9 +393,9 @@ class LSTM_model(object):
         attn_map = tf.matmul(feat_key, lang_query, transpose_b=True)  # [B, HW, 1]
         # Normalization for affinity matrix
         attn_map = tf.divide(attn_map, self.mlp_dim ** 0.5)
-        # attn_map = tf.nn.softmax(attn_map, axis=1)
+        attn_map = tf.nn.softmax(attn_map, axis=1)
         # attn_map: [B, HW, 1]
-        attn_map = tf.reshape(attn_map, [self.batch_size, self.vf_h, self.vf_w, 1]) # [B, H, W, C]
+        attn_map = tf.reshape(attn_map, [self.batch_size, self.vf_h, self.vf_w, 1]) # [B, H, W, 1]
         
         return attn_map
 
