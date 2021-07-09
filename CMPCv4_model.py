@@ -187,11 +187,11 @@ class LSTM_model(object):
         self.up_c4 = tf.image.resize_bilinear(score_c4, [self.H, self.W])
 #         score_c3 = self._conv("score_c3", fusion_c3, 3, self.mlp_dim, 1, [1, 1, 1, 1])
 #         self.up_c3 = tf.image.resize_bilinear(score_c3, [self.H, self.W])
-        self.consitency_score = loss.iou_with_threshold(tf.sigmoid(score_c4), tf.sigmoid(score_c5), 0.2)
+        # self.consitency_score = loss.iou_with_threshold(tf.sigmoid(score_c4), tf.sigmoid(score_c5), 0.2)
         valid_lang = self.nec_lang(words_parse, words_feat)
 #         fused_feats = self.gated_exchange_fusion_lstm_2times(fusion_c3,
 #                                                              fusion_c4, fusion_c5, valid_lang)
-        fused_feats = self.gated_exchange_fusion_lstm_2times(fusion_c4, fusion_c5, valid_lang, 0.3)
+        fused_feats = self.gated_exchange_fusion_lstm_2times(fusion_c4, fusion_c5, valid_lang)
         seg_feats = tf.concat(fused_feats, axis = -1)
         encoder_output = self.atrous_spatial_pyramid_pooling(seg_feats, 16, self.batch_norm_decay)
         score = self.decoder(encoder_output, self.batch_norm_decay)
@@ -368,9 +368,9 @@ class LSTM_model(object):
         '''
 #         feat_exg3 = self.gated_exchange_module(feat3, feat4, feat5, lang_feat, 'c3')
 #         feat_exg3 = tf.nn.l2_normalize(feat_exg3, 3)
-        feat5 = tf.cond(self.consitency_score > threshold, 
-                            lambda: feat5, 
-                            lambda: tf.identity(feat4))
+        # feat5 = tf.cond(self.consitency_score > threshold, 
+        #                     lambda: feat5, 
+        #                     lambda: tf.identity(feat4))
         feat_exg4 = self.gated_exchange_module(feat4, feat5, lang_feat, 'c4')
         feat_exg4 = tf.nn.l2_normalize(feat_exg4, 3)
         feat_exg5 = self.gated_exchange_module(feat5, feat4, lang_feat, 'c5')
@@ -455,6 +455,7 @@ class LSTM_model(object):
         words_parse = tf.nn.relu(words_parse)
         words_parse = self._conv("words_parse_2", words_parse, 1, 500, 4, [1, 1, 1, 1])
         words_parse = tf.nn.softmax(words_parse, axis=3)
+        self.words_type = tf.argmax(words_parse, axis=3)
         # words_parse: [B, 1, T, 4]
         # Four weights: Entity, Attribute, Relation, Unnecessary
         return words_parse

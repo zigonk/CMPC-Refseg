@@ -243,19 +243,22 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 proc_im_ = proc_im.astype(np.float32)
                 proc_im_ = proc_im_[:, :, ::-1]
                 proc_im_ -= mu
-                scores_val, up_val, sigm_val, up_c3, up_c4, up_c5, consitency_score = sess.run([model.pred, 
+                scores_val, up_val, sigm_val, up_c3, up_c4, up_c5, words_type = sess.run([model.pred, 
                                                                                                 model.up, 
                                                                                                 model.sigm, 
                                                                                                 model.up_c3, 
                                                                                                 model.up_c4, 
                                                                                                 model.up_c5,
-                                                                                                model.consitency_score
+                                                                                                model.words_type
+                                                                                                # model.consitency_score
                                                                                                 ],
                                                                                                 feed_dict={
                                                                                                     model.words: np.expand_dims(text, axis=0),
                                                                                                     model.im: np.expand_dims(proc_im_, axis=0),
                                                                                                     model.valid_idx: np.expand_dims(valid_idx, axis=0)
                                                                                                 })
+                print(words_type)
+                continue
                 # scores_val = np.squeeze(scores_val)
                 # pred_raw = (scores_val >= score_thresh).astype(np.float32)
                 up_c3 = im_processing.resize_and_crop(sigmoid(np.squeeze(up_c3)), frame.shape[0], frame.shape[1])
@@ -267,7 +270,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 plt.clf()
                 plt.subplot(1, 5, 1)
                 plt.imshow(frame)
-                plt.text(-0.7, -0.7, exp + str(consitency_score))
+                # plt.text(-0.7, -0.7, exp + str(consitency_score))
                 plt.subplot(1, 5, 2)
                 plt.imshow(up_c3)
                 plt.subplot(1, 5, 3)
