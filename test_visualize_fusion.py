@@ -261,6 +261,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 words_type = words_type[0][0][20 - len(exp_split):]
                 for i, word in enumerate(exp_split):
                     print(word, words_type[i])
+                print('---------------------')
                 break
                 # scores_val = np.squeeze(scores_val)
                 # pred_raw = (scores_val >= score_thresh).astype(np.float32)
