@@ -74,6 +74,7 @@ class LSTM_model(object):
         self.up_c3 = tf.convert_to_tensor(np.zeros((1,320,320)))
         self.batch_norm_decay = batch_norm_decay
         self.freeze_batch_norm = freeze_batch_norm
+        self.num_steps = num_steps
 
         self.words = tf.placeholder(tf.int32)
         self.im = tf.placeholder(tf.float32, [self.batch_size, self.H, self.W, 3])
@@ -155,7 +156,6 @@ class LSTM_model(object):
 
 
     def BiLSTM(self):
-        self.num_steps = tf.shape(self.words)[1]
         embedding_mat = tf.Variable(self.glove)
         embedded_seq = tf.nn.embedding_lookup(embedding_mat, tf.transpose(self.words))  # [num_step, batch_size, glove_emb]
         print("Build Glove Embedding.")
