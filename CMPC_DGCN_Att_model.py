@@ -146,9 +146,8 @@ class LSTM_model(object):
         valid_lang = self.nec_lang(words_parse, words_feat)
 #         fused_feats = self.gated_exchange_fusion_lstm_2times(fusion_c3,
 #                                                              fusion_c4, fusion_c5, valid_lang)
-        fused_feats = self.gated_exchange_fusion_lstm_2times(fusion_c4, fusion_c5, valid_lang)
-        seg_feats = tf.concat(fused_feats, axis = -1)
-        encoder_output = self.atrous_spatial_pyramid_pooling(seg_feats, 16, self.batch_norm_decay)
+        fused_attn_map = self.gated_exchange_fusion_lstm_2times(fusion_c4, fusion_c5, valid_lang)
+        encoder_output = self.atrous_spatial_pyramid_pooling(fused_attn_map, 16, self.batch_norm_decay)
         score = self.decoder(encoder_output, self.batch_norm_decay)
         self.pred = score
         self.up = tf.image.resize_bilinear(self.pred, [self.H, self.W])
@@ -376,7 +375,7 @@ class LSTM_model(object):
         print("Build Global Lang Vec")
         return gv_lang
     
-    def attention(self, feat, feat1, lang_feat, level=""):
+    def attention_map(self, feat, lang_feat, level=""):
         '''
         Get the global vector by adaptive avg pooling for feat.
         Pooling matrix is obtained by attention mechanism with lang feat.
@@ -386,7 +385,7 @@ class LSTM_model(object):
         :param level
         :return: feat_fused: [B, 1, 1, mlp_dim]
         '''
-        feat_key = self._conv("spa_graph_key_{}".format(level), feat1, 1, self.mlp_dim, self.mlp_dim, [1, 1, 1, 1])
+        feat_key = self._conv("spa_graph_key_{}".format(level), feat, 1, self.mlp_dim, self.mlp_dim, [1, 1, 1, 1])
         feat_key = tf.reshape(feat_key, [self.batch_size, self.vf_h * self.vf_w, self.mlp_dim])  # [B, HW, C]
         lang_query = self._conv("lang_query_{}".format(level), lang_feat, 1, self.rnn_size, self.mlp_dim, [1, 1, 1, 1])
         lang_query = tf.reshape(lang_query, [self.batch_size, 1, self.mlp_dim])  # [B, 1, C]
@@ -396,11 +395,9 @@ class LSTM_model(object):
         attn_map = tf.divide(attn_map, self.mlp_dim ** 0.5)
         attn_map = tf.nn.softmax(attn_map, axis=1)
         # attn_map: [B, HW, 1]
-        attn_map = tf.reshape(attn_map, [self.batch_size, self.vf_h, self.vf_w, self.mlp_dim]) # [B, H, W, C]
+        attn_map = tf.reshape(attn_map, [self.batch_size, self.vf_h, self.vf_w, 1]) # [B, H, W, C]
         
-        feat_fused = feat + attn_map * feat1
-        feat_fused = tf.nn.l2_normalize(feat_fused)
-        return feat_fused
+        return attn_map
 
     def gated_exchange_module(self, feat, feat1, lang_feat, level=""):
         '''
@@ -433,27 +430,34 @@ class LSTM_model(object):
         # feat5 = tf.cond(self.consitency_score > threshold, 
         #                     lambda: feat5, 
         #                     lambda: tf.identity(feat4))
-        feat_exg4 = self.attention(feat4, feat5, lang_feat, 'c4')
-        feat_exg5 = self.attention(feat5, feat4, lang_feat, 'c5')
+        feat_exg4 = self.attention_map(feat5, lang_feat, 'c4') * feat5 + feat4
+        feat_exg5 = self.attention_map(feat4, lang_feat, 'c5') * feat4 + feat5
+        feat_exg4 = tf.nn.l2_normalize(feat_exg4, 3)
+        feat_exg5 = tf.nn.l2_normalize(feat_exg5, 3)
 
         # Second time
 #         feat_exg3_2 = self.gated_exchange_module(feat_exg3, feat_exg4, feat_exg5, lang_feat, 'c3_2')
 #         feat_exg3_2 = tf.nn.l2_normalize(feat_exg3_2, 3)
-        feat_exg4_2 = self.attention(feat_exg4, feat_exg5, lang_feat, 'c4_2')
-        feat_exg5_2 = self.attention(feat_exg5, feat_exg4, lang_feat, 'c5_2')
+        feat_exg4_2 = self.attention_map(feat_exg5, lang_feat, 'c4_2') * feat_exg5 + feat_exg4
+        feat_exg5_2 = self.attention_map(feat_exg4, lang_feat, 'c5_2') * feat_exg4 + feat_exg5
+        feat_exg4_2 = tf.nn.l2_normalize(feat_exg4_2, 3)
+        feat_exg5_2 = tf.nn.l2_normalize(feat_exg5_2, 3)
+
+        attn_map_feat4 = self.attention_map(feat_exg4_2, lang_feat, 'attn_c4')
+        attn_map_feat5 = self.attention_map(feat_exg5_2, lang_feat, 'attn_c5')
         
         # Convolutional LSTM Fuse
-        convlstm_cell = ConvLSTMCell([self.vf_h, self.vf_w], self.mlp_dim, [1, 1])
-        convlstm_input = tf.stack((feat_exg4_2, feat_exg5_2), axis=1)
+        convlstm_cell = ConvLSTMCell([self.vf_h, self.vf_w], 1, [1, 1])
+        convlstm_input = tf.stack((attn_map_feat4, attn_map_feat5), axis=1)
         # convlstm_input = tf.cond(self.consitency_score > threshold, 
         #                             lambda: tf.stack((feat_exg4_2, feat_exg5_2), axis=1), 
         #                             lambda: tf.stack((feat_exg4_2, feat_exg4_2), axis=1))
         convlstm_outputs, states = tf.nn.dynamic_rnn(convlstm_cell, tf.convert_to_tensor(
             convlstm_input), dtype=tf.float32)
-        fused_feat = convlstm_outputs[:,-1]
+        fused_attn_map = convlstm_outputs[:,-1]
         print("Build Gated Fusion with ConvLSTM two times.")
 
-        return fused_feat
+        return fused_attn_map
 
     def mutan_head(self, lang_feat, spatial_feat, visual_feat, level=''):
         # visual feature transform
