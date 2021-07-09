@@ -177,7 +177,7 @@ class LSTM_model(object):
             # return tf.constant(0.), state
             return tf.zeros([self.batch_size, self.rnn_size]), state
 
-        def f2():
+        def f2(n):
             # Word input to embedding layer
             w_emb = embedded_seq[n, :, :]
             if self.mode == 'train' and self.keep_prob_emb < 1:
@@ -190,17 +190,18 @@ class LSTM_model(object):
                     tf.get_variable_scope().reuse_variables()
 
                 # rnn_output, state = cell(w_emb, state)
-                rnn_output, state = tf.cond(tf.equal(self.words[0, n], tf.constant(0)), f1, f2)
+                rnn_output, state = tf.cond(tf.equal(self.words[0, n], tf.constant(0)), f1, lambda: f2(n))
                 word_feat = tf.reshape(rnn_output, [self.batch_size, 1, self.rnn_size])
                 foward_words_feat_list.append(word_feat)
         
         with tf.variable_scope("backward_RNN"):
-            for n in range(self.num_steps, 0, -1):
+            for ind in range(self.num_steps, 0, -1):
+                n = ind - 1
                 if n < self.num_steps:
                     tf.get_variable_scope().reuse_variables()
 
                 # rnn_output, state = cell(w_emb, state)
-                rnn_output, state = tf.cond(tf.equal(self.words[0, n - 1], tf.constant(0)), f1, f2)
+                rnn_output, state = tf.cond(tf.equal(self.words[0, n], tf.constant(0)), f1, lambda: f2(n))
                 word_feat = tf.reshape(rnn_output, [self.batch_size, 1, self.rnn_size])
                 backward_words_feat_list.append(word_feat)
 
