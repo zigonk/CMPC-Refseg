@@ -446,8 +446,8 @@ class LSTM_model(object):
         attn_map_feat4 = self.attention_map(feat_exg4_2, lang_feat, 'attn_c4')
         attn_map_feat5 = self.attention_map(feat_exg5_2, lang_feat, 'attn_c5')
 
-        feat4_w_attn = tf.concat([feat_exg4_2, attn_map_feat4], axis = -1)
-        feat5_w_attn = tf.concat([feat_exg5_2, attn_map_feat5], axis = -1)
+        feat4_w_attn = feat_exg4_2 * attn_map_feat4
+        feat5_w_attn = feat_exg5_2 * attn_map_feat5
         
         # Convolutional LSTM Fuse
         convlstm_cell = ConvLSTMCell([self.vf_h, self.vf_w], 1, [1, 1])
