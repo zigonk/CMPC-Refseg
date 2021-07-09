@@ -258,7 +258,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                                                                                                     model.valid_idx: np.expand_dims(valid_idx, axis=0)
                                                                                                 })
                 print(words_type)
-                continue
+                break
                 # scores_val = np.squeeze(scores_val)
                 # pred_raw = (scores_val >= score_thresh).astype(np.float32)
                 up_c3 = im_processing.resize_and_crop(sigmoid(np.squeeze(up_c3)), frame.shape[0], frame.shape[1])
