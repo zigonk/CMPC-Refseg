@@ -190,7 +190,7 @@ class LSTM_model(object):
                     tf.get_variable_scope().reuse_variables()
 
                 # rnn_output, state = cell(w_emb, state)
-                rnn_output, state = tf.cond(tf.equal(self.words[0, n], tf.constant(0)), f1, lambda: f2(n))
+                rnn_output, state = f2(n)
                 word_feat = tf.reshape(rnn_output, [self.batch_size, 1, self.rnn_size])
                 foward_words_feat_list.append(word_feat)
         
@@ -201,7 +201,7 @@ class LSTM_model(object):
                     tf.get_variable_scope().reuse_variables()
 
                 # rnn_output, state = cell(w_emb, state)
-                rnn_output, state = tf.cond(tf.equal(self.words[0, n], tf.constant(0)), f1, lambda: f2(n))
+                rnn_output, state = f2(n)
                 word_feat = tf.reshape(rnn_output, [self.batch_size, 1, self.rnn_size])
                 backward_words_feat_list.append(word_feat)
 
