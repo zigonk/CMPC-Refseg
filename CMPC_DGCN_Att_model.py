@@ -393,7 +393,7 @@ class LSTM_model(object):
         attn_map = tf.matmul(feat_key, lang_query, transpose_b=True)  # [B, HW, 1]
         # Normalization for affinity matrix
         attn_map = tf.divide(attn_map, self.mlp_dim ** 0.5)
-        attn_map = tf.nn.softmax(attn_map, axis=1)
+        # attn_map = tf.nn.softmax(attn_map, axis=1)
         # attn_map: [B, HW, 1]
         attn_map = tf.reshape(attn_map, [self.batch_size, self.vf_h, self.vf_w, 1]) # [B, H, W, C]
         
@@ -445,10 +445,13 @@ class LSTM_model(object):
 
         attn_map_feat4 = self.attention_map(feat_exg4_2, lang_feat, 'attn_c4')
         attn_map_feat5 = self.attention_map(feat_exg5_2, lang_feat, 'attn_c5')
+
+        feat4_w_attn = tf.concat([feat_exg4_2, attn_map_feat4], axis = -1)
+        feat5_w_attn = tf.concat([feat_exg5_2, attn_map_feat5], axis = -1)
         
         # Convolutional LSTM Fuse
         convlstm_cell = ConvLSTMCell([self.vf_h, self.vf_w], 1, [1, 1])
-        convlstm_input = tf.stack((attn_map_feat4, attn_map_feat5), axis=1)
+        convlstm_input = tf.stack((feat4_w_attn, feat5_w_attn), axis=1)
         # convlstm_input = tf.cond(self.consitency_score > threshold, 
         #                             lambda: tf.stack((feat_exg4_2, feat_exg5_2), axis=1), 
         #                             lambda: tf.stack((feat_exg4_2, feat_exg4_2), axis=1))
