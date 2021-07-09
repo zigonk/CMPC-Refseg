@@ -258,7 +258,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                                                                                                     model.valid_idx: np.expand_dims(valid_idx, axis=0)
                                                                                                 })
                 exp_split = exp.split(' ')
-                words_type = words_type[0][0][20 - len(exp_split):]
+                words_type = words_type[0][0][max(0, 20 - len(exp_split)):]
                 print(exp)
                 print(words_type)
                 for i, word in enumerate(exp_split):
