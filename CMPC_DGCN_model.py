@@ -188,9 +188,9 @@ class LSTM_model(object):
             for n in range(self.num_steps):
                 if n > 0:
                     tf.get_variable_scope().reuse_variables()
-
-                # rnn_output, state = cell(w_emb, state)
-                rnn_output, state = f2(n)
+                w_emb = embedded_seq[n, :, :]
+                rnn_output, state = cell(w_emb, state)
+                # rnn_output, state = f2(n)
                 word_feat = tf.reshape(rnn_output, [self.batch_size, 1, self.rnn_size])
                 foward_words_feat_list.append(word_feat)
         
@@ -199,9 +199,9 @@ class LSTM_model(object):
                 n = ind - 1
                 if n < self.num_steps:
                     tf.get_variable_scope().reuse_variables()
-
-                # rnn_output, state = cell(w_emb, state)
-                rnn_output, state = f2(n)
+                w_emb = embedded_seq[n, :, :]
+                rnn_output, state = cell(w_emb, state)
+                # rnn_output, state = f2(n)
                 word_feat = tf.reshape(rnn_output, [self.batch_size, 1, self.rnn_size])
                 backward_words_feat_list.append(word_feat)
 
