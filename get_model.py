@@ -5,6 +5,7 @@ import CMPCv3_model
 import CMPCv4_model
 import CMPCv5_model
 import CMPCv6_model
+import CMPC_DGCN_model
 
 
 def get_segmentation_model(name, **kwargs):
