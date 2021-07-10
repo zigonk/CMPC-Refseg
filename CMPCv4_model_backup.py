@@ -569,7 +569,9 @@ class LSTM_model(object):
                           grads_and_vars]
 
         # training step
-        self.train = optimizer.apply_gradients(grads_and_vars, global_step=self.train_step)
+        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+        with tf.control_dependencies(update_ops):
+            self.train = optimizer.apply_gradients(grads_and_vars, global_step=self.train_step)
 
         # Summary in tensorboard
         tf.summary.scalar('loss_all', self.cls_loss_all)
