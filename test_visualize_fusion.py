@@ -262,7 +262,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 print(exp)
                 print(words_type)
                 for i, word in enumerate(exp_split):
-                    print(word, words_type[i])
+                    print(word, ("%0.3f" % words_type[i]))
                 print('---------------------')
                 # break
                 # scores_val = np.squeeze(scores_val)
