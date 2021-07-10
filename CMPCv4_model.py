@@ -159,7 +159,7 @@ class LSTM_model(object):
         embedded_seq = tf.nn.embedding_lookup(embedding_mat, tf.transpose(self.words))  # [num_step, batch_size, glove_emb]
         print("Build Glove Embedding.")
         embedded_seq = tf.transpose(embedded_seq, perm=[1,0,2])
-        rnn_cell = tf.compat.v1.nn.rnn_cell.LSTMCell(self.mlp_dim)
+        rnn_cell = tf.compat.v1.nn.rnn_cell.LSTMCell(self.rnn_size)
         # 'outputs' is a tensor of shape [batch_size, max_time, 256]
         # 'state' is a N-tuple where N is the number of LSTMCells containing a
         # tf.nn.rnn_cell.LSTMStateTuple for each cell
