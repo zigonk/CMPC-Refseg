@@ -78,7 +78,6 @@ class LSTM_model(object):
         self.words = tf.placeholder(tf.int32, [self.batch_size, self.num_steps])
         self.im = tf.placeholder(tf.float32, [self.batch_size, self.H, self.W, 3])
         self.target_fine = tf.placeholder(tf.float32, [self.batch_size, self.H, self.W, 1])
-        self.valid_idx = tf.placeholder(tf.int32, [self.batch_size, 1])
         self.seq_len = tf.placeholder(tf.int32, [self.batch_size])
 
         resmodel = deeplab101.DeepLabResNetModel({'data': self.im}, is_training=False)
@@ -461,7 +460,7 @@ class LSTM_model(object):
         # Fuse visual_feat, lang_attn_feat and spatial for SGR
         words_trans = self._conv("words_trans_{}".format(level), words_feat, 1, self.rnn_size, self.rnn_size,
                                  [1, 1, 1, 1])
-        words_trans = tf.reshape(words_trans, [self.batch_size, self.num_steps - self.valid_idx[0, 0], self.rnn_size])
+        words_trans = tf.reshape(words_trans, [self.batch_size, self.num_steps, self.rnn_size])
         spa_graph_trans2 = self._conv("spa_graph_trans2_{}".format(level), spa_graph, 1, self.v_emb_dim, self.v_emb_dim,
                                      [1, 1, 1, 1])
         spa_graph_trans2 = tf.reshape(spa_graph_trans2, [self.batch_size, self.vf_h * self.vf_w, self.v_emb_dim])
