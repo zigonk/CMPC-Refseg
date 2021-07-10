@@ -174,7 +174,7 @@ class LSTM_model(object):
         lang_feat = tf.reduce_sum(words_feat, -2)
         print(tf.shape(words_feat))
         # Parse seq mask
-        self.seq_mask = tf.cast(tf.logical_not(tf.equal(tf.reduce_sum(tf.abs(words_feat), -1), 0)), tf.int32)
+        self.seq_mask = tf.cast(tf.logical_not(tf.equal(tf.reduce_sum(tf.abs(words_feat), -1), 0)), tf.float32)
         return words_feat, lang_feat
         
     
