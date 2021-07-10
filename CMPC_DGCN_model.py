@@ -183,7 +183,7 @@ class LSTM_model(object):
         bw_outputs = tf.nn.l2_normalize(bw_outputs, -1)
         words_feat = tf.nn.l2_normalize(words_feat, -1)
         # Generate seq mask
-        self.seq_mask = tf.cast(tf.logical_not(tf.equal(tf.reduce_sum(tf.abs(words_feat), -1), 0)), tf.int32)
+        self.seq_mask = tf.cast(tf.logical_not(tf.equal(tf.reduce_sum(tf.abs(words_feat), -1), 0)), tf.float32)
         return words_feat, fw_outputs, bw_outputs
 
 
