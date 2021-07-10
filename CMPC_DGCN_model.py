@@ -148,8 +148,8 @@ class LSTM_model(object):
 #                                                              fusion_c4, fusion_c5, valid_lang)
         fused_feats = self.gated_exchange_fusion_lstm_2times(fusion_c4, fusion_c5, valid_lang)
         seg_feats = tf.concat(fused_feats, axis = -1)
-        encoder_output = self.atrous_spatial_pyramid_pooling(seg_feats, 16, self.batch_norm_decay)
-        score = self.decoder(encoder_output, self.batch_norm_decay)
+        encoder_output = self.atrous_spatial_pyramid_pooling(seg_feats, 16, self.batch_norm_decay, self.mode=='train')
+        score = self.decoder(encoder_output, self.batch_norm_decay, self.mode=='train')
         self.pred = score
         self.up = tf.image.resize_bilinear(self.pred, [self.H, self.W])
         self.sigm = tf.sigmoid(self.up)
