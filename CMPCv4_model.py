@@ -79,7 +79,7 @@ class LSTM_model(object):
         self.im = tf.placeholder(tf.float32, [self.batch_size, self.H, self.W, 3])
         self.target_fine = tf.placeholder(tf.float32, [self.batch_size, self.H, self.W, 1])
         self.valid_idx = tf.placeholder(tf.int32, [self.batch_size, 1])
-        self.seq_len = tf.placeholder(tf.int32, [self.batch_size, 1])
+        self.seq_len = tf.placeholder(tf.int32, [self.batch_size])
 
         resmodel = deeplab101.DeepLabResNetModel({'data': self.im}, is_training=False)
         self.visual_feat_c5 = resmodel.layers['res5c_relu']
