@@ -93,10 +93,10 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
             mask_batch[n_batch, ...] = mask
             seq_len_batch[n_batch] = seq_len
 
-        _, train_step, summary, seq_mask = sess.run([model.train,
+        _, train_step, summary, words_parse = sess.run([model.train,
                                             model.train_step,
                                             model.merged,
-                                            model.seq_mask
+                                            model.words_parse
                                             ],
                                             feed_dict={
                                                 model.words: text_batch,
@@ -104,7 +104,7 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
                                                 model.target_fine: mask_batch,
                                                 model.seq_len: seq_len_batch,
                                             })
-        print(seq_mask, seq_len_batch)
+        print(words_parse, seq_len_batch)
         # cls_loss_avg = decay * cls_loss_avg + (1 - decay) * cls_loss_val
         # cls_loss_avg 
         # Accuracy

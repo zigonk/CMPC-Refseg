@@ -171,7 +171,6 @@ class LSTM_model(object):
         words_feat = tf.nn.l2_normalize(outputs, -1)
         words_feat = tf.expand_dims(words_feat, 1)
         lang_feat = tf.reduce_sum(words_feat, -2)
-        print(tf.shape(words_feat))
         # Parse seq mask
         self.seq_mask = tf.cast(tf.logical_not(tf.equal(tf.reduce_sum(tf.abs(words_feat), -1, keepdims=True), 0)), tf.float32)
         return words_feat, lang_feat
@@ -434,10 +433,10 @@ class LSTM_model(object):
         words_parse = tf.nn.relu(words_parse)
         words_parse = self._conv("words_parse_2", words_parse, 1, 500, 4, [1, 1, 1, 1])
         words_parse = tf.nn.softmax(words_parse, axis=3)
-        words_parse = words_parse * self.seq_mask
+        self.words_parse = words_parse * self.seq_mask
         # words_parse: [B, 1, T, 4]
         # Four weights: Entity, Attribute, Relation, Unnecessary
-        return words_parse
+        return self.words_parse
 
     def graph_conv(self, graph_feat, nodes_num, nodes_dim, adj_mat, graph_name="", level=""):
         # Node message passing
