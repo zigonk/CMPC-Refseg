@@ -258,11 +258,11 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                                                                                                     model.valid_idx: np.expand_dims(valid_idx, axis=0)
                                                                                                 })
                 exp_split = exp.split(' ')[:20]
-                words_type = words_type[0][0][20 - len(exp_split):]
+                words_type = np.round(words_type[0][0][20 - len(exp_split):], 2)
                 print(exp)
                 print(words_type)
                 for i, word in enumerate(exp_split):
-                    print(word, ("%0.3f" % words_type[i]))
+                    print(word, words_type[i])
                 print('---------------------')
                 # break
                 # scores_val = np.squeeze(scores_val)
