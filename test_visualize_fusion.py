@@ -264,7 +264,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 for i, word in enumerate(exp_split):
                     print(word, words_type[i])
                 print('---------------------')
-                break
+                # break
                 # scores_val = np.squeeze(scores_val)
                 # pred_raw = (scores_val >= score_thresh).astype(np.float32)
                 up_c3 = im_processing.resize_and_crop(sigmoid(np.squeeze(up_c3)), frame.shape[0], frame.shape[1])
