@@ -66,8 +66,8 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
     text_batch = np.zeros((bs, num_steps), dtype=np.float32)
     image_batch = np.zeros((bs, im_h, im_w, 3), dtype=np.float32)
     mask_batch = np.zeros((bs, im_h, im_w, 1), dtype=np.float32)
-    seq_len_batch = np.zeros((bs, 1), dtype=np.int32)
-    valid_idx_batch = np.zeros((bs), dtype=np.int32)
+    seq_len_batch = np.zeros(bs, dtype=np.int32)
+    valid_idx_batch = np.zeros(bs, dtype=np.int32)
 
     if dataset == 'refvos':
         reader = data_reader_refvos.DataReader(im_dir=args.im_dir, mask_dir=args.mask_dir, train_metadata=args.meta)
