@@ -51,3 +51,17 @@ def preprocess_sentence(sentence, vocab_dict, T):
     if len(vocab_indices) < T:
         vocab_indices = [vocab_dict[PAD_IDENTIFIER]] * (T - len(vocab_indices)) + vocab_indices
     return vocab_indices
+
+def preprocess_sentence_lstm(sentence, vocab_dict, T):
+    # word_type = sentence2pos(sentence)
+    vocab_indices = sentence2vocab_indices(sentence, vocab_dict)
+    # # Append '<eos>' symbol to the end
+    # vocab_indices.append(vocab_dict[EOS_IDENTIFIER])
+    # Truncate long sentences
+    if len(vocab_indices) > T:
+        vocab_indices = vocab_indices[:T]
+    # Pad short sentences at the beginning with the special symbol '<pad>'
+    sequence_length = len(vocab_indices)
+    if len(vocab_indices) < T:
+        vocab_indices = vocab_indices + [vocab_dict[PAD_IDENTIFIER]] * (T - len(vocab_indices))
+    return vocab_indices, sequence_length

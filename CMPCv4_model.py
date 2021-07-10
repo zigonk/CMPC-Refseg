@@ -113,53 +113,7 @@ class LSTM_model(object):
         print("#" * 30)
         print("\n")
 
-        embedding_mat = tf.Variable(self.glove)
-        embedded_seq = tf.nn.embedding_lookup(embedding_mat, tf.transpose(self.words))  # [num_step, batch_size, glove_emb]
-        print("Build Glove Embedding.")
-
-        rnn_cell_basic = tf.nn.rnn_cell.BasicLSTMCell(self.rnn_size, state_is_tuple=False)
-        if self.mode == 'train' and self.keep_prob_rnn < 1:
-            rnn_cell_basic = tf.nn.rnn_cell.DropoutWrapper(rnn_cell_basic, output_keep_prob=self.keep_prob_rnn)
-        cell = tf.nn.rnn_cell.MultiRNNCell([rnn_cell_basic] * self.num_rnn_layers, state_is_tuple=False)
-
-        state = cell.zero_state(self.batch_size, tf.float32)
-        state_shape = state.get_shape().as_list()
-        state_shape[0] = self.batch_size
-        state.set_shape(state_shape)
-
-        words_feat_list = []
-
-        def f1():
-            # return tf.constant(0.), state
-            return tf.zeros([self.batch_size, self.rnn_size]), state
-
-        def f2():
-            # Word input to embedding layer
-            w_emb = embedded_seq[n, :, :]
-            if self.mode == 'train' and self.keep_prob_emb < 1:
-                w_emb = tf.nn.dropout(w_emb, self.keep_prob_emb)
-            return cell(w_emb, state)
-
-        with tf.variable_scope("RNN"):
-            for n in range(self.num_steps):
-                if n > 0:
-                    tf.get_variable_scope().reuse_variables()
-
-                # rnn_output, state = cell(w_emb, state)
-                rnn_output, state = tf.cond(tf.equal(self.words[0, n], tf.constant(0)), f1, f2)
-                word_feat = tf.reshape(rnn_output, [self.batch_size, 1, self.rnn_size])
-                words_feat_list.append(word_feat)
-
-        lang_feat = tf.reshape(rnn_output, [self.batch_size, 1, 1, self.rnn_size])
-        lang_feat = tf.nn.l2_normalize(lang_feat, 3)
-
-        # words_feat: [B, num_steps, rnn_size]
-        words_feat = tf.concat(words_feat_list, 1)
-        words_feat = tf.slice(words_feat, [0, self.valid_idx[0, 0], 0],
-                              [-1, self.num_steps - self.valid_idx[0, 0], -1])
-        words_feat = tf.nn.l2_normalize(words_feat, 2)
-        # words_feat: [B, 1, num_words, rnn_size]
-        words_feat = tf.expand_dims(words_feat, 1)
+        words_feat, lang_feat = self.lstm()
 
         visual_feat_c5 = self._conv("c5_lateral", self.visual_feat_c5, 1, self.vf_dim, self.v_emb_dim, [1, 1, 1, 1])
         visual_feat_c5 = tf.nn.l2_normalize(visual_feat_c5, 3)
@@ -198,6 +152,30 @@ class LSTM_model(object):
         self.pred = score
         self.up = tf.image.resize_bilinear(self.pred, [self.H, self.W])
         self.sigm = tf.sigmoid(self.up)
+
+    def lstm(self):
+        embedding_mat = tf.Variable(self.glove)
+        embedded_seq = tf.nn.embedding_lookup(embedding_mat, tf.transpose(self.words))  # [num_step, batch_size, glove_emb]
+        print("Build Glove Embedding.")
+
+        rnn_cell = tf.compat.v1.nn.rnn_cell.LSTMCell(self.mlp_dim)
+        # 'outputs' is a tensor of shape [batch_size, max_time, 256]
+        # 'state' is a N-tuple where N is the number of LSTMCells containing a
+        # tf.nn.rnn_cell.LSTMStateTuple for each cell
+        outputs, _ = tf.compat.v1.nn.dynamic_rnn(cell=rnn_cell,
+                                                    inputs=embedded_seq,
+                                                    sequence_length = self.seq_len,
+                                                    dtype=tf.float32)
+        
+        # words feat: [B, 1, num_words, rnn_size]
+        words_feat = tf.nn.l2_normalize(outputs, -1)
+        words_feat = tf.expand_dims(words_feat, 1)
+        lang_feat = tf.reduce_sum(words_feat, -2)
+        # Parse seq mask
+        self.seq_mask = tf.cast(tf.logical_not(tf.equal(tf.reduce_sum(tf.abs(words_feat), -1), 0)), tf.int32)
+        return words_feat, lang_feat
+        
+    
     def decoder(self, encoder_output, batch_norm_decay, is_training = True):
         with tf.variable_scope("decoder"):
           with tf.contrib.slim.arg_scope(resnet_v2.resnet_arg_scope(batch_norm_decay=batch_norm_decay)):
@@ -266,7 +244,7 @@ class LSTM_model(object):
         words_parse_sum = tf.reduce_sum(words_parse, 3)
         words_parse_valid = words_parse[:, :, :, 0] + words_parse[:, :, :, 1]
         # words_parse_valid: [B, 1, T]
-        words_feat_reshaped = tf.reshape(words_feat, [self.batch_size, self.num_steps - self.valid_idx[0, 0], self.rnn_size])
+        words_feat_reshaped = tf.reshape(words_feat, [self.batch_size, self.num_steps, self.rnn_size])
         # words_feat_reshaped: [B, T, C]
         valid_lang_feat = tf.matmul(words_parse_valid, words_feat_reshaped)
         # valid_lang_feat: [B, 1, C]
@@ -280,7 +258,7 @@ class LSTM_model(object):
         words_parse_sum = tf.reduce_sum(words_parse, 3)
         words_parse_valid = words_parse_sum - words_parse[:, :, :, 3]
         # words_parse_valid: [B, 1, T]
-        words_feat_reshaped = tf.reshape(words_feat, [self.batch_size, self.num_steps - self.valid_idx[0, 0], self.rnn_size])
+        words_feat_reshaped = tf.reshape(words_feat, [self.batch_size, self.num_steps, self.rnn_size])
         # words_feat_reshaped: [B, T, C]
         valid_lang_feat = tf.matmul(words_parse_valid, words_feat_reshaped)
         # valid_lang_feat: [B, 1, C]
@@ -455,6 +433,7 @@ class LSTM_model(object):
         words_parse = tf.nn.relu(words_parse)
         words_parse = self._conv("words_parse_2", words_parse, 1, 500, 4, [1, 1, 1, 1])
         words_parse = tf.nn.softmax(words_parse, axis=3)
+        words_parse = words_parse * self.seq_mask
         # words_parse: [B, 1, T, 4]
         # Four weights: Entity, Attribute, Relation, Unnecessary
         return words_parse

@@ -37,10 +37,11 @@ def preprocess_data(im, mask, sent, obj_id):
     bbox = im_processing.bboxes_from_masks(np.asarray(mask))
     bbox[:,2:4] += bbox[:,:2]
     label_bbox, true_bbox = processing_tools.preprocess_true_boxes(bbox, input_H, anchors)
-    text = text_processing.preprocess_sentence(sent, vocab_dict, T)
+    text, sequence_length = text_processing.preprocess_sentence_lstm(sent, vocab_dict, T)
     return {
         'text_batch': np.asarray(text),
         'im_batch': np.asarray(im),
+        'seq_length': sequence_length,
         'mask_batch': (mask > 0),
         'sent_batch': [sent],
         'label_bbox': label_bbox,

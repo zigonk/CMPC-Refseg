@@ -74,13 +74,11 @@ class LSTM_model(object):
         self.up_c3 = tf.convert_to_tensor(np.zeros((1,320,320)))
         self.batch_norm_decay = batch_norm_decay
         self.freeze_batch_norm = freeze_batch_norm
-        self.num_steps = num_steps
 
         self.words = tf.placeholder(tf.int32, [self.batch_size, self.num_steps])
         self.im = tf.placeholder(tf.float32, [self.batch_size, self.H, self.W, 3])
         self.target_fine = tf.placeholder(tf.float32, [self.batch_size, self.H, self.W, 1])
         self.valid_idx = tf.placeholder(tf.int32, [self.batch_size, 1])
-        self.seq_len = tf.placeholder(tf.int32, [self.batch_size, 1])
 
         resmodel = deeplab101.DeepLabResNetModel({'data': self.im}, is_training=False)
         self.visual_feat_c5 = resmodel.layers['res5c_relu']
@@ -115,7 +113,53 @@ class LSTM_model(object):
         print("#" * 30)
         print("\n")
 
-        words_feat, forward_words_feat, backward_words_feat = self.BiLSTM()
+        embedding_mat = tf.Variable(self.glove)
+        embedded_seq = tf.nn.embedding_lookup(embedding_mat, tf.transpose(self.words))  # [num_step, batch_size, glove_emb]
+        print("Build Glove Embedding.")
+
+        rnn_cell_basic = tf.nn.rnn_cell.BasicLSTMCell(self.rnn_size, state_is_tuple=False)
+        if self.mode == 'train' and self.keep_prob_rnn < 1:
+            rnn_cell_basic = tf.nn.rnn_cell.DropoutWrapper(rnn_cell_basic, output_keep_prob=self.keep_prob_rnn)
+        cell = tf.nn.rnn_cell.MultiRNNCell([rnn_cell_basic] * self.num_rnn_layers, state_is_tuple=False)
+
+        state = cell.zero_state(self.batch_size, tf.float32)
+        state_shape = state.get_shape().as_list()
+        state_shape[0] = self.batch_size
+        state.set_shape(state_shape)
+
+        words_feat_list = []
+
+        def f1():
+            # return tf.constant(0.), state
+            return tf.zeros([self.batch_size, self.rnn_size]), state
+
+        def f2():
+            # Word input to embedding layer
+            w_emb = embedded_seq[n, :, :]
+            if self.mode == 'train' and self.keep_prob_emb < 1:
+                w_emb = tf.nn.dropout(w_emb, self.keep_prob_emb)
+            return cell(w_emb, state)
+
+        with tf.variable_scope("RNN"):
+            for n in range(self.num_steps):
+                if n > 0:
+                    tf.get_variable_scope().reuse_variables()
+
+                # rnn_output, state = cell(w_emb, state)
+                rnn_output, state = tf.cond(tf.equal(self.words[0, n], tf.constant(0)), f1, f2)
+                word_feat = tf.reshape(rnn_output, [self.batch_size, 1, self.rnn_size])
+                words_feat_list.append(word_feat)
+
+        lang_feat = tf.reshape(rnn_output, [self.batch_size, 1, 1, self.rnn_size])
+        lang_feat = tf.nn.l2_normalize(lang_feat, 3)
+
+        # words_feat: [B, num_steps, rnn_size]
+        words_feat = tf.concat(words_feat_list, 1)
+        words_feat = tf.slice(words_feat, [0, self.valid_idx[0, 0], 0],
+                              [-1, self.num_steps - self.valid_idx[0, 0], -1])
+        words_feat = tf.nn.l2_normalize(words_feat, 2)
+        # words_feat: [B, 1, num_words, rnn_size]
+        words_feat = tf.expand_dims(words_feat, 1)
 
         visual_feat_c5 = self._conv("c5_lateral", self.visual_feat_c5, 1, self.vf_dim, self.v_emb_dim, [1, 1, 1, 1])
         visual_feat_c5 = tf.nn.l2_normalize(visual_feat_c5, 3)
@@ -129,9 +173,9 @@ class LSTM_model(object):
 
         words_parse = self.build_lang_parser(words_feat)
 
-        fusion_c5 = self.build_lang2vis(visual_feat_c5, words_feat, forward_words_feat, backward_words_feat,
+        fusion_c5 = self.build_lang2vis(visual_feat_c5, words_feat, lang_feat,
                                         words_parse, spatial, level="c5")
-        fusion_c4 = self.build_lang2vis(visual_feat_c4, words_feat, forward_words_feat, backward_words_feat,
+        fusion_c4 = self.build_lang2vis(visual_feat_c4, words_feat, lang_feat,
                                         words_parse, spatial, level="c4")
 #         fusion_c3 = self.build_lang2vis(visual_feat_c3, words_feat, lang_feat,
 #                                         words_parse, spatial, level="c3")
@@ -154,39 +198,6 @@ class LSTM_model(object):
         self.pred = score
         self.up = tf.image.resize_bilinear(self.pred, [self.H, self.W])
         self.sigm = tf.sigmoid(self.up)
-
-
-    def BiLSTM(self):
-        embedding_mat = tf.Variable(self.glove)
-        embedded_seq = tf.nn.embedding_lookup(embedding_mat, tf.transpose(self.words))  # [num_step, batch_size, glove_emb]
-        print("Build Glove Embedding.")
-
-        fw_rnn_cell = tf.compat.v1.nn.rnn_cell.LSTMCell(self.mlp_dim)
-        bw_rnn_cell = tf.compat.v1.nn.rnn_cell.LSTMCell(self.mlp_dim)
-
-        # 'outputs' is a tensor of shape [batch_size, max_time, 256]
-        # 'state' is a N-tuple where N is the number of LSTMCells containing a
-        # tf.nn.rnn_cell.LSTMStateTuple for each cell
-        outputs, _ = tf.compat.v1.nn.bidirectional_dynamic_rnn(cell_fw=fw_rnn_cell,
-                                                                            cell_bw=bw_rnn_cell,                                    
-                                                                            inputs=embedded_seq,
-                                                                            sequence_length = self.seq_len,
-                                                                            dtype=tf.float32)
-        
-        fw_outputs, bw_outputs = outputs
-        # words feat: [B, 1, num_words, rnn_size]
-        fw_outputs = tf.expand_dims(fw_outputs, 1) 
-        bw_outputs = tf.expand_dims(bw_outputs, 1)
-        words_feat = fw_outputs + bw_outputs
-        # Normalize output
-        fw_outputs = tf.nn.l2_normalize(fw_outputs, -1)
-        bw_outputs = tf.nn.l2_normalize(bw_outputs, -1)
-        words_feat = tf.nn.l2_normalize(words_feat, -1)
-        # Generate seq mask
-        self.seq_mask = tf.cast(tf.logical_not(tf.equal(tf.reduce_sum(tf.abs(words_feat), -1), 0)), tf.int32)
-        return words_feat, fw_outputs, bw_outputs
-
-
     def decoder(self, encoder_output, batch_norm_decay, is_training = True):
         with tf.variable_scope("decoder"):
           with tf.contrib.slim.arg_scope(resnet_v2.resnet_arg_scope(batch_norm_decay=batch_norm_decay)):
@@ -252,9 +263,10 @@ class LSTM_model(object):
 
     def valid_lang(self, words_parse, words_feat):
         # words_parse: [B, 1, T, 4]
+        words_parse_sum = tf.reduce_sum(words_parse, 3)
         words_parse_valid = words_parse[:, :, :, 0] + words_parse[:, :, :, 1]
         # words_parse_valid: [B, 1, T]
-        words_feat_reshaped = tf.reshape(words_feat, [self.batch_size, self.num_steps, self.rnn_size])
+        words_feat_reshaped = tf.reshape(words_feat, [self.batch_size, self.num_steps - self.valid_idx[0, 0], self.rnn_size])
         # words_feat_reshaped: [B, T, C]
         valid_lang_feat = tf.matmul(words_parse_valid, words_feat_reshaped)
         # valid_lang_feat: [B, 1, C]
@@ -265,14 +277,14 @@ class LSTM_model(object):
 
     def nec_lang(self, words_parse, words_feat):
         # words_parse: [B, 1, T, 4]
-        words_parse_sum = tf.reduce_sum(words_parse, -1)
-        words_parse_valid = words_parse_sum - words_parse[:, :, :, -1]
+        words_parse_sum = tf.reduce_sum(words_parse, 3)
+        words_parse_valid = words_parse_sum - words_parse[:, :, :, 3]
         # words_parse_valid: [B, 1, T]
-        words_feat_reshaped = tf.reshape(words_feat, [self.batch_size, self.num_steps, self.rnn_size])
+        words_feat_reshaped = tf.reshape(words_feat, [self.batch_size, self.num_steps - self.valid_idx[0, 0], self.rnn_size])
         # words_feat_reshaped: [B, T, C]
         valid_lang_feat = tf.matmul(words_parse_valid, words_feat_reshaped)
         # valid_lang_feat: [B, 1, C]
-        valid_lang_feat = tf.nn.l2_normalize(valid_lang_feat, -1)
+        valid_lang_feat = tf.nn.l2_normalize(valid_lang_feat, 2)
         valid_lang_feat = tf.reshape(valid_lang_feat, [self.batch_size, 1, 1, self.rnn_size])
         # [B, 1, 1, rnn_size]
         return valid_lang_feat
@@ -420,14 +432,12 @@ class LSTM_model(object):
 
         return fused_feats
 
-    def build_lang2vis(self, visual_feat, words_feat, forward_words_feat, backward_words_feat, words_parse, spatial, level=""):
+    def build_lang2vis(self, visual_feat, words_feat, lang_feat, words_parse, spatial, level=""):
         valid_lang_feat = self.valid_lang(words_parse, words_feat)
         vis_la_sp = self.mutan_fusion(valid_lang_feat, spatial, visual_feat, level=level)
         print("Build MutanFusion Module to get multi-modal features.")
-        spa_graph_feat = self.build_spa_graph(vis_la_sp, 
-                                                words_feat, forward_words_feat, backward_words_feat,
-                                                spatial,
-                                                words_parse, level=level)
+        spa_graph_feat = self.build_spa_graph(vis_la_sp, words_feat, spatial,
+                                              words_parse, level=level)
         print("Build Lang2Vis Module.")
 
         lang_vis_feat = tf.tile(valid_lang_feat, [1, self.vf_h, self.vf_w, 1])  # [B, H, W, C]
@@ -445,8 +455,6 @@ class LSTM_model(object):
         words_parse = tf.nn.relu(words_parse)
         words_parse = self._conv("words_parse_2", words_parse, 1, 500, 4, [1, 1, 1, 1])
         words_parse = tf.nn.softmax(words_parse, axis=3)
-        words_parse = words_parse * self.seq_mask
-        self.words_type = words_parse
         # words_parse: [B, 1, T, 4]
         # Four weights: Entity, Attribute, Relation, Unnecessary
         return words_parse
@@ -467,28 +475,23 @@ class LSTM_model(object):
         gconv_update = tf.nn.relu(gconv_update)
 
         return gconv_update
-    
-    def build_graph_words_affinity(self, spa_graph, words_feat, words_parse, level, direction):
+
+    def build_spa_graph(self, spa_graph, words_feat, spatial, words_parse, level=""):
         # Fuse visual_feat, lang_attn_feat and spatial for SGR
-        words_trans = self._conv("{}_words_trans_{}".format(direction, level), words_feat, 1, self.rnn_size, self.rnn_size,
+        words_trans = self._conv("words_trans_{}".format(level), words_feat, 1, self.rnn_size, self.rnn_size,
                                  [1, 1, 1, 1])
         words_trans = tf.reshape(words_trans, [self.batch_size, self.num_steps - self.valid_idx[0, 0], self.rnn_size])
-        spa_graph_trans2 = self._conv("{}_spa_graph_trans2_{}".format(direction, level), spa_graph, 1, self.v_emb_dim, self.v_emb_dim,
+        spa_graph_trans2 = self._conv("spa_graph_trans2_{}".format(level), spa_graph, 1, self.v_emb_dim, self.v_emb_dim,
                                      [1, 1, 1, 1])
         spa_graph_trans2 = tf.reshape(spa_graph_trans2, [self.batch_size, self.vf_h * self.vf_w, self.v_emb_dim])
         graph_words_affi = tf.matmul(spa_graph_trans2, words_trans, transpose_b=True)
         # Normalization for affinity matrix
         graph_words_affi = tf.divide(graph_words_affi, self.v_emb_dim ** 0.5)
-        graph_words_affi = words_parse[:, :, :, 2] * graph_words_affi
-        return graph_words_affi
-
-    def build_spa_graph(self, spa_graph, words_feat, forward_words_feat, backward_words_feat, spatial, words_parse, level=""):
-        forward_graph_words_affi = self.build_graph_words_affinity(spa_graph, forward_words_feat, words_parse, level, direction='forward')
-        backward_graph_words_affi = self.build_graph_words_affinity(spa_graph, backward_words_feat, words_parse, level, direction='backward')
-
         # graph_words_affi: [B, HW, T]
-        adj_mat = tf.matmul(forward_graph_words_affi, backward_graph_words_affi, transpose_b=True)
-        adj_mat = tf.nn.softmax(adj_mat, axis = 2)
+        graph_words_affi = words_parse[:, :, :, 2] * graph_words_affi
+        gw_affi_w = tf.nn.softmax(graph_words_affi, axis=2)
+        gw_affi_v = tf.nn.softmax(graph_words_affi, axis=1)
+        adj_mat = tf.matmul(gw_affi_w, gw_affi_v, transpose_b=True)
         # adj_mat: [B, HW, HW], sum == 1 on axis 2
 
         spa_graph_nodes_num = self.vf_h * self.vf_w

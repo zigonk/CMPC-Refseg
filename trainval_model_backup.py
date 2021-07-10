@@ -66,7 +66,6 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
     text_batch = np.zeros((bs, num_steps), dtype=np.float32)
     image_batch = np.zeros((bs, im_h, im_w, 3), dtype=np.float32)
     mask_batch = np.zeros((bs, im_h, im_w, 1), dtype=np.float32)
-    seq_len_batch = np.zeros((bs, 1), dtype=np.int32)
     valid_idx_batch = np.zeros((bs, 1), dtype=np.int32)
 
     if dataset == 'refvos':
@@ -84,27 +83,34 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
             im = batch['im_batch'].astype(np.float32)
             # mask = batch['mask_batch']
             mask = np.expand_dims(batch['mask_batch'].astype(np.float32), axis=2)
-            seq_len = batch['seq_length']
+
             im = im[:, :, ::-1]
             im -= mu
 
             text_batch[n_batch, ...] = text
             image_batch[n_batch, ...] = im
             mask_batch[n_batch, ...] = mask
-            seq_len_batch[n_batch, ...] = seq_len
 
-        _, train_step, summary, seq_mask = sess.run([model.train,
-                                            model.train_step,
-                                            model.merged,
-                                            model.seq_mask
-                                            ],
-                                            feed_dict={
-                                                model.words: text_batch,
-                                                model.im: image_batch,
-                                                model.target_fine: mask_batch,
-                                                model.seq_len: seq_len_batch,
-                                            })
-        print(seq_mask, seq_len_batch)
+            for idx in range(text.shape[0]):
+                if text[idx] != 0:
+                    valid_idx_batch[n_batch, :] = idx
+                    break
+        _, train_step, cls_loss_val, lr_val, scores_val, summary = sess.run([model.train,
+                                                                            model.train_step,
+                                                                            model.cls_loss,
+                                                                            model.learning_rate,
+                                                                            model.up,
+                                                                            # export summary
+                                                                            model.merged],
+                                                                            feed_dict={
+                                                                                model.words: text_batch,
+                                                                                # np.expand_dims(text, axis=0),
+                                                                                model.im: image_batch,
+                                                                                # np.expand_dims(im, axis=0),
+                                                                                model.target_fine: mask_batch,
+                                                                                # np.expand_dims(mask, axis=0)
+                                                                                model.valid_idx: valid_idx_batch
+                                                                            })
         # cls_loss_avg = decay * cls_loss_avg + (1 - decay) * cls_loss_val
         # cls_loss_avg 
         # Accuracy
