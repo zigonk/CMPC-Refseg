@@ -114,7 +114,7 @@ class LSTM_model(object):
         print("#" * 30)
         print("\n")
 
-        words_feat, lang_feat, forward_words_feat, backward_words_feat = self.BiLSTM()
+        words_feat, forward_words_feat, backward_words_feat = self.BiLSTM()
 
         visual_feat_c5 = self._conv("c5_lateral", self.visual_feat_c5, 1, self.vf_dim, self.v_emb_dim, [1, 1, 1, 1])
         visual_feat_c5 = tf.nn.l2_normalize(visual_feat_c5, 3)
