@@ -160,7 +160,7 @@ class LSTM_model(object):
         embedding_mat = tf.Variable(self.glove)
         embedded_seq = tf.nn.embedding_lookup(embedding_mat, tf.transpose(self.words))  # [num_step, batch_size, glove_emb]
         print("Build Glove Embedding.")
-
+        embedded_seq = tf.transpose(embedded_seq, perm=[1,0,2])
         fw_rnn_cell = tf.compat.v1.nn.rnn_cell.LSTMCell(self.mlp_dim)
         bw_rnn_cell = tf.compat.v1.nn.rnn_cell.LSTMCell(self.mlp_dim)
 
