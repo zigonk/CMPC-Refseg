@@ -303,7 +303,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 # Preprocess shape (TODO)
                 # frames_feature.append(np.sum(sigm_val * visual_feat), axis=1)
                 pred_raw = (sigm_val >= args.threshold).astype(np.float32) 
-                predicts = im_processing.resize_and_crop(pred_raw, mask.shape[0], mask.shape[1]).astype('uint8') * 255
+                predicts = im_processing.resize_and_crop(pred_raw, mask.shape[0] // 2, mask.shape[1] // 2).astype('uint8') * 255
                 if dcrf:
                     # Dense CRF post-processing
                     d = densecrf.DenseCRF2D(W, H, 2)
