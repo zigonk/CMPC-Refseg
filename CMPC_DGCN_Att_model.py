@@ -474,7 +474,7 @@ class LSTM_model(object):
         words_parse = self._conv("words_parse_2", words_parse, 1, 500, 4, [1, 1, 1, 1])
         words_parse = tf.nn.softmax(words_parse, axis=3)
         words_parse = words_parse * self.seq_mask
-        self.words_type = words_parse
+        self.words_parse = words_parse
         # words_parse: [B, 1, T, 4]
         # Four weights: Entity, Attribute, Relation, Unnecessary
         return words_parse

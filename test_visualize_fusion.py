@@ -220,12 +220,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
             avg_time = 0
             total_frame = 0
 #             Process text
-            text = np.array(text_processing.preprocess_sentence(exp, vocab_dict, T))
-            valid_idx = np.zeros([1], dtype=np.int32)
-            for idx in range(text.shape[0]):
-                if text[idx] != 0:
-                    valid_idx[0] = idx
-                    break
+            text, seq_len = text_processing.preprocess_sentence_lstm(exp, vocab_dict, T)
             for fid in frame_ids:
                 frame_id = int(fid)
                 if (frame_id % 20 != 0):
@@ -243,26 +238,25 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 proc_im_ = proc_im.astype(np.float32)
                 proc_im_ = proc_im_[:, :, ::-1]
                 proc_im_ -= mu
-                scores_val, up_val, sigm_val, up_c3, up_c4, up_c5, words_type = sess.run([model.pred, 
+                scores_val, up_val, sigm_val, up_c3, up_c4, up_c5, words_parse = sess.run([model.pred, 
                                                                                                 model.up, 
                                                                                                 model.sigm, 
                                                                                                 model.up_c3, 
                                                                                                 model.up_c4, 
                                                                                                 model.up_c5,
-                                                                                                model.words_type
+                                                                                                model.words_parse
                                                                                                 # model.consitency_score
                                                                                                 ],
                                                                                                 feed_dict={
                                                                                                     model.words: np.expand_dims(text, axis=0),
                                                                                                     model.im: np.expand_dims(proc_im_, axis=0),
-                                                                                                    model.valid_idx: np.expand_dims(valid_idx, axis=0)
+                                                                                                    model.seq_len: np.expand_dims(seq_len, axis=0)
                                                                                                 })
                 exp_split = exp.split(' ')[:20]
-                words_type = np.round(words_type[0][0][20 - len(exp_split):], 2)
                 print(exp)
-                print(words_type)
+                print(words_parse)
                 for i, word in enumerate(exp_split):
-                    print(word, words_type[i])
+                    print(word, words_parse[0][0][i])
                 print('---------------------')
                 # break
                 # scores_val = np.squeeze(scores_val)
