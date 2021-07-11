@@ -282,16 +282,17 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 proc_im_ = proc_im.astype(np.float32)
                 proc_im_ = proc_im_[:, :, ::-1]
                 proc_im_ -= mu
-                scores_val, up_val, sigm_val, _, _ = sess.run([model.pred, 
-                                                                            model.up, 
-                                                                            model.sigm, 
-                                                                            # model.consitency_score,
-                                                                            model.visual_feat_c4],
-                                                                            feed_dict={
-                                                                                model.words: np.expand_dims(text, axis=0),
-                                                                                model.im: np.expand_dims(proc_im_, axis=0),
-                                                                                model.seq_len: np.expand_dims(seq_len, axis=0)
-                                                                            })
+                scores_val, up_val, sigm_val = sess.run([model.pred, 
+                                                            model.up, 
+                                                            model.sigm, 
+                                                            # model.consitency_score,
+                                                            # model.visual_feat_c4
+                                                            ],
+                                                            feed_dict={
+                                                                model.words: np.expand_dims(text, axis=0),
+                                                                model.im: np.expand_dims(proc_im_, axis=0),
+                                                                model.seq_len: np.expand_dims(seq_len, axis=0)
+                                                            })
                 # scores_val = np.squeeze(scores_val)
                 # pred_raw = (scores_val >= score_thresh).astype(np.float32)
                 up_val = np.squeeze(up_val)
