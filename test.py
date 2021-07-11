@@ -263,12 +263,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
             avg_time = 0
             total_frame = 0
 #             Process text
-            text = np.array(text_processing.preprocess_sentence(exp, vocab_dict, T))
-            valid_idx = np.zeros([1], dtype=np.int32)
-            for idx in range(text.shape[0]):
-                if text[idx] != 0:
-                    valid_idx[0] = idx
-                    break
+            text, seq_len = text_processing.preprocess_sentence_lstm(exp, vocab_dict, T)
             frames_feature = []
             for fid in frame_ids:
                 vis_path = os.path.join(vis_dir, str('{}.png'.format(fid)))
@@ -295,7 +290,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                                                                             feed_dict={
                                                                                 model.words: np.expand_dims(text, axis=0),
                                                                                 model.im: np.expand_dims(proc_im_, axis=0),
-                                                                                model.valid_idx: np.expand_dims(valid_idx, axis=0)
+                                                                                model.seq_len: np.expand_dims(seq_len, axis=0)
                                                                             })
                 # scores_val = np.squeeze(scores_val)
                 # pred_raw = (scores_val >= score_thresh).astype(np.float32)
