@@ -271,7 +271,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 plt.clf()
                 plt.subplot(1, 5, 1)
                 plt.imshow(frame)
-                # plt.text(-0.7, -0.7, exp + str(consitency_score))
+                plt.text(-0.7, -0.7, exp)
                 plt.subplot(1, 5, 2)
                 plt.imshow(up_c3)
                 plt.subplot(1, 5, 3)
