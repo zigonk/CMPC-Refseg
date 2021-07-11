@@ -253,6 +253,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                                                                                                     model.seq_len: np.expand_dims(seq_len, axis=0)
                                                                                                 })
                 exp_split = exp.split(' ')[:20]
+                words_parse = np.round(words_parse, 2)
                 print(exp)
                 print(words_parse)
                 for i, word in enumerate(exp_split):
