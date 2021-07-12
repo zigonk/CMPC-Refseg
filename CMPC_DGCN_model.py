@@ -445,12 +445,12 @@ class LSTM_model(object):
 
         # feat_all = tf.concat([spa_graph_feat_rel, spatial], 3)
         # # Feature fusion
-        # fusion = self._conv("fusion_{}".format(level), spa_graph_feat_rel, 1,
-        #                     self.v_emb_dim,
-        #                     self.mlp_dim, [1, 1, 1, 1], bias=False)
-        # fusion = tf.layers.batch_normalization(fusion, training = is_training)
-        # fusion = tf.nn.relu(fusion)
-        return spa_graph_feat_rel
+        fusion = self._conv("fusion_{}".format(level), spa_graph_feat_rel, 1,
+                            self.v_emb_dim,
+                            self.mlp_dim, [1, 1, 1, 1], bias=False)
+        fusion = tf.layers.batch_normalization(fusion, training = is_training)
+        fusion = tf.nn.relu(fusion)
+        return fusion
 
     def build_lang_parser(self, words_feat):
         # Language Attention
