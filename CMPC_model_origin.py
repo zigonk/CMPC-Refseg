@@ -36,8 +36,7 @@ class LSTM_model(object):
                  mode='eval',
                  conv5=False,
                  glove_dim=300,
-                 emb_name='Gref',
-                 emb_dir='data'):
+                 emb_name='Gref'):
         self.batch_size = batch_size
         self.num_steps = num_steps
         self.vf_h = vf_h
@@ -75,7 +74,7 @@ class LSTM_model(object):
         self.visual_feat_c3 = resmodel.layers['res3b3_relu']
 
         # GloVe Embedding
-        glove_np = np.load('{}/{}_emb.npy'.format(emb_dir, self.emb_name))
+        glove_np = np.load('data/{}_emb.npy'.format(self.emb_name))
         print("Loaded embedding npy at data/{}_emb.npy".format(self.emb_name))
         self.glove = tf.convert_to_tensor(glove_np, tf.float32)  # [vocab_size, 400]
 
@@ -305,12 +304,12 @@ class LSTM_model(object):
         feat_exg4_2 = tf.nn.l2_normalize(feat_exg4_2, 3)
         feat_exg5_2 = self.gated_exchange_module(feat_exg5, feat_exg3, feat_exg4, lang_feat, 'c5_2')
         feat_exg5_2 = tf.nn.l2_normalize(feat_exg5_2, 3)
-        
+
         # Convolutional LSTM Fuse
         convlstm_cell = ConvLSTMCell([self.vf_h, self.vf_w], self.mlp_dim, [1, 1])
         convlstm_outputs, states = tf.nn.dynamic_rnn(convlstm_cell, tf.convert_to_tensor(
-            tf.stack((feat_exg3_2, feat_exg4_2, feat_exg5_2), axis=1)), dtype=tf.float32)
-        fused_feat = convlstm_outputs[:,-1]
+            [[feat_exg3_2[0], feat_exg4_2[0], feat_exg5_2[0]]]), dtype=tf.float32)
+        fused_feat = convlstm_outputs[:, -1]
         print("Build Gated Fusion with ConvLSTM two times.")
 
         return fused_feat
@@ -373,6 +372,7 @@ class LSTM_model(object):
         words_parse = tf.nn.relu(words_parse)
         words_parse = self._conv("words_parse_2", words_parse, 1, 500, 4, [1, 1, 1, 1])
         words_parse = tf.nn.softmax(words_parse, axis=3)
+        self.words_type = tf.argmax(words_parse, -1)
         # words_parse: [B, 1, T, 4]
         # Four weights: Entity, Attribute, Relation, Unnecessary
         return words_parse
@@ -459,8 +459,8 @@ class LSTM_model(object):
         self.cost = self.cls_loss_all + self.reg_loss
 
         # learning rate
-        self.train_step = tf.Variable(0.0, trainable=False)
-        self.learning_rate = tf.train.polynomial_decay(self.start_lr, self.train_step, self.lr_decay_step, end_learning_rate=0.00001,
+        lr = tf.Variable(0.0, trainable=False)
+        self.learning_rate = tf.train.polynomial_decay(self.start_lr, lr, self.lr_decay_step, end_learning_rate=0.00001,
                                                        power=0.9)
 
         # optimizer
@@ -487,18 +487,4 @@ class LSTM_model(object):
                           grads_and_vars]
 
         # training step
-        self.train = optimizer.apply_gradients(grads_and_vars, global_step=self.train_step)
-
-        # Summary in tensorboard
-        tf.summary.scalar('loss_all', self.cls_loss_all)
-        tf.summary.scalar('loss_c3', self.cls_loss_c3)
-        tf.summary.scalar('loss_c4', self.cls_loss_c4)
-        tf.summary.scalar('loss_c5', self.cls_loss_c5)
-        tf.summary.scalar('loss_last', self.cls_loss)
-        pred = tf.convert_to_tensor(tf.cast(self.up > 0, tf.int32), tf.int32)
-        labl = self.target_fine
-        intersect = tf.reduce_sum(tf.cast(tf.logical_and(tf.cast(pred, tf.bool), tf.cast(labl, tf.bool)), tf.int32), axis=(1, 2, 3))
-        union = tf.reduce_sum(tf.cast(tf.logical_or(tf.cast(pred, tf.bool), tf.cast(labl, tf.bool)), tf.int32), axis=(1, 2, 3))
-        self.mIoU = tf.reduce_mean(tf.divide(intersect, union))
-        tf.summary.scalar('mean_IOU', self.mIoU)
-        self.merged = tf.summary.merge_all()
+        self.train_step = optimizer.apply_gradients(grads_and_vars, global_step=lr)
