@@ -187,19 +187,19 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
     sess.run(tf.global_variables_initializer())
     snapshot_restorer.restore(sess, weights)
     reader = data_reader.DataReader(data_folder, data_prefix, shuffle=False)
-    total_parameters = 0
-    for variable in tf.trainable_variables():
-        # shape is an array of tf.Dimension
-        shape = variable.get_shape()
-        print(shape)
-        print(len(shape))
-        variable_parameters = 1
-        for dim in shape:
-            print(dim)
-            variable_parameters *= dim.value
-        print(variable_parameters)
-        total_parameters += variable_parameters
-    print(total_parameters)
+    # total_parameters = 0
+    # for variable in tf.trainable_variables():
+    #     # shape is an array of tf.Dimension
+    #     shape = variable.get_shape()
+    #     print(shape)
+    #     print(len(shape))
+    #     variable_parameters = 1
+    #     for dim in shape:
+    #         print(dim)
+    #         variable_parameters *= dim.value
+    #     print(variable_parameters)
+    #     total_parameters += variable_parameters
+    # print(total_parameters)
     processing_time = 0
     NN = reader.num_batch
     for n_iter in range(reader.num_batch):
