@@ -472,7 +472,8 @@ class LSTM_model(object):
         graph_mask = tf.reshape(self.seq_mask, [self.batch_size, 1, self.num_steps])
         graph_mask_softmax = (1 - graph_mask) * tf.float32.min
 
-        gw_affi_w = graph_words_affi + graph_mask_softmax
+        gw_affi_w = graph_mask * graph_words_affi
+        gw_affi_w = gw_affi_w + graph_mask_softmax
         gw_affi_w = tf.nn.softmax(gw_affi_w, axis=2)
         
         gw_affi_v = tf.nn.softmax(graph_words_affi, axis=1)
