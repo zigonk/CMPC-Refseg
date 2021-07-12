@@ -93,8 +93,9 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
             mask_batch[n_batch, ...] = mask
             seq_len_batch[n_batch] = seq_len
 
-        _, train_step, summary = sess.run([model.train,
+        _, train_step, graph_affi, summary = sess.run([model.train,
                                             model.train_step,
+                                            model.graph_affi,
                                             model.merged,
                                             ],
                                             feed_dict={
@@ -103,6 +104,7 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
                                                 model.target_fine: mask_batch,
                                                 model.seq_len: seq_len_batch,
                                             })
+        print(graph_affi)
         # cls_loss_avg = decay * cls_loss_avg + (1 - decay) * cls_loss_val
         # cls_loss_avg 
         # Accuracy
