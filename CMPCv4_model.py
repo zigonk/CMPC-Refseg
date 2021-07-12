@@ -474,7 +474,7 @@ class LSTM_model(object):
 
         gw_affi_w = graph_words_affi + graph_mask_softmax
         gw_affi_w = tf.nn.softmax(gw_affi_w, axis=2)
-        self.graph_affi = gw_affi_w
+        
         gw_affi_v = tf.nn.softmax(graph_words_affi, axis=1)
         gw_affi_v = graph_mask * gw_affi_v
 
