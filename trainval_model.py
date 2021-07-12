@@ -227,7 +227,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
         proc_im_ = proc_im_[:, :, ::-1]
         proc_im_ -= mu
         current_time = time.time()
-        scores_val, up_val, sigm_val, words_type = sess.run([model.pred, model.up, model.sigm, model.words_type],
+        scores_val, up_val, sigm_val, words_parse = sess.run([model.pred, model.up, model.sigm, model.words_parse],
                                                 feed_dict={
                                                     model.words: np.expand_dims(text, axis=0),
                                                     model.im: np.expand_dims(proc_im_, axis=0),
@@ -237,7 +237,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_folder, model_name
         # scores_val = np.squeeze(scores_val)
         # pred_raw = (scores_val >= score_thresh).astype(np.float32)
         print('Sentence:', sent)
-        print('Words type:', words_type[0][0])
+        print('Words type:', words_parse[0][0])
         up_val = np.squeeze(up_val)
         pred_raw = (up_val >= score_thresh).astype(np.float32)
         predicts = im_processing.resize_and_crop(pred_raw, mask.shape[0], mask.shape[1])
