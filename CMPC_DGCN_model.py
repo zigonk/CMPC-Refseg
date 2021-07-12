@@ -485,9 +485,14 @@ class LSTM_model(object):
         forward_graph_words_affi = self.build_graph_words_affinity(spa_graph, forward_words_feat, words_parse, level, direction='forward')
         backward_graph_words_affi = self.build_graph_words_affinity(spa_graph, backward_words_feat, words_parse, level, direction='backward')
 
+        graph_mask = tf.reshape(self.seq_mask, [self.batch_size, 1, self.num_steps])
+        graph_mask_softmax = (1 - graph_mask) * tf.float32.min
         # graph_words_affi: [B, HW, T]
-        gw_affi_w = tf.nn.softmax(forward_graph_words_affi, axis=2)
+        gw_affi_w = forward_graph_words_affi + graph_mask_softmax
+        gw_affi_w = tf.nn.softmax(gw_affi_w, axis=2)
+
         gw_affi_v = tf.nn.softmax(backward_graph_words_affi, axis=1)
+        gw_affi_v = graph_mask * gw_affi_v
         adj_mat = tf.matmul(gw_affi_w, gw_affi_v, transpose_b=True)
         # adj_mat: [B, HW, HW], sum == 1 on axis 2
 
