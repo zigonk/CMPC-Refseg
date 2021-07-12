@@ -429,13 +429,13 @@ class LSTM_model(object):
                                                 words_feat, 
                                                 words_feat,
                                                 spatial,
-                                                words_parse_entity, level=level)
+                                                words_parse_entity, level="entity_" + level)
         words_parse_rel = words_parse[:, :, :, 2]
         spa_graph_feat_rel = self.build_spa_graph(spa_graph_feat_entity, 
                                                 forward_words_feat, 
                                                 backward_words_feat,
                                                 spatial,
-                                                words_parse_rel, level=level)
+                                                words_parse_rel, level="rel_" + level)
         print("Build Lang2Vis Module.")
 
         lang_vis_feat = tf.tile(valid_lang_feat, [1, self.vf_h, self.vf_w, 1])  # [B, H, W, C]
