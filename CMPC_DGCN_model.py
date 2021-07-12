@@ -444,12 +444,13 @@ class LSTM_model(object):
                                                 words_parse_rel, level="rel_" + level)
         print("Build Lang2Vis Module.")
 
-        lang_vis_feat = tf.tile(valid_lang_feat, [1, self.vf_h, self.vf_w, 1])  # [B, H, W, C]
-        feat_all = tf.concat([spa_graph_feat_rel, lang_vis_feat, spatial], 3)
+        # lang_vis_feat = tf.tile(valid_lang_feat, [1, self.vf_h, self.vf_w, 1])  # [B, H, W, C]
+        feat_all = tf.concat([spa_graph_feat_rel, spatial], 3)
         # Feature fusion
         fusion = self._conv("fusion_{}".format(level), feat_all, 1,
-                            self.v_emb_dim + self.rnn_size + 8,
-                            self.mlp_dim, [1, 1, 1, 1])
+                            self.v_emb_dim + 8,
+                            self.mlp_dim, [1, 1, 1, 1], bias=False)
+        fusion = tf.layers.batch_normalization(vis_trans, training = is_training)
         fusion = tf.nn.relu(fusion)
         return fusion
 
