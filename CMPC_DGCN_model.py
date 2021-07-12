@@ -176,7 +176,8 @@ class LSTM_model(object):
         # words feat: [B, 1, num_words, rnn_size]
         fw_outputs = tf.expand_dims(fw_outputs, 1) 
         bw_outputs = tf.expand_dims(bw_outputs, 1)
-        words_feat = fw_outputs + bw_outputs
+        words_feat = tf.concat([fw_outputs, bw_outputs], -1)
+        words_feat = self._conv('words_feat', words_feat, 1, 2 * self.rnn_size, self.rnn_size, [1, 1, 1, 1])     
         # Normalize output
         fw_outputs = tf.nn.l2_normalize(fw_outputs, -1)
         bw_outputs = tf.nn.l2_normalize(bw_outputs, -1)
@@ -420,17 +421,25 @@ class LSTM_model(object):
         return fused_feats
 
     def build_lang2vis(self, visual_feat, words_feat, forward_words_feat, backward_words_feat, words_parse, spatial, level=""):
-        valid_lang_feat = self.valid_lang(words_parse, words_feat)
+        valid_lang_feat = self.nec_lang(words_parse, words_feat)
         vis_la_sp = self.mutan_fusion(valid_lang_feat, spatial, visual_feat, level=level)
         print("Build MutanFusion Module to get multi-modal features.")
-        spa_graph_feat = self.build_spa_graph(vis_la_sp, 
-                                                words_feat, forward_words_feat, backward_words_feat,
+        words_parse_entity = words_parse[:, :, :, 0] + words_parse[:, :, :, 1]
+        spa_graph_feat_entity = self.build_spa_graph(vis_la_sp, 
+                                                words_feat, 
+                                                words_feat,
                                                 spatial,
-                                                words_parse, level=level)
+                                                words_parse_entity, level=level)
+        words_parse_rel = words_parse[:, :, :, 2]
+        spa_graph_feat_rel = self.build_spa_graph(spa_graph_feat_entity, 
+                                                forward_words_feat, 
+                                                backward_words_feat,
+                                                spatial,
+                                                words_parse_rel, level=level)
         print("Build Lang2Vis Module.")
 
         lang_vis_feat = tf.tile(valid_lang_feat, [1, self.vf_h, self.vf_w, 1])  # [B, H, W, C]
-        feat_all = tf.concat([vis_la_sp, spa_graph_feat, lang_vis_feat, spatial], 3)
+        feat_all = tf.concat([vis_la_sp, spa_graph_feat_rel, lang_vis_feat, spatial], 3)
         # Feature fusion
         fusion = self._conv("fusion_{}".format(level), feat_all, 1,
                             self.v_emb_dim * 2 + self.rnn_size + 8,
@@ -478,10 +487,10 @@ class LSTM_model(object):
         graph_words_affi = tf.matmul(spa_graph_trans2, words_trans, transpose_b=True)
         # Normalization for affinity matrix
         graph_words_affi = tf.divide(graph_words_affi, self.v_emb_dim ** 0.5)
-        graph_words_affi = words_parse[:, :, :, 2] * graph_words_affi
+        graph_words_affi = words_parse * graph_words_affi
         return graph_words_affi
 
-    def build_spa_graph(self, spa_graph, words_feat, forward_words_feat, backward_words_feat, spatial, words_parse, level=""):
+    def build_spa_graph(self, spa_graph, forward_words_feat, backward_words_feat, spatial, words_parse, level=""):
         forward_graph_words_affi = self.build_graph_words_affinity(spa_graph, forward_words_feat, words_parse, level, direction='forward')
         backward_graph_words_affi = self.build_graph_words_affinity(spa_graph, backward_words_feat, words_parse, level, direction='backward')
 
