@@ -422,10 +422,16 @@ class LSTM_model(object):
 
     def build_lang2vis(self, visual_feat, words_feat, forward_words_feat, backward_words_feat, words_parse, spatial, level=""):
         valid_lang_feat = self.nec_lang(words_parse, words_feat)
-        vis_la_sp = self.mutan_fusion(valid_lang_feat, spatial, visual_feat, level=level)
+        # Add spatial feature
+        vis_trans = tf.concat([visual_feat, spatial], 3)   # [B, H, W, C+8]
+        vis_trans = self._conv("vis_trans_{}".format(level), vis_trans, 1,
+                               self.v_emb_dim+8, self.v_emb_dim, [1, 1, 1, 1], bias=False)
+        is_training = (self.mode == 'train')
+        vis_trans_norm = tf.layers.batch_normalization(vis_trans, training = is_training)
+        vis_trans_norm = tf.nn.relu(vis_trans_norm)
         print("Build MutanFusion Module to get multi-modal features.")
         words_parse_entity = words_parse[:, :, :, 0] + words_parse[:, :, :, 1]
-        spa_graph_feat_entity = self.build_spa_graph(vis_la_sp, 
+        spa_graph_feat_entity = self.build_spa_graph(vis_trans_norm, 
                                                 words_feat, 
                                                 words_feat,
                                                 spatial,
@@ -439,10 +445,10 @@ class LSTM_model(object):
         print("Build Lang2Vis Module.")
 
         lang_vis_feat = tf.tile(valid_lang_feat, [1, self.vf_h, self.vf_w, 1])  # [B, H, W, C]
-        feat_all = tf.concat([vis_la_sp, spa_graph_feat_rel, lang_vis_feat, spatial], 3)
+        feat_all = tf.concat([spa_graph_feat_rel, lang_vis_feat, spatial], 3)
         # Feature fusion
         fusion = self._conv("fusion_{}".format(level), feat_all, 1,
-                            self.v_emb_dim * 2 + self.rnn_size + 8,
+                            self.v_emb_dim + self.rnn_size + 8,
                             self.mlp_dim, [1, 1, 1, 1])
         fusion = tf.nn.relu(fusion)
         return fusion
@@ -515,12 +521,15 @@ class LSTM_model(object):
 
         return spa_graph
 
-    def _conv(self, name, x, filter_size, in_filters, out_filters, strides):
+    def _conv(self, name, x, filter_size, in_filters, out_filters, strides, bias=True):
         with tf.variable_scope(name):
             w = tf.get_variable('DW', [filter_size, filter_size, in_filters, out_filters],
                                 initializer=tf.contrib.layers.xavier_initializer_conv2d())
-            b = tf.get_variable('biases', out_filters, initializer=tf.constant_initializer(0.))
-            return tf.nn.conv2d(x, w, strides, padding='SAME') + b
+            if bias:
+                b = tf.get_variable('biases', out_filters, initializer=tf.constant_initializer(0.))
+                return tf.nn.conv2d(x, w, strides, padding='SAME') + b
+            else:
+                return tf.nn.conv2d(x, w, strides, padding='SAME')
 
     def _atrous_conv(self, name, x, filter_size, in_filters, out_filters, rate):
         with tf.variable_scope(name):
