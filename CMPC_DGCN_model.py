@@ -421,7 +421,6 @@ class LSTM_model(object):
         return fused_feats
 
     def build_lang2vis(self, visual_feat, words_feat, forward_words_feat, backward_words_feat, words_parse, spatial, level=""):
-        valid_lang_feat = self.nec_lang(words_parse, words_feat)
         # Add spatial feature
         vis_trans = tf.concat([visual_feat, spatial], 3)   # [B, H, W, C+8]
         vis_trans = self._conv("vis_trans_{}".format(level), vis_trans, 1,
@@ -429,7 +428,7 @@ class LSTM_model(object):
         is_training = (self.mode == 'train')
         vis_trans_norm = tf.layers.batch_normalization(vis_trans, training = is_training)
         vis_trans_norm = tf.nn.relu(vis_trans_norm)
-        print("Build MutanFusion Module to get multi-modal features.")
+        
         words_parse_entity = words_parse[:, :, :, 0] + words_parse[:, :, :, 1]
         spa_graph_feat_entity = self.build_spa_graph(vis_trans_norm, 
                                                 words_feat, 
@@ -444,7 +443,6 @@ class LSTM_model(object):
                                                 words_parse_rel, level="rel_" + level)
         print("Build Lang2Vis Module.")
 
-        # lang_vis_feat = tf.tile(valid_lang_feat, [1, self.vf_h, self.vf_w, 1])  # [B, H, W, C]
         feat_all = tf.concat([spa_graph_feat_rel, spatial], 3)
         # Feature fusion
         fusion = self._conv("fusion_{}".format(level), feat_all, 1,
