@@ -447,7 +447,7 @@ class LSTM_model(object):
         feat_all = self.mutan_fusion(nec_lang_feat, spatial, spa_graph_feat_rel, level=level)
         # # Feature fusion
         fusion = self._conv("fusion_{}".format(level), feat_all, 1,
-                            self.v_emb_dim * 2 + 3 ,
+                            self.v_emb_dim,
                             self.mlp_dim, [1, 1, 1, 1], bias=False)
         fusion = tf.layers.batch_normalization(fusion, training = is_training)
         fusion = tf.nn.relu(fusion)
