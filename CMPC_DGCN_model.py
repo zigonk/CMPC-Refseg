@@ -422,6 +422,7 @@ class LSTM_model(object):
 
     def build_lang2vis(self, visual_feat, words_feat, forward_words_feat, backward_words_feat, words_parse, spatial, level=""):
         # Add spatial feature
+        nec_lang_feat = self.nec_lang(words_parse, words_feat)
         vis_trans = tf.concat([visual_feat, spatial], 3)   # [B, H, W, C+8]
         vis_trans = self._conv("vis_trans_{}".format(level), vis_trans, 1,
                                self.v_emb_dim+8, self.v_emb_dim, [1, 1, 1, 1], bias=False)
@@ -443,13 +444,14 @@ class LSTM_model(object):
                                                 words_parse_rel, level="rel_" + level)
         print("Build Lang2Vis Module.")
 
-        feat_all = tf.concat([vis_trans_norm, spa_graph_feat_rel], 3)
+        feat_all = self.mutan_fusion(nec_lang_feat, spatial, spa_graph_feat_rel, level=level)
         # # Feature fusion
         fusion = self._conv("fusion_{}".format(level), feat_all, 1,
-                            self.v_emb_dim * 2,
+                            self.v_emb_dim * 2 + 3 ,
                             self.mlp_dim, [1, 1, 1, 1], bias=False)
         fusion = tf.layers.batch_normalization(fusion, training = is_training)
         fusion = tf.nn.relu(fusion)
+        
         return fusion
 
     def build_lang_parser(self, words_feat):
