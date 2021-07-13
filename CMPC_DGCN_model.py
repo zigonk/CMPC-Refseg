@@ -136,10 +136,10 @@ class LSTM_model(object):
 #                                         words_parse, spatial, level="c3")
 
         # For multi-level losses
-        score_c5 = self._conv("score_c5", fusion_c5, 3, self.mlp_dim, 1, [1, 1, 1, 1])
-        self.up_c5 = tf.image.resize_bilinear(score_c5, [self.H, self.W])
-        score_c4 = self._conv("score_c4", fusion_c4, 3, self.mlp_dim, 1, [1, 1, 1, 1])
-        self.up_c4 = tf.image.resize_bilinear(score_c4, [self.H, self.W])
+        # score_c5 = self._conv("score_c5", fusion_c5, 3, self.mlp_dim, 1, [1, 1, 1, 1])
+        # self.up_c5 = tf.image.resize_bilinear(score_c5, [self.H, self.W])
+        # score_c4 = self._conv("score_c4", fusion_c4, 3, self.mlp_dim, 1, [1, 1, 1, 1])
+        # self.up_c4 = tf.image.resize_bilinear(score_c4, [self.H, self.W])
 #         score_c3 = self._conv("score_c3", fusion_c3, 3, self.mlp_dim, 1, [1, 1, 1, 1])
 #         self.up_c3 = tf.image.resize_bilinear(score_c3, [self.H, self.W])
         # self.consitency_score = loss.iou_with_threshold(tf.sigmoid(score_c4), tf.sigmoid(score_c5), 0.2)
@@ -555,12 +555,11 @@ class LSTM_model(object):
 
         # define loss
         self.target = tf.image.resize_bilinear(self.target_fine, [self.vf_h, self.vf_w])
-        self.cls_loss_c5 = loss.weighed_logistic_loss(self.up_c5, self.target_fine, 1, 1)
-        self.cls_loss_c4 = loss.weighed_logistic_loss(self.up_c4, self.target_fine, 1, 1)
+        # self.cls_loss_c5 = loss.weighed_logistic_loss(self.up_c5, self.target_fine, 1, 1)
+        # self.cls_loss_c4 = loss.weighed_logistic_loss(self.up_c4, self.target_fine, 1, 1)
 #         self.cls_loss_c3 = loss.weighed_logistic_loss(self.up_c3, self.target_fine, 1, 1)
         self.cls_loss = loss.weighed_logistic_loss(self.up, self.target_fine, 1, 1)
-        self.cls_loss_all = 0.8 * self.cls_loss + 0.1 * self.cls_loss_c5 \
-                            + 0.1 * self.cls_loss_c4
+        self.cls_loss_all = self.cls_loss
         self.reg_loss = loss.l2_regularization_loss(reg_var_list, self.weight_decay)
         self.cost = self.cls_loss_all + self.reg_loss
 
@@ -600,8 +599,8 @@ class LSTM_model(object):
         # Summary in tensorboard
         tf.summary.scalar('loss_all', self.cls_loss_all)
 #         tf.summary.scalar('loss_c3', self.cls_loss_c3)
-        tf.summary.scalar('loss_c4', self.cls_loss_c4)
-        tf.summary.scalar('loss_c5', self.cls_loss_c5)
+        # tf.summary.scalar('loss_c4', self.cls_loss_c4)
+        # tf.summary.scalar('loss_c5', self.cls_loss_c5)
         tf.summary.scalar('loss_last', self.cls_loss)
         pred = tf.convert_to_tensor(tf.cast(self.up > 0, tf.int32), tf.int32)
         labl = self.target_fine
