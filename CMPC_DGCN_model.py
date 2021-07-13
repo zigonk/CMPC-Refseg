@@ -443,10 +443,10 @@ class LSTM_model(object):
                                                 words_parse_rel, level="rel_" + level)
         print("Build Lang2Vis Module.")
 
-        # feat_all = tf.concat([spa_graph_feat_rel, spatial], 3)
+        feat_all = tf.concat([vis_trans_norm, spa_graph_feat_rel], 3)
         # # Feature fusion
-        fusion = self._conv("fusion_{}".format(level), spa_graph_feat_rel, 1,
-                            self.v_emb_dim,
+        fusion = self._conv("fusion_{}".format(level), feat_all, 1,
+                            self.v_emb_dim * 2,
                             self.mlp_dim, [1, 1, 1, 1], bias=False)
         fusion = tf.layers.batch_normalization(fusion, training = is_training)
         fusion = tf.nn.relu(fusion)
