@@ -146,7 +146,7 @@ class LSTM_model(object):
         valid_lang = self.nec_lang(words_parse, words_feat)
 #         fused_feats = self.gated_exchange_fusion_lstm_2times(fusion_c3,
 #                                                              fusion_c4, fusion_c5, valid_lang)
-        fused_feats = self.gated_exchange_fusion_lstm_2times(fusion_c4, fusion_c5, valid_lang)
+        fused_feats = self.gated_exchange_fusion_lstm_2times(fusion_c4, fusion_c5, valid_lang, spatial)
         seg_feats = tf.concat(fused_feats, axis = -1)
         encoder_output = self.atrous_spatial_pyramid_pooling(seg_feats, 16, self.batch_norm_decay, self.mode=='train')
         score = self.decoder(encoder_output, self.batch_norm_decay, self.mode=='train')
@@ -344,7 +344,7 @@ class LSTM_model(object):
         feat_exg = feat + feat1
         return feat_exg
 
-    def gated_exchange_fusion_lstm_2times(self, feat4, feat5, lang_feat, threshold = 0.5):
+    def gated_exchange_fusion_lstm_2times(self, feat4, feat5, lang_feat, spatial, threshold = 0.5):
         '''
         Fuse exchanged features of level3, level4, level5
         LSTM is used to fuse the exchanged features
@@ -373,8 +373,10 @@ class LSTM_model(object):
         feat_exg5_2 = tf.nn.l2_normalize(feat_exg5_2, 3)
         
         # Convolutional LSTM Fuse
+        feat_exg4_mutan = self.mutan_fusion(lang_feat, spatial, feat_exg4_2, level='c4')
+        feat_exg5_mutan = self.mutan_fusion(lang_feat, spatial, feat_exg5_2, level='c5')
         convlstm_cell = ConvLSTMCell([self.vf_h, self.vf_w], self.mlp_dim, [1, 1])
-        convlstm_input = tf.stack((feat_exg4_2, feat_exg5_2), axis=1)
+        convlstm_input = tf.stack((feat_exg4_mutan, feat_exg5_mutan), axis=1)
         # convlstm_input = tf.cond(self.consitency_score > threshold, 
         #                             lambda: tf.stack((feat_exg4_2, feat_exg5_2), axis=1), 
         #                             lambda: tf.stack((feat_exg4_2, feat_exg4_2), axis=1))
@@ -389,12 +391,12 @@ class LSTM_model(object):
         # visual feature transform
         vis_trans = tf.concat([visual_feat, spatial_feat], 3)   # [B, H, W, C+8]
         vis_trans = self._conv("vis_trans_{}".format(level), vis_trans, 1,
-                               self.v_emb_dim+8, self.v_emb_dim, [1, 1, 1, 1])
+                               self.mlp_dim+8, self.mlp_dim, [1, 1, 1, 1])
         vis_trans = tf.nn.tanh(vis_trans)  # [B, H, W, C]
 
         # lang feature transform
         lang_trans = self._conv("lang_trans_{}".format(level), lang_feat,
-                                1, self.rnn_size, self.v_emb_dim, [1, 1, 1, 1])
+                                1, self.rnn_size, self.mlp_dim, [1, 1, 1, 1])
 
         lang_trans = tf.nn.tanh(lang_trans)  # [B, 1, 1, C]
 
@@ -422,7 +424,6 @@ class LSTM_model(object):
 
     def build_lang2vis(self, visual_feat, words_feat, forward_words_feat, backward_words_feat, words_parse, spatial, level=""):
         # Add spatial feature
-        nec_lang_feat = self.nec_lang(words_parse, words_feat)
         vis_trans = tf.concat([visual_feat, spatial], 3)   # [B, H, W, C+8]
         vis_trans = self._conv("vis_trans_{}".format(level), vis_trans, 1,
                                self.v_emb_dim+8, self.v_emb_dim, [1, 1, 1, 1], bias=False)
@@ -444,7 +445,8 @@ class LSTM_model(object):
                                                 words_parse_rel, level="rel_" + level)
         print("Build Lang2Vis Module.")
 
-        feat_all = self.mutan_fusion(nec_lang_feat, spatial, spa_graph_feat_rel, level=level)
+        # feat_all = self.mutan_fusion(nec_lang_feat, spatial, spa_graph_feat_rel, level=level)
+        feat_all = vis_trans_norm + spa_graph_feat_rel
         # # Feature fusion
         fusion = self._conv("fusion_{}".format(level), feat_all, 1,
                             self.v_emb_dim,
