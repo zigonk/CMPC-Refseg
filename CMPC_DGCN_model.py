@@ -85,6 +85,8 @@ class LSTM_model(object):
         self.visual_feat_c5 = resmodel.layers['res5c_relu']
         self.visual_feat_c4 = resmodel.layers['res4b22_relu']
         self.visual_feat_c2 = resmodel.layers['res2b_relu']
+        self.up_c4 = np.zeros((self.batch_size, self.H, self.W))
+        self.up_c5 = np.zeros((self.batch_size, self.H, self.W))
 
         # GloVe Embedding
         glove_np = np.load('{}/{}_emb.npy'.format(emb_dir, self.emb_name))
