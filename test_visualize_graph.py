@@ -260,7 +260,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 # break
                 # scores_val = np.squeeze(scores_val)
                 # pred_raw = (scores_val >= score_thresh).astype(np.float32)
-                gw_w = np.unsqueeze(gw_w)
+                print(gw_w)
                 print(gw_w.shape)
                 return
                 # up_val = np.squeeze(up_val)
