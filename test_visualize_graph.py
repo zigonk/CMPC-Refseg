@@ -254,6 +254,8 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 words_parse = np.round(words_parse, 2)
                 # print(exp)
                 # print(words_parse)
+                if (model_name == 'CMPC_DGCN_model'):
+                    gw_v = gw_v[0]['rel_c4']
                 for i, word in enumerate(exp_split):
                     print(word, words_parse[0][0][i])
                 print('---------------------')
