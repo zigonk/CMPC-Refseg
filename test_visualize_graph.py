@@ -263,7 +263,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 gw_w = np.squeeze(gw_w)
                 gw_w = np.reshape(gw_w, (40, 40, 20))
                 plt.clf()
-                for i in range(20):
+                for i in range(len(exp_split)):
                     plt.text(-1, -1, exp_split[i])
                     plt.subplot(4, 5, i + 1)
                     plt.imshow(gw_w[:,:,i])
