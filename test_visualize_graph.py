@@ -238,10 +238,10 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 proc_im_ = proc_im.astype(np.float32)
                 proc_im_ = proc_im_[:, :, ::-1]
                 proc_im_ -= mu
-                scores_val, up_val, sigm_val, gw_w, words_parse = sess.run([model.pred, 
+                scores_val, up_val, sigm_val, gw_v, words_parse = sess.run([model.pred, 
                                                                                 model.up, 
                                                                                 model.sigm, 
-                                                                                model.gw_w,
+                                                                                model.gw_v,
                                                                                 model.words_parse
                                                                                 # model.consitency_score
                                                                                 ],
@@ -260,13 +260,13 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 # break
                 # scores_val = np.squeeze(scores_val)
                 # pred_raw = (scores_val >= score_thresh).astype(np.float32)
-                gw_w = np.squeeze(gw_w)
-                gw_w = np.reshape(gw_w, (40, 40, 20))
+                gw_v = np.squeeze(gw_v)
+                gw_v = np.reshape(gw_v, (40, 40, 20))
                 plt.clf()
                 for i in range(len(exp_split)):
                     plt.subplot(4, 5, i + 1)
                     plt.text(0, -1, exp_split[i])
-                    plt.imshow(gw_w[:,:,i])
+                    plt.imshow(gw_v[:,:,i])
                 plt.savefig(vis_path)
                 # up_val = np.squeeze(up_val)
                 # # if (not math.isnan(consitency_score) and consitency_score < 0.3):
