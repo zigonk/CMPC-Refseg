@@ -264,8 +264,8 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 gw_w = np.reshape(gw_w, (40, 40, 20))
                 plt.clf()
                 for i in range(len(exp_split)):
-                    plt.text(0, -1, exp_split[i])
                     plt.subplot(4, 5, i + 1)
+                    plt.text(0, -1, exp_split[i])
                     plt.imshow(gw_w[:,:,i])
                 plt.savefig(vis_path)
                 # up_val = np.squeeze(up_val)
