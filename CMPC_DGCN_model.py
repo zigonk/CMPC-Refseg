@@ -44,7 +44,7 @@ class LSTM_model(object):
                  conv5=False,
                  glove_dim=300,
                  emb_name='Gref',
-                 freeze_batch_norm=False,
+                 freeze_bn=False,
                  emb_dir='data'):
         self.batch_size = batch_size
         self.num_steps = num_steps
@@ -73,7 +73,7 @@ class LSTM_model(object):
         self.conv5 = conv5
         self.up_c3 = tf.convert_to_tensor(np.zeros((1,320,320)))
         self.batch_norm_decay = batch_norm_decay
-        self.freeze_batch_norm = freeze_batch_norm
+        self.freeze_bn = freeze_bn
         self.num_steps = num_steps
 
         self.words = tf.placeholder(tf.int32, [self.batch_size, self.num_steps])
@@ -548,6 +548,8 @@ class LSTM_model(object):
                      or var.name.startswith('res3')]
         else:
             tvars = [var for var in tf.trainable_variables() if var.op.name.startswith('text_objseg')]
+        if self.freeze_bn:
+            tvars = [var for var in tvars if 'beta' not in var.name and 'gamma' not in var.name]
         reg_var_list = [var for var in tvars if var.op.name.find(r'DW') > 0 or var.name[-9:-2] == 'weights']
         print('Collecting variables for regularization:')
         for var in reg_var_list: print('\t%s' % var.name)
