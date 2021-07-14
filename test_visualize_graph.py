@@ -260,8 +260,13 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 # break
                 # scores_val = np.squeeze(scores_val)
                 # pred_raw = (scores_val >= score_thresh).astype(np.float32)
-                print(gw_w)
-                print(gw_w.shape)
+                gw_w = np.squeeze(gw_w)
+                gw_w = np.reshape(gw_w, (40, 40, 20))
+                plt.clf()
+                for i in range(20):
+                    plt.subplot(i//5, i%5, i)
+                    plt.imshow(gw_w[:,:,i])
+                plt.savefig(vis_path)
                 return
                 # up_val = np.squeeze(up_val)
                 # # if (not math.isnan(consitency_score) and consitency_score < 0.3):
