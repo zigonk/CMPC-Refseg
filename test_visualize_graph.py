@@ -264,7 +264,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 gw_w = np.reshape(gw_w, (40, 40, 20))
                 plt.clf()
                 for i in range(20):
-                    plt.subplot(i//5, i%5, i)
+                    plt.subplot(4, 5, i)
                     plt.imshow(gw_w[:,:,i])
                 plt.savefig(vis_path)
                 return
