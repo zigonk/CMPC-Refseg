@@ -33,8 +33,7 @@ def preprocess_data(im, mask, sent, obj_id):
     mask_color = object_color[obj_id]
     mask_obj = np.asarray(((mask == mask_color)[:,:,0]))
     # Augmentation brightness 
-    im_aug = im_processing.brightness(im)
-    im = skimage.img_as_ubyte(im_processing.resize_and_pad(im_aug, input_H, input_W))
+    im = skimage.img_as_ubyte(im_processing.resize_and_pad(im, input_H, input_W))
     mask = im_processing.resize_and_pad(mask_obj, input_H, input_W)
     bbox = im_processing.bboxes_from_masks(np.asarray(mask))
     bbox[:,2:4] += bbox[:,:2]

@@ -106,11 +106,6 @@ def brightness(x, gamma=0.2, gain=1, is_random=True):
         The constant multiplier. Default value is 1.
     is_random : boolean, default False
         - If True, randomly change brightness.
-
-    References
-    -----------
-    - `skimage.exposure.adjust_gamma <http://scikit-image.org/docs/dev/api/skimage.exposure.html>`_
-    - `chinese blog <http://www.cnblogs.com/denny402/p/5124402.html>`_
     """
     if is_random:
         gamma = np.random.uniform(1-gamma, 1+gamma)
