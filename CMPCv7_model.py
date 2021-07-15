@@ -432,10 +432,10 @@ class LSTM_model(object):
         words_parse = tf.nn.relu(words_parse)
         words_parse = self._conv("words_parse_2", words_parse, 1, 500, 1, [1, 1, 1, 1])
         words_parse = tf.nn.sigmoid(words_parse)
-        self.words_parse = words_parse[:, :, :, 0] * self.seq_mask
+        self.words_parse = words_parse * self.seq_mask
         # words_parse: [B, 1, T, 4]
         # Four weights: Entity, Attribute, Relation, Unnecessary
-        return self.words_parse
+        return self.words_parse[:, :, :, 0]
 
     def graph_conv(self, graph_feat, nodes_num, nodes_dim, adj_mat, graph_name="", level=""):
         # Node message passing
