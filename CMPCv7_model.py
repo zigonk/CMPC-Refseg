@@ -242,7 +242,7 @@ class LSTM_model(object):
 
     def valid_lang(self, words_parse, words_feat):
         # words_parse: [B, 1, T, 1]
-        words_parse_valid = words_parse[:,:,:,0]
+        words_parse_valid = words_parse
         # words_parse_valid: [B, 1, T]
         words_feat_reshaped = tf.reshape(words_feat, [self.batch_size, self.num_steps, self.rnn_size])
         # words_feat_reshaped: [B, T, C]
@@ -256,7 +256,7 @@ class LSTM_model(object):
 
     def nec_lang(self, words_parse, words_feat):
         # words_parse: [B, 1, T, 1]
-        words_parse_valid = words_parse[:,:,:,0]
+        words_parse_valid = words_parse
         # words_parse_valid: [B, 1, T]
         words_feat_reshaped = tf.reshape(words_feat, [self.batch_size, self.num_steps, self.rnn_size])
         # words_feat_reshaped: [B, T, C]
@@ -467,7 +467,7 @@ class LSTM_model(object):
         # Normalization for affinity matrix
         graph_words_affi = tf.divide(graph_words_affi, self.v_emb_dim ** 0.5)
         # graph_words_affi: [B, HW, T]
-        graph_words_affi = words_parse[:, :, :, 0] * graph_words_affi
+        graph_words_affi = words_parse * graph_words_affi
 
         graph_mask = tf.reshape(self.seq_mask, [self.batch_size, 1, self.num_steps])
         graph_mask_softmax = (1 - graph_mask) * tf.float32.min
