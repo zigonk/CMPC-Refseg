@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 import skimage.transform
+from skimage import exposure
 import numpy as np
 
 def resize_and_pad(im, input_h, input_w):
@@ -89,3 +90,29 @@ def crop_masks_subtract_mean(im, masks, crop_size, image_mean):
 
     imcrop_batch -= image_mean
     return imcrop_batch
+
+def brightness(x, gamma=0.2, gain=1, is_random=True):
+    """Change the brightness of a single image, randomly or non-randomly.
+
+    Parameters
+    -----------
+    x : numpy array
+        An image with dimension of [row, col, channel] (default).
+    gamma : float, small than 1 means brighter.
+        Non negative real number. Default value is 1.
+
+        - If is_random is True, gamma in a range of (1-gamma, 1+gamma).
+    gain : float
+        The constant multiplier. Default value is 1.
+    is_random : boolean, default False
+        - If True, randomly change brightness.
+
+    References
+    -----------
+    - `skimage.exposure.adjust_gamma <http://scikit-image.org/docs/dev/api/skimage.exposure.html>`_
+    - `chinese blog <http://www.cnblogs.com/denny402/p/5124402.html>`_
+    """
+    if is_random:
+        gamma = np.random.uniform(1-gamma, 1+gamma)
+    x = exposure.adjust_gamma(x, gamma, gain)
+    return x 
