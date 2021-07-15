@@ -246,6 +246,7 @@ class LSTM_model(object):
         # words_parse_valid: [B, 1, T]
         words_feat_reshaped = tf.reshape(words_feat, [self.batch_size, self.num_steps, self.rnn_size])
         # words_feat_reshaped: [B, T, C]
+        print(words_parse_valid.shape())
         valid_lang_feat = tf.matmul(words_parse_valid, words_feat_reshaped)
         # valid_lang_feat: [B, 1, C]
         valid_lang_feat = tf.nn.l2_normalize(valid_lang_feat, 2)
