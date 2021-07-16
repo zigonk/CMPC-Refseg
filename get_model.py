@@ -8,6 +8,7 @@ import CMPCv6_model
 import CMPC_DGCN_model
 import CMPC_DGCN_Att_model
 import CMPCv7_model
+import CMPCv8_model
 
 
 def get_segmentation_model(name, **kwargs):
