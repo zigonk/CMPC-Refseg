@@ -361,8 +361,8 @@ class LSTM_model(object):
         feat_exg4_2 = tf.nn.l2_normalize(feat_exg4_2, 3)
         feat_exg5_2 = self.gated_exchange_module(feat_exg5, feat_exg4, lang_feat, 'c5_2')
         feat_exg5_2 = tf.nn.l2_normalize(feat_exg5_2, 3)
-        feat_exg4_mutan = self.mutan_fusion(fusion_lang_feat, spatial, self.mlp_dim, feat_exg4_2)
-        feat_exg5_mutan = self.mutan_fusion(fusion_lang_feat, spatial, self.mlp_dim, feat_exg5_2)
+        feat_exg4_mutan = self.mutan_fusion(fusion_lang_feat, spatial, self.mlp_dim, self.mlp_dim, feat_exg4_2)
+        feat_exg5_mutan = self.mutan_fusion(fusion_lang_feat, spatial, self.mlp_dim, self.mlp_dim, feat_exg5_2)
         # Convolutional LSTM Fuse
         feat_shape = tf.shape(feat_exg4_mutan)[-1]
         convlstm_cell = ConvLSTMCell([self.vf_h, self.vf_w], feat_shape, [1, 1])
@@ -377,10 +377,10 @@ class LSTM_model(object):
 
         return fused_feat
 
-    def mutan_head(self, lang_feat, spatial_feat, visual_feat, out_channel, level=''):
+    def mutan_head(self, lang_feat, spatial_feat, visual_feat, in_channel, out_channel, level=''):
         # visual feature transform
         vis_trans = tf.concat([visual_feat, spatial_feat], 3)   # [B, H, W, C+8]
-        vis_shape = tf.shape(vis_trans)[-1].numpy()
+        vis_shape = in_channel + 8
         vis_trans = self._conv("vis_trans_{}".format(level), vis_trans, 1,
                                vis_shape, out_channel, [1, 1, 1, 1])
         vis_trans = tf.nn.tanh(vis_trans)  # [B, H, W, C]
@@ -394,15 +394,15 @@ class LSTM_model(object):
         mutan_feat = vis_trans * lang_trans  # [B, H, W, C]
         return mutan_feat
 
-    def mutan_fusion(self, lang_feat, spatial_feat, visual_feat, out_channel, level=''):
+    def mutan_fusion(self, lang_feat, spatial_feat, visual_feat, in_channel, out_channel, level=''):
         # fuse language feature and visual feature
         # lang_feat: [B, 1, 1, C], visual_feat: [B, H, W, C], spatial_feat: [B, H, W, 8]
         # output: [B, H, W, C']
-        head1 = self.mutan_head(lang_feat, spatial_feat, visual_feat, out_channel, '{}_head1'.format(level))
-        head2 = self.mutan_head(lang_feat, spatial_feat, visual_feat, out_channel, '{}_head2'.format(level))
-        head3 = self.mutan_head(lang_feat, spatial_feat, visual_feat, out_channel, '{}_head3'.format(level))
-        head4 = self.mutan_head(lang_feat, spatial_feat, visual_feat, out_channel, '{}_head4'.format(level))
-        head5 = self.mutan_head(lang_feat, spatial_feat, visual_feat, out_channel, '{}_head5'.format(level))
+        head1 = self.mutan_head(lang_feat, spatial_feat, visual_feat, in_channel, out_channel, '{}_head1'.format(level))
+        head2 = self.mutan_head(lang_feat, spatial_feat, visual_feat, in_channel, out_channel, '{}_head2'.format(level))
+        head3 = self.mutan_head(lang_feat, spatial_feat, visual_feat, in_channel, out_channel, '{}_head3'.format(level))
+        head4 = self.mutan_head(lang_feat, spatial_feat, visual_feat, in_channel, out_channel, '{}_head4'.format(level))
+        head5 = self.mutan_head(lang_feat, spatial_feat, visual_feat, in_channel, out_channel, '{}_head5'.format(level))
 
         fused_feats = tf.stack([head1, head2, head3, head4, head5], axis=4)  # [B, H, W, C, 5]
         fused_feats = tf.reduce_sum(fused_feats, 4)  # [B, H, W, C]
@@ -415,7 +415,7 @@ class LSTM_model(object):
 
     def build_lang2vis(self, visual_feat, words_feat, lang_feat, words_parse, spatial, level=""):
         valid_lang_feat = self.valid_lang(words_parse, words_feat)
-        vis_la_sp = self.mutan_fusion(valid_lang_feat, spatial, visual_feat, self.v_emb_dim, level=level)
+        vis_la_sp = self.mutan_fusion(valid_lang_feat, spatial, visual_feat, self.v_emb_dim, self.v_emb_dim, level=level)
         print("Build MutanFusion Module to get multi-modal features.")
         spa_graph_feat = self.build_spa_graph(vis_la_sp, words_feat, spatial,
                                               words_parse, level=level)
