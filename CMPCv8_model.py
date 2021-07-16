@@ -380,7 +380,7 @@ class LSTM_model(object):
     def mutan_head(self, lang_feat, spatial_feat, visual_feat, out_channel, level=''):
         # visual feature transform
         vis_trans = tf.concat([visual_feat, spatial_feat], 3)   # [B, H, W, C+8]
-        vis_shape = tf.shape(vis_trans)[-1]
+        vis_shape = int(tf.shape(vis_trans)[-1])
         vis_trans = self._conv("vis_trans_{}".format(level), vis_trans, 1,
                                vis_shape, out_channel, [1, 1, 1, 1])
         vis_trans = tf.nn.tanh(vis_trans)  # [B, H, W, C]
