@@ -361,11 +361,10 @@ class LSTM_model(object):
         feat_exg4_2 = tf.nn.l2_normalize(feat_exg4_2, 3)
         feat_exg5_2 = self.gated_exchange_module(feat_exg5, feat_exg4, lang_feat, 'c5_2')
         feat_exg5_2 = tf.nn.l2_normalize(feat_exg5_2, 3)
-        feat_exg4_mutan = self.mutan_fusion(fusion_lang_feat, spatial, self.mlp_dim, self.mlp_dim, feat_exg4_2)
-        feat_exg5_mutan = self.mutan_fusion(fusion_lang_feat, spatial, self.mlp_dim, self.mlp_dim, feat_exg5_2)
+        feat_exg4_mutan = self.mutan_fusion(fusion_lang_feat, spatial, feat_exg4_2, self.mlp_dim, self.mlp_dim, level='f4')
+        feat_exg5_mutan = self.mutan_fusion(fusion_lang_feat, spatial, feat_exg5_2, self.mlp_dim, self.mlp_dim, level='f5')
         # Convolutional LSTM Fuse
-        feat_shape = tf.shape(feat_exg4_mutan)[-1]
-        convlstm_cell = ConvLSTMCell([self.vf_h, self.vf_w], feat_shape, [1, 1])
+        convlstm_cell = ConvLSTMCell([self.vf_h, self.vf_w], self.mlp_dim, [1, 1])
         convlstm_input = tf.stack((feat_exg4_mutan, feat_exg5_mutan), axis=1)
         # convlstm_input = tf.cond(self.consitency_score > threshold, 
         #                             lambda: tf.stack((feat_exg4_2, feat_exg5_2), axis=1), 
