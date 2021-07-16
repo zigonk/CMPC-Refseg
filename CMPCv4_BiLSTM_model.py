@@ -181,7 +181,7 @@ class LSTM_model(object):
         words_feat = tf.nn.l2_normalize(words_feat, -1)
         # Generate seq mask
         self.seq_mask = tf.cast(tf.logical_not(tf.equal(tf.reduce_sum(tf.abs(words_feat), -1, keepdims=True), 0)), tf.float32)
-        return words_feat
+        return words_feat, words_feat
         
     
     def decoder(self, encoder_output, batch_norm_decay, is_training = True):
