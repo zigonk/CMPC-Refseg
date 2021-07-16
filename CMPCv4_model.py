@@ -45,7 +45,8 @@ class LSTM_model(object):
                  glove_dim=300,
                  emb_name='Gref',
                  freeze_bn=False,
-                 emb_dir='data'):
+                 emb_dir='data',
+                 is_aug=True):
         self.batch_size = batch_size
         self.num_steps = num_steps
         self.vf_h = vf_h

@@ -36,7 +36,7 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
         print("Use pretrained Embeddings.")
         model = get_segmentation_model(model_name, mode='train',
                                        vocab_size=vocab_size, start_lr=lr,
-                                       batch_size=bs, conv5=conv5, emb_name=emb_name, emb_dir=emb_dir, freeze_bn = args.freeze_bn)
+                                       batch_size=bs, conv5=conv5, emb_name=emb_name, emb_dir=emb_dir, freeze_bn = args.freeze_bn, is_aug = args.is_aug)
     else:
         model = get_segmentation_model(model_name, mode='train',
                                        vocab_size=vocab_size, start_lr=lr,
@@ -355,6 +355,7 @@ if __name__ == "__main__":
     parser.add_argument('-n', type=str, default='')  # select model
     parser.add_argument('-conv5', default=False, action='store_true')  # finetune conv layers
     parser.add_argument('-freeze_bn', default=False, action='store_true')  # finetune conv layers
+    parser.add_argument('-is_aug', default=False, action='store_true')  # finetune conv layers
     parser.add_argument('-log_dir', type=str, default='./logdir')
     parser.add_argument('-im_dir', type=str, default='')
     parser.add_argument('-mask_dir', type=str, default='')
