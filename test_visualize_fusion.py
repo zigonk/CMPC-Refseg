@@ -226,6 +226,8 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 if (frame_id % 20 != 0):
                     continue
                 vis_path = os.path.join(vis_dir, str('{}_{}_{}.png'.format(vid,eid,fid)))
+                if (os.path.exists(vis_path)): 
+                    continue
                 frame = load_frame_from_id(vid, fid)
                 if frame is None:
                     continue
@@ -252,13 +254,15 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                                                                                                     model.im: np.expand_dims(proc_im_, axis=0),
                                                                                                     model.seq_len: np.expand_dims(seq_len, axis=0)
                                                                                                 })
-                exp_split = exp.split(' ')[:20]
-                words_parse = np.round(words_parse, 2)
+                
                 # print(exp)
                 # print(words_parse)
-                for i, word in enumerate(exp_split):
-                    print(word, words_parse[0][0][i])
-                print('---------------------')
+                if (fid == frame_ids[0]):
+                    exp_split = exp.split(' ')[:20]
+                    words_parse = np.round(words_parse, 2)
+                    for i, word in enumerate(exp_split):
+                        print(word, words_parse[0][0][i])
+                    print('---------------------')
                 # break
                 # scores_val = np.squeeze(scores_val)
                 # pred_raw = (scores_val >= score_thresh).astype(np.float32)
