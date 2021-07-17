@@ -456,6 +456,25 @@ class LSTM_model(object):
         gconv_update = tf.nn.relu(gconv_update)
 
         return gconv_update
+    def get_top_k(self, input, k=30):
+        # Input data
+        # Find top elements
+        values, indices = tf.nn.top_k(input, k, sorted=False)
+        # Apply softmax
+        values_sm = tf.nn.softmax(values)
+        # Reconstruct into original shape
+        input_shape = tf.shape(input)
+        bs = input_shape[0]
+        row = input_shape[1]
+        # Build index
+        bn_idx = tf.tile(tf.range(input_shape[0])[:,tf.newaxis], (1, input_shape[1] * k))
+        row_idx = tf.tile(tf.range(input_shape[1])[:,tf.newaxis], (input_shape[0], k))
+        # Reshape to [B, HW, K]
+        bn_idx = tf.reshape(bn_idx, (bs, row, k))
+        row_idx = tf.reshape(row_idx, (bs, row, k))
+        # Build scatter index
+        scatter_idx = tf.stack([bn_idx, row_idx, indices], axis = -1)
+        return tf.scatter_nd(scatter_idx, values_sm, input_shape)
 
     def build_spa_graph(self, spa_graph, words_feat, spatial, words_parse, level=""):
         # Fuse visual_feat, lang_attn_feat and spatial for SGR
@@ -485,6 +504,7 @@ class LSTM_model(object):
 
         adj_mat = tf.matmul(gw_affi_w, gw_affi_v, transpose_b=True)
         adj_mat = tf.transpose(adj_mat, perm=[0, 2, 1])
+        adj_mat = self.get_top_k(adj_mat)
         # adj_mat: [B, HW, HW], sum == 1 on axis 2
 
         spa_graph_nodes_num = self.vf_h * self.vf_w
