@@ -261,7 +261,8 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                     exp_split = exp.split(' ')[:20]
                     words_parse = np.round(words_parse, 2)
                     for i, word in enumerate(exp_split):
-                        print(word, words_parse[0][0][i])
+                        print(word)
+                        print(words_parse[0][0][i])
                     print('---------------------')
                 # break
                 # scores_val = np.squeeze(scores_val)
