@@ -11,6 +11,7 @@ import CMPCv7_model
 import CMPCv8_model
 import CMPCv4_BiLSTM_model
 import CMPCv4_BiLSTM_topk_model
+import CMPCv4_T_model
 
 
 def get_segmentation_model(name, **kwargs):
