@@ -179,7 +179,6 @@ class LSTM_model(object):
         
     
     def decoder(self, encoder_output, batch_norm_decay, is_training = True):
-        is_training = True
         with tf.variable_scope("decoder"):
           with tf.contrib.slim.arg_scope(resnet_v2.resnet_arg_scope(batch_norm_decay=batch_norm_decay)):
             with arg_scope([layers.batch_norm], is_training=is_training):
@@ -210,7 +209,6 @@ class LSTM_model(object):
       Returns:
         The atrous spatial pyramid pooling output.
       """
-      is_training = True
       with tf.variable_scope("aspp"):
         if output_stride not in [8, 16]:
           raise ValueError('output_stride must be either 8 or 16.')
