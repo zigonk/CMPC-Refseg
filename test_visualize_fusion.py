@@ -210,9 +210,9 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
         frame_ids = videos[vid]['frames']
         for eid in expressions:
             exp = expressions[eid]['exp']
-            # if (eid != '0'):
-            #     continue
-            # exp = 'a small grey shark swimming under a person'
+            if (eid != '4'):
+                continue
+            exp = 'a man in pink shirt'
             index = int(eid)
             vis_dir = args.visdir
 #             mask_dir = os.path.join(args.maskdir, str('{}/{}/'.format(vid, index)))
@@ -260,13 +260,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 
                 # print(exp)
                 # print(words_parse)
-                if (fid == frame_ids[0]):
-                    exp_split = exp.split(' ')[:20]
-                    words_parse = np.round(words_parse, 2)
-                    for i, word in enumerate(exp_split):
-                        print(word)
-                        print(words_parse[0][0][i])
-                    print('---------------------')
+                print('---------------------')
                 # break
                 # scores_val = np.squeeze(scores_val)
                 # pred_raw = (scores_val >= score_thresh).astype(np.float32)
@@ -289,6 +283,11 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 plt.subplot(1, 5, 5)
                 plt.imshow(sigm_val)
                 plt.savefig(vis_path)
+            exp_split = exp.split(' ')[:20]
+            words_parse = np.round(words_parse, 2)
+            for i, word in enumerate(exp_split):
+                print(word)
+                print(words_parse[0][0][i])
 #                 pred_raw = (up_val >= score_thresh).astype('uint8') * 255
 #                 pred_raw = (up_val >= score_thresh).astype(np.float32)
 #                 predicts = im_processing.resize_and_crop(pred_raw, mask.shape[0], mask.shape[1])
