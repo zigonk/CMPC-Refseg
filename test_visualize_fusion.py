@@ -272,10 +272,10 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 exp_split = exp.split(' ')[:20]
                 words_parse = np.round(words_parse, 2)
                 for i, word in enumerate(exp_split):
-                    # print(word)
-                    # print(words_parse[0][0][i])
-                    words_parse_dict[word] += words_parse[0][0][i]
-                    words_count[word] += 1
+                    print(word)
+                    print(words_parse[0][0][i])
+                    # words_parse_dict[word] += words_parse[0][0][i]
+                    # words_count[word] += 1
 
                 print('---------------------')
                 up_c3 = im_processing.resize_and_crop(sigmoid(np.squeeze(up_c3)), frame.shape[0], frame.shape[1])
