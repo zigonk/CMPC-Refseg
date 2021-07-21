@@ -206,6 +206,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
     sorted_video_key = ['b205d868e6']
     for vid_ind, vid in enumerate(sorted_video_key):
         print("Running on video {}/{}".format(vid_ind + 1, len(videos.keys())))
+        print("Video id:{}".format(vid))
         expressions = videos[vid]['expressions']
         # instance_ids = [expression['obj_id'] for expression_id in videos[vid]['expressions']]
         frame_ids = videos[vid]['frames']
