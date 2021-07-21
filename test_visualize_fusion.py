@@ -217,7 +217,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
             exp = expressions[eid]['exp']
             if (eid != '2'):
                 continue
-            # exp = 'a man wearing red shirt and black short'
+            exp = 'the hand is stretched out toward the tree and lizard behind the white'
             index = int(eid)
             vis_dir = args.visdir
 #             mask_dir = os.path.join(args.maskdir, str('{}/{}/'.format(vid, index)))
