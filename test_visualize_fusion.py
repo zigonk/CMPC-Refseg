@@ -347,6 +347,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
     seg_total += 1
     for word in words_parse_dict.keys():
         words_parse_dict[word] /= words_count[word]
+        words_parse_dict[word] = np.round(words_parse_dict[word], 2)
         print(word)
         print(words_parse_dict[word])
     # Print results
