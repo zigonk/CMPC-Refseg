@@ -231,9 +231,9 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
 #             Process text
             text, seq_len = text_processing.preprocess_sentence_lstm(exp, vocab_dict, T)
             for fid in frame_ids:
-                # frame_id = int(fid)
-                # if (frame_id % 20 != 0):
-                #     continue
+                frame_id = int(fid)
+                if (frame_id % 20 != 0):
+                    continue
                 vis_path = os.path.join(vis_dir, str('{}_{}_{}.png'.format(vid,eid,fid)))
                 # if (os.path.exists(vis_path)): 
                 #     continue
@@ -272,7 +272,6 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 exp_split = exp.split(' ')[:20]
                 words_parse = np.round(words_parse, 2)
 
-                print('---------------------')
                 up_c3 = im_processing.resize_and_crop(sigmoid(np.squeeze(up_c3)), frame.shape[0], frame.shape[1])
                 up_c4 = im_processing.resize_and_crop(sigmoid(np.squeeze(up_c4)), frame.shape[0], frame.shape[1])
                 up_c5 = im_processing.resize_and_crop(sigmoid(np.squeeze(up_c5)), frame.shape[0], frame.shape[1])
@@ -295,6 +294,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
             for i, word in enumerate(exp_split):
                 print(word)
                 print(words_parse[0][0][i])
+            print('---------------------')
                 # words_parse_dict[word] += words_parse[0][0][i]
                 # words_count[word] += 1
 #                 pred_raw = (up_val >= score_thresh).astype('uint8') * 255
