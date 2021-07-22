@@ -206,6 +206,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
     # sorted_video_key = ['853ca85618'] #Example 1
     # sorted_video_key = ['b205d868e6'] #Example 2
     # sorted_video_key = ['d975e5f4a9'] #Example 3
+    sorted_video_key = ['b5514f75d8'] #Example 4
     words_parse_dict = DefaultDict(lambda: np.asarray([0, 0, 0, 0], dtype=np.float32))
     words_count = DefaultDict(lambda: 0)
     for vid_ind, vid in enumerate(sorted_video_key):
@@ -216,9 +217,9 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
         frame_ids = videos[vid]['frames']
         for eid in expressions:
             exp = expressions[eid]['exp']
-            # if (eid != '3'):
-            #     continue
-            # exp = 'a person in purple shirt'
+            if (eid != '3'):
+                continue
+            exp = 'a black fish is swimming in the middle of the tank in front of the pink coral'
             index = int(eid)
             vis_dir = args.visdir
 #             mask_dir = os.path.join(args.maskdir, str('{}/{}/'.format(vid, index)))
