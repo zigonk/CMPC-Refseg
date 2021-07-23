@@ -216,7 +216,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
         # instance_ids = [expression['obj_id'] for expression_id in videos[vid]['expressions']]
         frame_ids = videos[vid]['frames']
         for eid in expressions:
-            # exp = expressions[eid]['exp']
+            exp = expressions[eid]['exp']
             # if (eid != '3'):
             #     continue
             # exp = 'a person in purple shirt and'
