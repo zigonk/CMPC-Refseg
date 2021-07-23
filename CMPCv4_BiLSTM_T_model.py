@@ -29,11 +29,11 @@ class LSTM_model(object):
                  vocab_size=12112,
                  w_emb_dim=1000,
                  v_emb_dim=1000,
-                 mlp_dim=500,
+                 mlp_dim=512,
                  start_lr=0.00025,
                  lr_decay_step=800000,
                  lr_decay_rate=1.0,
-                 rnn_size=1000,
+                 rnn_size=1024,
                  keep_prob_rnn=1.0,
                  keep_prob_emb=1.0,
                  keep_prob_mlp=1.0,
@@ -116,7 +116,7 @@ class LSTM_model(object):
         print("#" * 30)
         print("\n")
 
-        words_feat, lang_feat = self.BiLSTM()
+        words_feat, lang_feat, words_parse = self.BiLSTM()
 
         visual_feat_c5 = self._conv("c5_lateral", self.visual_feat_c5, 1, self.vf_dim, self.v_emb_dim, [1, 1, 1, 1])
         visual_feat_c5 = tf.nn.l2_normalize(visual_feat_c5, 3)
@@ -127,8 +127,6 @@ class LSTM_model(object):
 
         # Generate spatial grid
         spatial = tf.convert_to_tensor(generate_spatial_batch(self.batch_size, self.vf_h, self.vf_w))
-
-        words_parse = self.build_lang_parser(words_feat)
 
         fusion_c5 = self.build_lang2vis(visual_feat_c5, words_feat, lang_feat,
                                         words_parse, spatial, level="c5")
@@ -180,9 +178,11 @@ class LSTM_model(object):
         words_feat = self._conv('words_feat', words_feat, 1, 2 * self.rnn_size, self.rnn_size, [1, 1, 1, 1])     
         # Normalize output
         words_feat = tf.nn.l2_normalize(words_feat, -1)
+        fw_outputs = tf.nn.l2_normalize(fw_outputs, -1)
         # Generate seq mask
         self.seq_mask = tf.cast(tf.logical_not(tf.equal(tf.reduce_sum(tf.abs(words_feat), -1, keepdims=True), 0)), tf.float32)
-        return words_feat, words_feat
+        words_parse = self.build_lang_parser(words_feat)
+        return fw_outputs, words_feat, words_parse
         
     
     def decoder(self, encoder_output, batch_norm_decay, is_training = True):

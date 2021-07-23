@@ -490,19 +490,8 @@ class LSTM_model(object):
         # graph_words_affi: [B, HW, T]
         graph_words_affi = words_parse[:, :, :, 2] * graph_words_affi
 
-        graph_mask = tf.reshape(self.seq_mask, [self.batch_size, 1, self.num_steps])
-        graph_mask_softmax = (1 - graph_mask) * tf.float32.min
-
-        gw_affi_w = graph_mask * graph_words_affi
-        gw_affi_w = gw_affi_w + graph_mask_softmax
-        gw_affi_w = tf.nn.softmax(gw_affi_w, axis=2)
-        self.gw_w = gw_affi_w
-        
-        gw_affi_v = tf.nn.softmax(graph_words_affi, axis=1)
-        gw_affi_v = graph_mask * gw_affi_v
-        self.gw_v = gw_affi_v
-        adj_mat = tf.matmul(gw_affi_w, gw_affi_v, transpose_b=True)
-        adj_mat = tf.transpose(adj_mat, perm=[0, 2, 1])
+        adj_mat = tf.matmul(graph_words_affi, graph_words_affi, transpose_b=True)
+        adj_mat = tf.nn.softmax(adj_mat, axis=-1)
         # adj_mat = self.get_top_k(adj_mat)
         # adj_mat: [B, HW, HW], sum == 1 on axis 2
 
