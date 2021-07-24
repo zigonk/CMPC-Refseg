@@ -16,7 +16,7 @@ from PIL import Image
 from get_model import get_segmentation_model
 from pydensecrf import densecrf
 
-from util import data_reader
+from util import data_reader, save_image_worker
 from util.processing_tools import *
 from util import im_processing, eval_tools, MovingAverage, text_processing
 
@@ -246,6 +246,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
     #         continue
     meta_pivot_frames = DefaultDict(lambda: DefaultDict())
     inconsistent_frames = []
+    save_worker = save_image_worker.SaveImageWorker()
     for vid in sorted_video_key:
         print("Processing video {}".format(vid))
         expressions = videos[vid]['expressions']
@@ -325,7 +326,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
 #                         np.save(mask_path, np.array(pred_raw_dcrf))
 #                         visualize_seg(vis_path, im, exp, predicts_dcrf)
                     else:
-                        cv2.imwrite(vis_path, predicts)
+                        save_worker.save_image(vis_path, predicts)
             # meta_pivot_frames[vid][eid] = find_pivot_frames(frames_feature)
 #                         visualize_seg(vis_path, im, exp, predicts)
 #                         np.save(mask_path, np.array(pred_raw))
@@ -349,8 +350,9 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
     #         seg_correct_dcrf[n_eval_iou] += (I_dcrf / U_dcrf >= eval_seg_iou)
     # print(msg)
     seg_total += 1
-    with open('inconsitent_frames.json', 'w') as f:
-        json.dump(inconsistent_frames, f)
+    save_worker.save_queue.join()
+    # with open('inconsitent_frames.json', 'w') as f:
+    #     json.dump(inconsistent_frames, f)
 
     # Print results
     # print('Segmentation evaluation (without DenseCRF):')
