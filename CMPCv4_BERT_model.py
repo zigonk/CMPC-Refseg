@@ -225,7 +225,6 @@ class LSTM_model(object):
         # words_parse: [B, 1, T, 4]
         words_parse_sum = tf.reduce_sum(words_parse, 3)
         words_parse_valid = words_parse[:, :, :, 0] + words_parse[:, :, :, 1]
-        print(tf.shape(words_parse))
         # words_parse_valid: [B, 1, T]
         words_feat_reshaped = tf.reshape(words_feat, [self.batch_size, self.num_steps, self.rnn_size])
         # words_feat_reshaped: [B, T, C]
@@ -417,6 +416,7 @@ class LSTM_model(object):
         words_parse = self._conv("words_parse_2", words_parse, 1, 500, 4, [1, 1, 1, 1])
         words_parse = tf.nn.softmax(words_parse, axis=3)
         self.words_parse = words_parse * self.seq_mask
+        print(self.words_parse)
         # words_parse: [B, 1, T, 4]
         # Four weights: Entity, Attribute, Relation, Unnecessary
         return self.words_parse
