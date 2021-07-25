@@ -58,7 +58,6 @@ class LSTM_model(object):
         self.lr_decay_step = lr_decay_step
         self.lr_decay_rate = lr_decay_rate
         self.vocab_size = vocab_size
-        self.w_emb_dim = w_emb_dim
         self.v_emb_dim = v_emb_dim
         self.glove_dim = glove_dim
         self.emb_name = emb_name
@@ -76,6 +75,7 @@ class LSTM_model(object):
         self.freeze_bn = freeze_bn
         self.bert_size = 786
         self.rnn_size = self.bert_size
+        self.w_emb_dim = self.bert_size
 
         self.words_feat = tf.placeholder(tf.float32, [self.batch_size, self.num_steps, self.bert_size])
         self.im = tf.placeholder(tf.float32, [self.batch_size, self.H, self.W, 3])
