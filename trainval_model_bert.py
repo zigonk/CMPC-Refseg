@@ -66,7 +66,7 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
     text_batch = np.zeros((bs, num_steps, bert_size), dtype=np.float32)
     image_batch = np.zeros((bs, im_h, im_w, 3), dtype=np.float32)
     mask_batch = np.zeros((bs, im_h, im_w, 1), dtype=np.float32)
-    seq_mask_batch = np.zeros((bs, num_steps, 1), dtype=np.int32)
+    seq_mask_batch = np.zeros((bs, num_steps), dtype=np.int32)
     valid_idx_batch = np.zeros(bs, dtype=np.int32)
 
     if dataset == 'refvos':
