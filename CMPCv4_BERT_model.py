@@ -225,6 +225,7 @@ class LSTM_model(object):
         # words_parse: [B, 1, T, 4]
         words_parse_sum = tf.reduce_sum(words_parse, 3)
         words_parse_valid = words_parse[:, :, :, 0] + words_parse[:, :, :, 1]
+        print(tf.shape(words_parse))
         # words_parse_valid: [B, 1, T]
         words_feat_reshaped = tf.reshape(words_feat, [self.batch_size, self.num_steps, self.rnn_size])
         # words_feat_reshaped: [B, T, C]
