@@ -101,7 +101,7 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
                                                 model.words_feat: text_batch,
                                                 model.im: image_batch,
                                                 model.target_fine: mask_batch,
-                                                model.seq_mask: seq_mask_batch,
+                                                model.sequence_mask: seq_mask_batch,
                                             })
         # cls_loss_avg = decay * cls_loss_avg + (1 - decay) * cls_loss_val
         # cls_loss_avg 
