@@ -26,13 +26,12 @@ class LSTM_model(object):
                  W=320,
                  vf_dim=2048,
                  vocab_size=12112,
-                 w_emb_dim=1000,
-                 v_emb_dim=1000,
-                 mlp_dim=500,
+                 vw_emb_dim=512,
+                 v_emb_dim=1024,
+                 mlp_dim=512,
                  start_lr=0.00025,
                  lr_decay_step=800000,
                  lr_decay_rate=1.0,
-                 rnn_size=1000,
                  keep_prob_rnn=1.0,
                  keep_prob_emb=1.0,
                  keep_prob_mlp=1.0,
@@ -76,6 +75,7 @@ class LSTM_model(object):
         self.bert_size = 786
         self.rnn_size = self.bert_size
         self.w_emb_dim = self.bert_size
+        self.vw_emb_dim = vw_emb_dim
 
         self.words_feat = tf.placeholder(tf.float32, [self.batch_size, self.num_steps, self.bert_size])
         self.im = tf.placeholder(tf.float32, [self.batch_size, self.H, self.W, 3])
@@ -440,12 +440,12 @@ class LSTM_model(object):
 
     def build_spa_graph(self, spa_graph, words_feat, spatial, words_parse, level=""):
         # Fuse visual_feat, lang_attn_feat and spatial for SGR
-        words_trans = self._conv("words_trans_{}".format(level), words_feat, 1, self.rnn_size, self.rnn_size,
+        words_trans = self._conv("words_trans_{}".format(level), words_feat, 1, self.rnn_size, self.vw_emb_dim,
                                  [1, 1, 1, 1])
         words_trans = tf.reshape(words_trans, [self.batch_size, self.num_steps, self.rnn_size])
-        spa_graph_trans2 = self._conv("spa_graph_trans2_{}".format(level), spa_graph, 1, self.v_emb_dim, self.v_emb_dim,
+        spa_graph_trans2 = self._conv("spa_graph_trans2_{}".format(level), spa_graph, 1, self.v_emb_dim, self.vw_emb_dim,
                                      [1, 1, 1, 1])
-        spa_graph_trans2 = tf.reshape(spa_graph_trans2, [self.batch_size, self.vf_h * self.vf_w, self.v_emb_dim])
+        spa_graph_trans2 = tf.reshape(spa_graph_trans2, [self.batch_size, self.vf_h * self.vf_w, self.vw_emb_dim])
         graph_words_affi = tf.matmul(spa_graph_trans2, words_trans, transpose_b=True)
         # Normalization for affinity matrix
         graph_words_affi = tf.divide(graph_words_affi, self.v_emb_dim ** 0.5)
