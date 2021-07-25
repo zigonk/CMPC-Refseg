@@ -80,7 +80,7 @@ class LSTM_model(object):
         self.words_feat = tf.placeholder(tf.float32, [self.batch_size, self.num_steps, self.bert_size])
         self.im = tf.placeholder(tf.float32, [self.batch_size, self.H, self.W, 3])
         self.target_fine = tf.placeholder(tf.float32, [self.batch_size, self.H, self.W, 1])
-        self.seq_mask = tf.placeholder(tf.float32, [self.batch_size, self.num_steps])
+        self.seq_mask = tf.placeholder(tf.float32, [self.batch_size, 1, self.num_steps])
         if (self.mode == 'train'):
             self.im = tf.image.random_brightness(self.im, 0.2, seed=42)
         resmodel = deeplab101.DeepLabResNetModel({'data': self.im}, is_training=False)
