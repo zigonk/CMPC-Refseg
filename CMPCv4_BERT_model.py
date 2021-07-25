@@ -77,7 +77,7 @@ class LSTM_model(object):
         self.bert_size = 786
         self.rnn_size = self.bert_size
 
-        self.words_feat = tf.placeholder(tf.int32, [self.batch_size, self.num_steps, self.bert_size])
+        self.words_feat = tf.placeholder(tf.float32, [self.batch_size, self.num_steps, self.bert_size])
         self.im = tf.placeholder(tf.float32, [self.batch_size, self.H, self.W, 3])
         self.target_fine = tf.placeholder(tf.float32, [self.batch_size, self.H, self.W, 1])
         self.seq_mask = tf.placeholder(tf.int32, [self.batch_size, self.num_steps, 1])
