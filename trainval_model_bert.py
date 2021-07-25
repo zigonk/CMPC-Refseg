@@ -80,7 +80,6 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
     for n_iter in range(last_iter + 1, max_iter):
         for n_batch in range(bs):
             batch = reader.read_batch(is_log=(n_batch == 0 and n_iter % iters_per_log == 0))
-            continue
             text = batch['text_batch']
             im = batch['im_batch'].astype(np.float32)
             # mask = batch['mask_batch']
@@ -93,7 +92,7 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
             image_batch[n_batch, ...] = im
             mask_batch[n_batch, ...] = mask
             seq_mask_batch[n_batch, ...] = seq_mask
-        continue
+
         _, train_step, summary = sess.run([model.train,
                                             model.train_step,
                                             model.merged,

@@ -51,7 +51,6 @@ def run_prefetch(prefetch_queue, im_dir, mask_dir, bert_dir, metadata, num_batch
         batch_id = fetch_order[n_batch_prefetch]
         print(metadata[batch_id])
         im_name, mask_name, sent, obj_id, eid = metadata[batch_id]
-        continue
         vid = im_name.split('/')[0]
         veid = vid + '_' + eid
         text_preprocess = np.load(os.path.join(bert_dir, veid + '.npz'))
