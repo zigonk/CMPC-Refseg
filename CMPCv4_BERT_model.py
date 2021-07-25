@@ -118,6 +118,7 @@ class LSTM_model(object):
 
         words_feat = tf.expand_dims(self.words_feat, 1)
         self.seq_mask = tf.expand_dims(self.sequence_mask, 1)
+        self.seq_mask = tf.expand_dims(self.seq_mask, -1)
         lang_feat = None
 
         visual_feat_c5 = self._conv("c5_lateral", self.visual_feat_c5, 1, self.vf_dim, self.v_emb_dim, [1, 1, 1, 1])
