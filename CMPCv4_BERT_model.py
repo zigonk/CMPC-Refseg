@@ -72,7 +72,7 @@ class LSTM_model(object):
         self.up_c3 = tf.convert_to_tensor(np.zeros((1,320,320)))
         self.batch_norm_decay = batch_norm_decay
         self.freeze_bn = freeze_bn
-        self.bert_size = 786
+        self.bert_size = 768
         self.rnn_size = self.bert_size
         self.w_emb_dim = self.bert_size
         self.vw_emb_dim = vw_emb_dim
