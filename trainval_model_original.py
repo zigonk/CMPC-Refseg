@@ -36,7 +36,7 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
         print("Use pretrained Embeddings.")
         model = get_segmentation_model(model_name, mode='train',
                                        vocab_size=vocab_size, start_lr=lr,
-                                       batch_size=bs, conv5=conv5, emb_name=emb_name, emb_dir=emb_dir, freeze_bn = args.freeze_bn, is_aug = args.is_aug)
+                                       batch_size=bs, conv5=conv5, emb_name=emb_name, emb_dir=emb_dir)
     else:
         model = get_segmentation_model(model_name, mode='train',
                                        vocab_size=vocab_size, start_lr=lr,
