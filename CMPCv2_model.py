@@ -432,10 +432,11 @@ class LSTM_model(object):
         self.target = tf.image.resize_bilinear(self.target_fine, [self.vf_h, self.vf_w])
         self.cls_loss_c5 = loss.weighed_logistic_loss(self.up_c5, self.target_fine, 1, 1)
         self.cls_loss_c4 = loss.weighed_logistic_loss(self.up_c4, self.target_fine, 1, 1)
-        self.cls_loss_c3 = loss.weighed_logistic_loss(self.up_c3, self.target_fine, 1, 1)
+        # self.cls_loss_c3 = loss.weighed_logistic_loss(self.up_c3, self.target_fine, 1, 1)
         self.cls_loss = loss.weighed_logistic_loss(self.up, self.target_fine, 1, 1)
-        self.cls_loss_all = 0.7 * self.cls_loss + 0.1 * self.cls_loss_c5 \
-                            + 0.1 * self.cls_loss_c4 + 0.1 * self.cls_loss_c3
+        self.cls_loss_all = 0.7 * self.cls_loss + 0.15 * self.cls_loss_c5 \
+                            + 0.15 * self.cls_loss_c4 
+                            # + 0.1 * self.cls_loss_c3
         self.reg_loss = loss.l2_regularization_loss(reg_var_list, self.weight_decay)
         self.cost = self.cls_loss_all + self.reg_loss
 
@@ -472,7 +473,7 @@ class LSTM_model(object):
 
         # Summary in tensorboard
         tf.summary.scalar('loss_all', self.cls_loss_all)
-        tf.summary.scalar('loss_c3', self.cls_loss_c3)
+        # tf.summary.scalar('loss_c3', self.cls_loss_c3)
         tf.summary.scalar('loss_c4', self.cls_loss_c4)
         tf.summary.scalar('loss_c5', self.cls_loss_c5)
         tf.summary.scalar('loss_last', self.cls_loss)
