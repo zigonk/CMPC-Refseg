@@ -68,6 +68,7 @@ class LSTM_model(object):
         self.im = tf.placeholder(tf.float32, [self.batch_size, self.H, self.W, 3])
         self.target_fine = tf.placeholder(tf.float32, [self.batch_size, self.H, self.W, 1])
         self.valid_idx = tf.placeholder(tf.int32, [self.batch_size, 1])
+        self.seq_len = tf.placeholder(tf.int32, [self.batch_size])
 
         resmodel = deeplab101.DeepLabResNetModel({'data': self.im}, is_training=False)
         self.visual_feat_c5 = resmodel.layers['res5c_relu']
@@ -102,60 +103,14 @@ class LSTM_model(object):
         print("#" * 30)
         print("\n")
 
-        embedding_mat = tf.Variable(self.glove)
-        embedded_seq = tf.nn.embedding_lookup(embedding_mat, tf.transpose(self.words))  # [num_step, batch_size, glove_emb]
-        print("Build Glove Embedding.")
-
-        rnn_cell_basic = tf.nn.rnn_cell.BasicLSTMCell(self.rnn_size, state_is_tuple=False)
-        if self.mode == 'train' and self.keep_prob_rnn < 1:
-            rnn_cell_basic = tf.nn.rnn_cell.DropoutWrapper(rnn_cell_basic, output_keep_prob=self.keep_prob_rnn)
-        cell = tf.nn.rnn_cell.MultiRNNCell([rnn_cell_basic] * self.num_rnn_layers, state_is_tuple=False)
-
-        state = cell.zero_state(self.batch_size, tf.float32)
-        state_shape = state.get_shape().as_list()
-        state_shape[0] = self.batch_size
-        state.set_shape(state_shape)
-
-        words_feat_list = []
-
-        def f1():
-            # return tf.constant(0.), state
-            return tf.zeros([self.batch_size, self.rnn_size]), state
-
-        def f2():
-            # Word input to embedding layer
-            w_emb = embedded_seq[n, :, :]
-            if self.mode == 'train' and self.keep_prob_emb < 1:
-                w_emb = tf.nn.dropout(w_emb, self.keep_prob_emb)
-            return cell(w_emb, state)
-
-        with tf.variable_scope("RNN"):
-            for n in range(self.num_steps):
-                if n > 0:
-                    tf.get_variable_scope().reuse_variables()
-
-                # rnn_output, state = cell(w_emb, state)
-                rnn_output, state = tf.cond(tf.equal(self.words[0, n], tf.constant(0)), f1, f2)
-                word_feat = tf.reshape(rnn_output, [self.batch_size, 1, self.rnn_size])
-                words_feat_list.append(word_feat)
-
-        lang_feat = tf.reshape(rnn_output, [self.batch_size, 1, 1, self.rnn_size])
-        lang_feat = tf.nn.l2_normalize(lang_feat, 3)
-
-        # words_feat: [B, num_steps, rnn_size]
-        words_feat = tf.concat(words_feat_list, 1)
-        words_feat = tf.slice(words_feat, [0, self.valid_idx[0, 0], 0],
-                              [-1, self.num_steps - self.valid_idx[0, 0], -1])
-        words_feat = tf.nn.l2_normalize(words_feat, 2)
-        # words_feat: [B, 1, num_words, rnn_size]
-        words_feat = tf.expand_dims(words_feat, 1)
+        words_feat, lang_feat = self.lstm()
 
         visual_feat_c5 = self._conv("c5_lateral", self.visual_feat_c5, 1, self.vf_dim, self.v_emb_dim, [1, 1, 1, 1])
         visual_feat_c5 = tf.nn.l2_normalize(visual_feat_c5, 3)
         visual_feat_c4 = self._conv("c4_lateral", self.visual_feat_c4, 1, 1024, self.v_emb_dim, [1, 1, 1, 1])
         visual_feat_c4 = tf.nn.l2_normalize(visual_feat_c4, 3)
-        visual_feat_c3 = self._conv("c3_lateral", self.visual_feat_c3, 1, 512, self.v_emb_dim, [1, 1, 1, 1])
-        visual_feat_c3 = tf.nn.l2_normalize(visual_feat_c3, 3)
+        # visual_feat_c3 = self._conv("c3_lateral", self.visual_feat_c3, 1, 512, self.v_emb_dim, [1, 1, 1, 1])
+        # visual_feat_c3 = tf.nn.l2_normalize(visual_feat_c3, 3)
 
         # Generate spatial grid
         spatial = tf.convert_to_tensor(generate_spatial_batch(self.batch_size, self.vf_h, self.vf_w))
@@ -166,32 +121,53 @@ class LSTM_model(object):
                                         words_parse, spatial, level="c5")
         fusion_c4 = self.build_lang2vis(visual_feat_c4, words_feat, lang_feat,
                                         words_parse, spatial, level="c4")
-        fusion_c3 = self.build_lang2vis(visual_feat_c3, words_feat, lang_feat,
-                                        words_parse, spatial, level="c3")
+        # fusion_c3 = self.build_lang2vis(visual_feat_c3, words_feat, lang_feat,
+        #                                 words_parse, spatial, level="c3")
 
         # For multi-level losses
         score_c5 = self._conv("score_c5", fusion_c5, 3, self.mlp_dim, 1, [1, 1, 1, 1])
         self.up_c5 = tf.image.resize_bilinear(score_c5, [self.H, self.W])
         score_c4 = self._conv("score_c4", fusion_c4, 3, self.mlp_dim, 1, [1, 1, 1, 1])
         self.up_c4 = tf.image.resize_bilinear(score_c4, [self.H, self.W])
-        score_c3 = self._conv("score_c3", fusion_c3, 3, self.mlp_dim, 1, [1, 1, 1, 1])
-        self.up_c3 = tf.image.resize_bilinear(score_c3, [self.H, self.W])
+        # score_c3 = self._conv("score_c3", fusion_c3, 3, self.mlp_dim, 1, [1, 1, 1, 1])
+        # self.up_c3 = tf.image.resize_bilinear(score_c3, [self.H, self.W])
 
         valid_lang = self.nec_lang(words_parse, words_feat)
-        fused_feats = self.gated_exchange_fusion_lstm_2times(fusion_c3,
-                                                             fusion_c4, fusion_c5, valid_lang)
+        fused_feats = self.gated_exchange_fusion_lstm_2times(fusion_c4, fusion_c5, valid_lang)
         score = self._conv("score", fused_feats, 3, self.mlp_dim, 1, [1, 1, 1, 1])
 
         self.pred = score
         self.up = tf.image.resize_bilinear(self.pred, [self.H, self.W])
         self.sigm = tf.sigmoid(self.up)
+    
+    def lstm(self):
+        embedding_mat = tf.Variable(self.glove)
+        embedded_seq = tf.nn.embedding_lookup(embedding_mat, tf.transpose(self.words))  # [num_step, batch_size, glove_emb]
+        print("Build Glove Embedding.")
+        embedded_seq = tf.transpose(embedded_seq, perm=[1,0,2])
+        rnn_cell = tf.compat.v1.nn.rnn_cell.LSTMCell(self.rnn_size, state_is_tuple=False)
+        # 'outputs' is a tensor of shape [batch_size, max_time, 256]
+        # 'state' is a N-tuple where N is the number of LSTMCells containing a
+        # tf.nn.rnn_cell.LSTMStateTuple for each cell
+        outputs, _ = tf.compat.v1.nn.dynamic_rnn(cell=rnn_cell,
+                                                    inputs=embedded_seq,
+                                                    sequence_length = self.seq_len,
+                                                    dtype=tf.float32)
+        
+        # words feat: [B, 1, num_words, rnn_size]
+        words_feat = tf.nn.l2_normalize(outputs, -1)
+        words_feat = tf.expand_dims(words_feat, 1)
+        lang_feat = tf.reduce_sum(words_feat, -2)
+        # Parse seq mask
+        self.seq_mask = tf.cast(tf.logical_not(tf.equal(tf.reduce_sum(tf.abs(words_feat), -1, keepdims=True), 0)), tf.float32)
+        return words_feat, lang_feat
 
     def valid_lang(self, words_parse, words_feat):
         # words_parse: [B, 1, T, 4]
         words_parse_sum = tf.reduce_sum(words_parse, 3)
         words_parse_valid = words_parse[:, :, :, 0] + words_parse[:, :, :, 1]
         # words_parse_valid: [B, 1, T]
-        words_feat_reshaped = tf.reshape(words_feat, [self.batch_size, self.num_steps - self.valid_idx[0, 0], self.rnn_size])
+        words_feat_reshaped = tf.reshape(words_feat, [self.batch_size, self.num_steps, self.rnn_size])
         # words_feat_reshaped: [B, T, C]
         valid_lang_feat = tf.matmul(words_parse_valid, words_feat_reshaped)
         # valid_lang_feat: [B, 1, C]
@@ -205,7 +181,7 @@ class LSTM_model(object):
         words_parse_sum = tf.reduce_sum(words_parse, 3)
         words_parse_valid = words_parse_sum - words_parse[:, :, :, 3]
         # words_parse_valid: [B, 1, T]
-        words_feat_reshaped = tf.reshape(words_feat, [self.batch_size, self.num_steps - self.valid_idx[0, 0], self.rnn_size])
+        words_feat_reshaped = tf.reshape(words_feat, [self.batch_size, self.num_steps, self.rnn_size])
         # words_feat_reshaped: [B, T, C]
         valid_lang_feat = tf.matmul(words_parse_valid, words_feat_reshaped)
         # valid_lang_feat: [B, 1, C]
@@ -265,7 +241,7 @@ class LSTM_model(object):
         print("Build Global Lang Vec")
         return gv_lang
 
-    def gated_exchange_module(self, feat, feat1, feat2, lang_feat, level=""):
+    def gated_exchange_module(self, feat, feat1, lang_feat, level=""):
         '''
         Exchange information of feat1 and feat2 with feat, using sentence feature
         as guidance.
@@ -277,11 +253,10 @@ class LSTM_model(object):
         '''
         gv_lang = self.global_vec(feat, lang_feat, level + 'gv_f1')  # [B, 1, 1, C]
         feat1 = self.lang_se(feat1, gv_lang, level + '_f1')
-        feat2 = self.lang_se(feat2, gv_lang, level + '_f2')
-        feat_exg = feat + feat1 + feat2
+        feat_exg = feat + feat1
         return feat_exg
 
-    def gated_exchange_fusion_lstm_2times(self, feat3, feat4, feat5, lang_feat):
+    def gated_exchange_fusion_lstm_2times(self, feat4, feat5, lang_feat):
         '''
         Fuse exchanged features of level3, level4, level5
         LSTM is used to fuse the exchanged features
@@ -291,25 +266,21 @@ class LSTM_model(object):
         :param lang_feat: [B, 1, 1, C]
         :return: fused feat3, feat4, feat5
         '''
-        feat_exg3 = self.gated_exchange_module(feat3, feat4, feat5, lang_feat, 'c3')
-        feat_exg3 = tf.nn.l2_normalize(feat_exg3, 3)
-        feat_exg4 = self.gated_exchange_module(feat4, feat3, feat5, lang_feat, 'c4')
+        feat_exg4 = self.gated_exchange_module(feat4, feat5, lang_feat, 'c4')
         feat_exg4 = tf.nn.l2_normalize(feat_exg4, 3)
-        feat_exg5 = self.gated_exchange_module(feat5, feat3, feat4, lang_feat, 'c5')
+        feat_exg5 = self.gated_exchange_module(feat5, feat4, lang_feat, 'c5')
         feat_exg5 = tf.nn.l2_normalize(feat_exg5, 3)
 
         # Second time
-        feat_exg3_2 = self.gated_exchange_module(feat_exg3, feat_exg4, feat_exg5, lang_feat, 'c3_2')
-        feat_exg3_2 = tf.nn.l2_normalize(feat_exg3_2, 3)
-        feat_exg4_2 = self.gated_exchange_module(feat_exg4, feat_exg3, feat_exg5, lang_feat, 'c4_2')
+        feat_exg4_2 = self.gated_exchange_module(feat_exg4, feat_exg5, lang_feat, 'c4_2')
         feat_exg4_2 = tf.nn.l2_normalize(feat_exg4_2, 3)
-        feat_exg5_2 = self.gated_exchange_module(feat_exg5, feat_exg3, feat_exg4, lang_feat, 'c5_2')
+        feat_exg5_2 = self.gated_exchange_module(feat_exg5, feat_exg4, lang_feat, 'c5_2')
         feat_exg5_2 = tf.nn.l2_normalize(feat_exg5_2, 3)
         
         # Convolutional LSTM Fuse
         convlstm_cell = ConvLSTMCell([self.vf_h, self.vf_w], self.mlp_dim, [1, 1])
         convlstm_outputs, states = tf.nn.dynamic_rnn(convlstm_cell, tf.convert_to_tensor(
-            tf.stack((feat_exg5_2, feat_exg4_2, feat_exg3_2), axis=1)), dtype=tf.float32)
+            tf.stack((feat_exg4_2, feat_exg5_2), axis=1)), dtype=tf.float32)
         fused_feat = convlstm_outputs[:,-1]
         print("Build Gated Fusion with ConvLSTM two times.")
 
@@ -373,6 +344,7 @@ class LSTM_model(object):
         words_parse = tf.nn.relu(words_parse)
         words_parse = self._conv("words_parse_2", words_parse, 1, 500, 4, [1, 1, 1, 1])
         words_parse = tf.nn.softmax(words_parse, axis=3)
+        words_parse = words_parse * self.seq_mask
         # words_parse: [B, 1, T, 4]
         # Four weights: Entity, Attribute, Relation, Unnecessary
         return words_parse
@@ -398,7 +370,7 @@ class LSTM_model(object):
         # Fuse visual_feat, lang_attn_feat and spatial for SGR
         words_trans = self._conv("words_trans_{}".format(level), words_feat, 1, self.rnn_size, self.rnn_size,
                                  [1, 1, 1, 1])
-        words_trans = tf.reshape(words_trans, [self.batch_size, self.num_steps - self.valid_idx[0, 0], self.rnn_size])
+        words_trans = tf.reshape(words_trans, [self.batch_size, self.num_steps, self.rnn_size])
         spa_graph_trans2 = self._conv("spa_graph_trans2_{}".format(level), spa_graph, 1, self.v_emb_dim, self.v_emb_dim,
                                      [1, 1, 1, 1])
         spa_graph_trans2 = tf.reshape(spa_graph_trans2, [self.batch_size, self.vf_h * self.vf_w, self.v_emb_dim])
@@ -407,8 +379,17 @@ class LSTM_model(object):
         graph_words_affi = tf.divide(graph_words_affi, self.v_emb_dim ** 0.5)
         # graph_words_affi: [B, HW, T]
         graph_words_affi = words_parse[:, :, :, 2] * graph_words_affi
-        gw_affi_w = tf.nn.softmax(graph_words_affi, axis=2)
+        graph_mask = tf.reshape(self.seq_mask, [self.batch_size, 1, self.num_steps])
+        graph_mask_softmax = (1 - graph_mask) * tf.float32.min
+
+        gw_affi_w = graph_mask * graph_words_affi
+        gw_affi_w = gw_affi_w + graph_mask_softmax
+        gw_affi_w = tf.nn.softmax(gw_affi_w, axis=2)
+        self.gw_w = gw_affi_w
+        
         gw_affi_v = tf.nn.softmax(graph_words_affi, axis=1)
+        gw_affi_v = graph_mask * gw_affi_v
+        self.gw_v = gw_affi_v
         adj_mat = tf.matmul(gw_affi_w, gw_affi_v, transpose_b=True)
         # adj_mat: [B, HW, HW], sum == 1 on axis 2
 
