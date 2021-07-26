@@ -70,16 +70,17 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
     valid_idx_batch = np.zeros(bs, dtype=np.int32)
 
     if dataset == 'refvos':
-        reader = data_reader_refvos_bert.DataReader(im_dir=args.im_dir, mask_dir=args.mask_dir, train_metadata=args.meta, bert_dir=args.bert)
+        train_reader = data_reader_refvos_bert.DataReader(im_dir=args.im_dir, mask_dir=args.mask_dir, train_metadata=args.meta, bert_dir=args.bert)
+        val_reader = data_reader_refvos_bert.DataReader(im_dir=args.im_dir, mask_dir=args.mask_dir, train_metadata=args.meta, bert_dir=args.bert)
 
     # for time calculate
     last_time = time.time()
     time_avg = MovingAverage()
     meanIoU = 0
-    last_epoch = (last_iter * bs) // reader.num_batch
+    last_epoch = (last_iter * bs) // train_reader.num_batch
     for n_iter in range(last_iter + 1, max_iter):
         for n_batch in range(bs):
-            batch = reader.read_batch(is_log=(n_batch == 0 and n_iter % iters_per_log == 0))
+            batch = train_reader.read_batch(is_log=(n_batch == 0 and n_iter % iters_per_log == 0))
             text = batch['text_batch']
             im = batch['im_batch'].astype(np.float32)
             # mask = batch['mask_batch']
@@ -103,6 +104,22 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
                                                 model.target_fine: mask_batch,
                                                 model.sequence_mask: seq_mask_batch,
                                             })
+        if (n_iter % args.iters_per_val == 0):
+            for i in range(val_reader.num_batch):
+                for n_batch in range(bs):
+                    batch = val_reader.read_batch(is_log=(n_batch == 0 and n_iter % iters_per_log == 0))
+                    text = batch['text_batch']
+                    im = batch['im_batch'].astype(np.float32)
+                    # mask = batch['mask_batch']
+                    mask = np.expand_dims(batch['mask_batch'].astype(np.float32), axis=2)
+                    seq_mask = batch['seq_mask']
+                    im = im[:, :, ::-1]
+                    im -= mu
+
+                    text_batch[n_batch, ...] = text
+                    image_batch[n_batch, ...] = im
+                    mask_batch[n_batch, ...] = mask
+                    seq_mask_batch[n_batch, ...] = seq_mask
         # cls_loss_avg = decay * cls_loss_avg + (1 - decay) * cls_loss_val
         # cls_loss_avg 
         # Accuracy
