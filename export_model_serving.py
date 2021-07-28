@@ -113,7 +113,7 @@ if __name__ == "__main__":
     parser.add_argument('-mask_dir', type=str, default='')
     parser.add_argument('-meta', type=str, default='./train_meta.json')
     parser.add_argument('-version', type=str, default='1')
-    parser.add_argument('-export_dir', type=str, default='')
+    parser.add_argument('-export', type=str, default='')
 
     args = parser.parse_args()
     # os.environ['CUDA_VISIBLE_DEVICES'] = args.g
