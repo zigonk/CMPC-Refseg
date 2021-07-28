@@ -121,5 +121,4 @@ if __name__ == "__main__":
     export_model(dataset=args.d,
                 tfmodel_folder=args.f,
                 model_name=args.n,
-                stop_iter=args.st,
                 pre_emb=args.emb)
