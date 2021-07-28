@@ -16,7 +16,7 @@ from util.processing_tools import *
 from util import im_processing, eval_tools, MovingAverage
 
 
-def export_model(dataset, tfmodel_folder, model_name, pre_emb=False):
+def export_model(dataset, export_dir, tfmodel_folder, model_name, pre_emb=False):
     global args
     weights = tfmodel_folder
     print("Loading trained weights from {}".format(weights))
@@ -45,7 +45,7 @@ def export_model(dataset, tfmodel_folder, model_name, pre_emb=False):
     sess.run(tf.global_variables_initializer())
     snapshot_restorer.restore(sess, weights)
     # Log tensorboard
-    export_path_base = sys.argv[-1]
+    export_path_base = export_dir
     export_path = os.path.join(
         tf.compat.as_bytes(export_path_base),
         tf.compat.as_bytes(str(args.version)))
@@ -113,12 +113,14 @@ if __name__ == "__main__":
     parser.add_argument('-mask_dir', type=str, default='')
     parser.add_argument('-meta', type=str, default='./train_meta.json')
     parser.add_argument('-version', type=str, default='1')
+    parser.add_argument('-export_dir', type=str, default='')
 
     args = parser.parse_args()
     # os.environ['CUDA_VISIBLE_DEVICES'] = args.g
     mu = np.array((104.00698793, 116.66876762, 122.67891434))
 
     export_model(dataset=args.d,
+                export_dir=args.export,
                 tfmodel_folder=args.f,
                 model_name=args.n,
                 pre_emb=args.emb)
