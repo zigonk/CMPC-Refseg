@@ -16,7 +16,7 @@ from util.processing_tools import *
 from util import im_processing, eval_tools, MovingAverage
 
 
-def export_model(dataset, tfmodel_folder, model_name, pre_emb=False, finetune=False, pretrain_path = ''):
+def export_model(dataset, tfmodel_folder, model_name, pre_emb=False):
     global args
     weights = tfmodel_folder
     print("Loading trained weights from {}".format(weights))
@@ -118,20 +118,8 @@ if __name__ == "__main__":
     # os.environ['CUDA_VISIBLE_DEVICES'] = args.g
     mu = np.array((104.00698793, 116.66876762, 122.67891434))
 
-    export_model(max_iter=args.i,
-                snapshot=args.s,
-                dataset=args.d,
-                data_dir=args.datadir,
-                setname=args.t,
-                mu=mu,
-                lr=args.lr,
-                bs=args.bs,
+    export_model(dataset=args.d,
                 tfmodel_folder=args.f,
-                conv5=args.conv5,
                 model_name=args.n,
                 stop_iter=args.st,
-                pre_emb=args.emb,
-                finetune=args.finetune,
-                last_iter=args.lastiter,
-                pretrain_path=args.pretrain,
-                emb_dir=args.embdir)
+                pre_emb=args.emb)
