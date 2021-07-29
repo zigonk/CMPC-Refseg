@@ -250,7 +250,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 proc_im_ = proc_im.astype(np.float32)
                 proc_im_ = proc_im_[:, :, ::-1]
                 proc_im_ -= mu
-                scores_val, up_val, sigm_val, up_c3, up_c4, up_c5, words_parse = sess.run([model.pred, 
+                scores_val, up_val, sigm_val, up_c3, up_c4, up_c5, word_parse = sess.run([model.pred, 
                                                                                                 model.up, 
                                                                                                 model.sigm, 
                                                                                                 model.up_c3, 
@@ -282,7 +282,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 plt.clf()
                 plt.subplot(1, 5, 1)
                 plt.imshow(frame)
-                plt.text(-0.7, -0.7, exp)
+                plt.text(-10, -0.7, exp)
                 plt.subplot(1, 5, 2)
                 plt.imshow(up_c3)
                 plt.subplot(1, 5, 3)
