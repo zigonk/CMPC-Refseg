@@ -46,7 +46,7 @@ class LSTM_model(object):
                  emb_name='Gref',
                  freeze_bn=False,
                  emb_dir='data',
-                 is_aug=True):
+                 is_aug=False):
         self.batch_size = batch_size
         self.num_steps = num_steps
         self.vf_h = vf_h
