@@ -46,7 +46,7 @@ class LSTM_model(object):
                  emb_name='Gref',
                  freeze_bn=False,
                  emb_dir='data',
-                 is_aug=True):
+                 is_aug=False):
         self.batch_size = batch_size
         self.num_steps = num_steps
         self.vf_h = vf_h
@@ -80,7 +80,7 @@ class LSTM_model(object):
         self.im = tf.placeholder(tf.float32, [self.batch_size, self.H, self.W, 3])
         self.target_fine = tf.placeholder(tf.float32, [self.batch_size, self.H, self.W, 1])
         self.seq_len = tf.placeholder(tf.int32, [self.batch_size])
-        if (self.mode == 'train'):
+        if (self.mode == 'train' and is_aug):
             self.im = tf.image.random_brightness(self.im, 0.2, seed=42)
         resmodel = deeplab101.DeepLabResNetModel({'data': self.im}, is_training=False)
         self.visual_feat_c5 = resmodel.layers['res5c_relu']
