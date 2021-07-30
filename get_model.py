@@ -3,6 +3,7 @@ import CMPC_model_origin
 import CMPCv2_model
 import CMPCv3_model
 import CMPCv4_model
+import CMPCv4_fuse_model
 import CMPCv5_model
 import CMPCv6_model
 import CMPC_DGCN_model
