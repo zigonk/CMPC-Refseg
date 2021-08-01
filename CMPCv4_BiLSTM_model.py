@@ -176,11 +176,11 @@ class LSTM_model(object):
         fw_outputs = tf.expand_dims(fw_outputs, 1) 
         bw_outputs = tf.expand_dims(bw_outputs, 1)
         words_feat = tf.concat([fw_outputs, bw_outputs], -1)
+        self.seq_mask = tf.cast(tf.logical_not(tf.equal(tf.reduce_sum(tf.abs(words_feat), -1, keepdims=True), 0)), tf.float32)
         words_feat = self._conv('words_feat', words_feat, 1, 2 * self.rnn_size, self.rnn_size, [1, 1, 1, 1])     
         # Normalize output
         words_feat = tf.nn.l2_normalize(words_feat, -1)
         # Generate seq mask
-        self.seq_mask = tf.cast(tf.logical_not(tf.equal(tf.reduce_sum(tf.abs(words_feat), -1, keepdims=True), 0)), tf.float32)
         return words_feat, words_feat
         
     
