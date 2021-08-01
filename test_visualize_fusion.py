@@ -272,7 +272,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 # pred_raw = (scores_val >= score_thresh).astype(np.float32)
                 exp_split = exp.split(' ')[:20]
                 words_parse = np.round(words_parse, 2)
-                print(words_parse)
+                # print(words_parse)
             #     up_c3 = im_processing.resize_and_crop(sigmoid(np.squeeze(up_c3)), frame.shape[0], frame.shape[1])
             #     up_c4 = im_processing.resize_and_crop(sigmoid(np.squeeze(up_c4)), frame.shape[0], frame.shape[1])
             #     up_c5 = im_processing.resize_and_crop(sigmoid(np.squeeze(up_c5)), frame.shape[0], frame.shape[1])
