@@ -292,9 +292,9 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
             #     plt.subplot(1, 5, 5)
             #     plt.imshow(sigm_val)
             #     plt.savefig(vis_path)
-            # for i, word in enumerate(exp_split):
-            #     print(word)
-            #     print(words_parse[0][0][i])
+            for i, word in enumerate(exp_split):
+                print(word)
+                print(words_parse[0][0][i])
             print('---------------------')
                 # words_parse_dict[word] += words_parse[0][0][i]
                 # words_count[word] += 1
