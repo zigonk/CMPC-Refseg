@@ -207,8 +207,8 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
     # sorted_video_key = ['b205d868e6'] #Example 2
     # sorted_video_key = ['d975e5f4a9'] #Example 3
     # sorted_video_key = ['b5514f75d8'] #Example 4
-    visualize_list = ['63883da4f5_1_00120', 'b3b92781d9_0_00120', 'bc9ba8917e_1_00160', 'eb49ce8027_1_00000', '6a75316e99_1_00220']
-    sorted_video_key = ['63883da4f5', 'b3b92781d9', 'bc9ba8917e', 'eb49ce8027', '6a75316e99']
+    # visualize_list = ['63883da4f5_1_00120', 'b3b92781d9_0_00120', 'bc9ba8917e_1_00160', 'eb49ce8027_1_00000', '6a75316e99_1_00220']
+    # sorted_video_key = ['63883da4f5', 'b3b92781d9', 'bc9ba8917e', 'eb49ce8027', '6a75316e99']
     words_parse_dict = DefaultDict(lambda: np.asarray([0, 0, 0, 0], dtype=np.float32))
     words_count = DefaultDict(lambda: 0)
     for vid_ind, vid in enumerate(sorted_video_key):
@@ -237,9 +237,9 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 frame_id = int(fid)
                 if (frame_id % 20 != 0):
                     continue
-                visualize_name = '{}_{}_{}'.format(vid, eid, fid)
-                if (visualize_name not in visualize_list):
-                    continue
+                # visualize_name = '{}_{}_{}'.format(vid, eid, fid)
+                # if (visualize_name not in visualize_list):
+                #     continue
                 vis_path = os.path.join(vis_dir, str('{}_{}_{}.png'.format(vid,eid,fid)))
                 # if (os.path.exists(vis_path)): 
                 #     continue
