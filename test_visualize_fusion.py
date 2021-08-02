@@ -201,12 +201,14 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
     with open(args.meta) as meta_file:
         meta_expression = json.load(meta_file)
     videos = meta_expression['videos']
-    plt.figure(figsize=[15, 4])
+    plt.figure(figsize=[12, 4])
     sorted_video_key = ['b5514f75d8', 'a9f23c9150', '4fe6619a47', '3f4bacb16a', '65e0640a2a', 'e11254d3b9', '1335b16cf9', '226f1e10f7', '0e8a6b63bb', '65350fd60a', '62bf7630b3', '1e20ceafae', 'c74fc37224', '45dc90f558', 'd975e5f4a9', 'cb06f84b6e', 'eea1a45e49', '369919ef49', '822c31928a', '7daa6343e6', '246e38963b', '547416bda1', '466734bc5c', '30fe0ed0ce', 'c280d21988', '94fa9bd3b5', 'bf2d38aefe', '54526e3c66', 'e027ebc228', 'f7255a57d0', 'c9ef04fe59', 'b205d868e6', '621487be65', '6a75316e99', '0062f687f1', 'd69812339e', 'd59c093632', '3dd327ab4e', 'f2a45acf1c', '03fe6115d4', 'a4bce691c6', 'c16d9a4ade', 'b83923fd72', '8273b59141', 'a2948d4116', '8e2e5af6a8', 'e633eec195', '8939473ea7', '13ca7bbcfd', '8dea7458de', 'deed0ab4fc', '853ca85618', '975be70866', 'e10236eb37', '9a38b8e463', 'c42fdedcdd', '0f3f8b2b2f', '1ab5f4bbc5', 'f143fede6f', '33c8dcbe09', '3674b2c70a', '541ccb0844', '623d24ce2b', '5d2020eff8', '4ee0105885', 'abae1ce57d', '17cba76927', 'a1251195e7', '44e5d1a969', '35948a7fca', '9787f452bf', '4f5b3310e3', '696e01387c', '5460cc540a', '9da2156a73', '43115c42b2', '0daaddc9da', '64c6f2ed76', '6031809500', '182dbfd6ba', '1a1dbe153e', 'dce363032d', 'f3678388a7', '7a19a80b19', 'a0fc95d8fc', '01c88b5b60', '0788b4033d', 'dea0160a12', '33e8066265', 'eb263ef128', 'b2256e265c', '749f1abdf9', '335fc10235', '0b0c90e21a', '06a5dfb511', '9f429af409', 'b05faf54f7', 'b772ac822a', '29c06df0f2', '218ac81c2d', '48d2909d9e', '6cb5b08d93', '77df215672', '332dabe378', 'b00ff71889', '60362df585', 'ab9a7583f1', '352ad66724', '47d01d34c8', '13c3cea202', '188cb4e03d', '35d5e5149d', 'f39c805b54', 'd1ac0d8b81', '3be852ed44', '0a598e18a8', 'fb104c286f', 'eeb18f9d47', 'b7b7e52e02', '37b4ec2e1a', 'a00c3fa88e', 'cbea8f6bea', '9f16d17e42', 'd7a38bf258', '7a72130f21', 'f054e28786', '85968ae408', 'd7ff44ea97', 'bf4cc89b18', 'fef7e84268', 'fd8cf868b2', '92fde455eb', '3e03f623bb', '0782a6df7e', 'cd896a9bee', '6cc8bce61a', 'f7d7fb16d0', '8c60938d92', '9fd2d2782b', '1a609fa7ee', '69c0f7494e', '7775043b5e', '61fca8cbf1', 'cc7c3138ff', '72d613f21a', 'cdcfd9f93a', '1a894a8f98', '9c0b55cae5', '0390fabe58', '31d3a7d2ee', '450bd2e238', 'dab44991de', '4f6662e4e0', 'd1dd586cfd', '4037d8305d', '257f7fd5b8', '63883da4f5', 'b58a97176b', '411774e9ff', 'a46012c642', '20a93b4c54', '3b72dc1941', '559a611d86', 'c2bbd6d121', '9ce299a510', '4b783f1fc5', 'b7928ea5c0', 'eb49ce8027', 'bc9ba8917e', '9f21474aca', '68dab8f80c', '0c04834d61', 'b90f8c11db', '06cd94d38d', 'aceb34fcbe', 'dc197289ef', '0723d7d4fe', '39bce09d8d', '8d803e87f7', '39b7491321', 'b3b92781d9', '4307020e0f', '1f390d22ea', '31e0beaf99', '19cde15c4b', 'ba8823f2d2', 'ee9415c553', 'a7462d6aaf', '1e0257109e', '2b904b76c9', '97b38cabcc', '34564d26d8', '8b7b57b94d', 'cc1a82ac2a', '7741a0fbce', 'cd69993923', 'a806e58451', '7f26b553ae', 'ebe7138e58', '0620b43a31', '7836afc0c2', '152fe4902a']
     # sorted_video_key = ['853ca85618'] #Example 1
     # sorted_video_key = ['b205d868e6'] #Example 2
     # sorted_video_key = ['d975e5f4a9'] #Example 3
     # sorted_video_key = ['b5514f75d8'] #Example 4
+    visualize_list = ['63883da4f5_1_00120', 'b3b92781d9_0_00120', 'bc9ba8917e_1_00160', 'eb49ce8027_1_00000', '6a75316e99_1_00220']
+    sorted_video_key = ['63883da4f5', 'b3b92781d9', 'bc9ba8917e', 'eb49ce8027', '6a75316e99']
     words_parse_dict = DefaultDict(lambda: np.asarray([0, 0, 0, 0], dtype=np.float32))
     words_count = DefaultDict(lambda: 0)
     for vid_ind, vid in enumerate(sorted_video_key):
@@ -234,6 +236,9 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
             for fid in frame_ids:
                 frame_id = int(fid)
                 if (frame_id % 20 != 0):
+                    continue
+                visualize_name = '{}_{}_{}'.format(vid, eid, fid)
+                if (visualize_name not in visualize_list):
                     continue
                 vis_path = os.path.join(vis_dir, str('{}_{}_{}.png'.format(vid,eid,fid)))
                 # if (os.path.exists(vis_path)): 
@@ -273,25 +278,30 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 exp_split = exp.split(' ')[:20]
                 words_parse = np.round(words_parse, 2)
                 # print(words_parse)
-            #     up_c3 = im_processing.resize_and_crop(sigmoid(np.squeeze(up_c3)), frame.shape[0], frame.shape[1])
-            #     up_c4 = im_processing.resize_and_crop(sigmoid(np.squeeze(up_c4)), frame.shape[0], frame.shape[1])
-            #     up_c5 = im_processing.resize_and_crop(sigmoid(np.squeeze(up_c5)), frame.shape[0], frame.shape[1])
-            #     sigm_val = im_processing.resize_and_crop(sigmoid(np.squeeze(sigm_val)), frame.shape[0], frame.shape[1])
-            #     up_val = np.squeeze(up_val)
-            #     # if (not math.isnan(consitency_score) and consitency_score < 0.3):
-            #     plt.clf()
-            #     plt.subplot(1, 5, 1)
-            #     plt.imshow(frame)
-            #     plt.text(-10, -0.7, exp)
-            #     plt.subplot(1, 5, 2)
-            #     plt.imshow(up_c3)
-            #     plt.subplot(1, 5, 3)
-            #     plt.imshow(up_c4)
-            #     plt.subplot(1, 5, 4)
-            #     plt.imshow(up_c5)
-            #     plt.subplot(1, 5, 5)
-            #     plt.imshow(sigm_val)
-            #     plt.savefig(vis_path)
+                up_c3 = im_processing.resize_and_crop(sigmoid(np.squeeze(up_c3)), frame.shape[0], frame.shape[1])
+                up_c4 = im_processing.resize_and_crop(sigmoid(np.squeeze(up_c4)), frame.shape[0], frame.shape[1])
+                up_c5 = im_processing.resize_and_crop(sigmoid(np.squeeze(up_c5)), frame.shape[0], frame.shape[1])
+                sigm_val = im_processing.resize_and_crop(sigmoid(np.squeeze(sigm_val)), frame.shape[0], frame.shape[1])
+                up_val = np.squeeze(up_val)
+                # if (not math.isnan(consitency_score) and consitency_score < 0.3):
+                plt.clf()
+                plt.subplot(1, 5, 1)
+                plt.text(-10, -10, exp)
+                plt.imshow(frame)
+                plt.axis('off')
+                plt.subplot(1, 5, 2)
+                plt.imshow(up_c3).set_cmap('jet')
+                plt.axis('off')
+                plt.subplot(1, 5, 3)
+                plt.imshow(up_c4).set_cmap('jet')
+                plt.axis('off')
+                plt.subplot(1, 5, 4)
+                plt.imshow(up_c5).set_cmap('jet')
+                plt.axis('off')
+                plt.subplot(1, 5, 5)
+                plt.imshow(sigm_val).set_cmap('jet')
+                plt.axis('off')
+                plt.savefig(vis_path)
             for i, word in enumerate(exp_split):
                 print(word)
                 print(words_parse[0][0][i])
