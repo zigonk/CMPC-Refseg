@@ -301,7 +301,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 plt.subplot(1, 5, 5)
                 plt.imshow(sigm_val).set_cmap('jet')
                 plt.axis('off')
-                plt.savefig(vis_path, pad_inches = 0)
+                plt.savefig(vis_path, bbox_inches='tight',pad_inches = 0)
             for i, word in enumerate(exp_split):
                 print(word)
                 print(words_parse[0][0][i])
