@@ -118,8 +118,10 @@ class LSTM_model(object):
         words_feat, lang_feat = self.BiLSTM()
 
         visual_feat_c5 = self._conv("c5_lateral", self.visual_feat_c5, 1, self.vf_dim, self.v_emb_dim, [1, 1, 1, 1])
+        visual_feat_c5 = tf.nn.tanh(visual_feat_c5)
         visual_feat_c5 = tf.nn.l2_normalize(visual_feat_c5, 3)
         visual_feat_c4 = self._conv("c4_lateral", self.visual_feat_c4, 1, 1024, self.v_emb_dim, [1, 1, 1, 1])
+        visual_feat_c4 = tf.nn.tanh(visual_feat_c4)
         visual_feat_c4 = tf.nn.l2_normalize(visual_feat_c4, 3)
 #         visual_feat_c3 = self._conv("c3_lateral", self.visual_feat_c3, 1, 512, self.v_emb_dim, [1, 1, 1, 1])
 #         visual_feat_c3 = tf.nn.l2_normalize(visual_feat_c3, 3)
@@ -178,6 +180,7 @@ class LSTM_model(object):
         words_feat = tf.concat([fw_outputs, bw_outputs], -1)
         self.seq_mask = tf.cast(tf.logical_not(tf.equal(tf.reduce_sum(tf.abs(words_feat), -1, keepdims=True), 0)), tf.float32)
         words_feat = self._conv('words_feat', words_feat, 1, 2 * self.rnn_size, self.rnn_size, [1, 1, 1, 1])     
+        words_feat = tf.nn.tanh(words_feat)
         # Normalize output
         words_feat = tf.nn.l2_normalize(words_feat, -1)
         # Generate seq mask
@@ -322,6 +325,7 @@ class LSTM_model(object):
         gv_lang = tf.concat([gv_pooled, lang_feat], 3)  # [B, 1, 1, 3C]
         gv_lang = self._conv("gv_lang_{}".format(level), gv_lang, 1, self.mlp_dim + self.rnn_size, self.mlp_dim,
                              [1, 1, 1, 1])  # [B, 1, 1, C]
+        gv_lang = tf.nn.tanh(gv_lang)
         gv_lang = tf.nn.l2_normalize(gv_lang)
         print("Build Global Lang Vec")
         return gv_lang
@@ -478,11 +482,9 @@ class LSTM_model(object):
         graph_words_affi = words_parse[:, :, :, 2] * graph_words_affi
 
         graph_mask = tf.reshape(self.seq_mask, [self.batch_size, 1, self.num_steps])
-        graph_mask_softmax = (1 - graph_mask) * tf.float32.min
 
-        gw_affi_w = graph_mask * graph_words_affi
-        gw_affi_w = gw_affi_w + graph_mask_softmax
-        gw_affi_w = tf.nn.softmax(gw_affi_w, axis=2)
+        gw_affi_w = tf.nn.softmax(graph_words_affi, axis=2)
+        gw_affi_w = graph_mask * gw_affi_w
         self.gw_w = gw_affi_w
         
         gw_affi_v = tf.nn.softmax(graph_words_affi, axis=1)

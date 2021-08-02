@@ -46,7 +46,7 @@ class LSTM_model(object):
                  emb_name='Gref',
                  freeze_bn=False,
                  emb_dir='data',
-                 is_aug=True):
+                 is_aug=False):
         self.batch_size = batch_size
         self.num_steps = num_steps
         self.vf_h = vf_h
@@ -80,7 +80,7 @@ class LSTM_model(object):
         self.im = tf.placeholder(tf.float32, [self.batch_size, self.H, self.W, 3])
         self.target_fine = tf.placeholder(tf.float32, [self.batch_size, self.H, self.W, 1])
         self.seq_len = tf.placeholder(tf.int32, [self.batch_size])
-        if (self.mode == 'train'):
+        if (self.mode == 'train' and is_aug):
             self.im = tf.image.random_brightness(self.im, 0.2, seed=42)
         resmodel = deeplab101.DeepLabResNetModel({'data': self.im}, is_training=False)
         self.visual_feat_c5 = resmodel.layers['res5c_relu']
@@ -456,25 +456,6 @@ class LSTM_model(object):
         gconv_update = tf.nn.relu(gconv_update)
 
         return gconv_update
-    def get_top_k(self, input, k=30):
-        # Input data
-        # Find top elements
-        values, indices = tf.nn.top_k(input, k, sorted=False)
-        # Apply softmax
-        values_sm = tf.nn.softmax(values)
-        # Reconstruct into original shape
-        input_shape = tf.shape(input)
-        bs = input_shape[0]
-        row = input_shape[1]
-        # Build index
-        bn_idx = tf.tile(tf.range(input_shape[0])[:,tf.newaxis], (1, input_shape[1] * k))
-        row_idx = tf.tile(tf.range(input_shape[1])[:,tf.newaxis], (input_shape[0], k))
-        # Reshape to [B, HW, K]
-        bn_idx = tf.reshape(bn_idx, (bs, row, k))
-        row_idx = tf.reshape(row_idx, (bs, row, k))
-        # Build scatter index
-        scatter_idx = tf.stack([bn_idx, row_idx, indices], axis = -1)
-        return tf.scatter_nd(scatter_idx, values_sm, input_shape)
 
     def build_spa_graph(self, spa_graph, words_feat, spatial, words_parse, level=""):
         # Fuse visual_feat, lang_attn_feat and spatial for SGR
@@ -490,9 +471,17 @@ class LSTM_model(object):
         # graph_words_affi: [B, HW, T]
         graph_words_affi = words_parse[:, :, :, 2] * graph_words_affi
 
-        adj_mat = tf.matmul(graph_words_affi, graph_words_affi, transpose_b=True)
-        adj_mat = tf.nn.softmax(adj_mat, axis=-1)
-        # adj_mat = self.get_top_k(adj_mat)
+        graph_mask = tf.reshape(self.seq_mask, [self.batch_size, 1, self.num_steps])
+
+        gw_affi_w = tf.nn.softmax(graph_words_affi, axis=2)
+        gw_affi_w = graph_mask * gw_affi_w
+        self.gw_w = gw_affi_w
+        
+        gw_affi_v = tf.nn.softmax(graph_words_affi, axis=1)
+        gw_affi_v = graph_mask * gw_affi_v
+        self.gw_v = gw_affi_v
+
+        adj_mat = tf.matmul(gw_affi_w, gw_affi_v, transpose_b=True)
         # adj_mat: [B, HW, HW], sum == 1 on axis 2
 
         spa_graph_nodes_num = self.vf_h * self.vf_w
