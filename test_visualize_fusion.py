@@ -286,7 +286,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 # if (not math.isnan(consitency_score) and consitency_score < 0.3):
                 plt.clf()
                 plt.subplot(1, 5, 1)
-                plt.text(0, -100, 'Expression:' + exp, fontsize=16)
+                plt.text(0, -100, 'Expression: ' + exp, fontsize=16)
                 plt.imshow(frame)
                 plt.axis('off')
                 plt.subplot(1, 5, 2)
