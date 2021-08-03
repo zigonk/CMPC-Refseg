@@ -120,14 +120,16 @@ class LSTM_model(object):
         mu = tf.constant([104.00698793, 116.66876762, 122.67891434])
         im_bgr = self.im + mu
         im_bgr = im_bgr / 255
+        im_rgb = tf.reverse(im_bgr, -1)
+        im_hsv = tf.image.rgb_to_hsv(im_rgb)
         visual_feat_size = tf.shape(self.visual_feat_c5)[1:3]
-        im_bgr = tf.image.resize_bilinear(im_bgr, visual_feat_size)
+        im_hsv = tf.image.resize_bilinear(im_hsv, visual_feat_size)
 
-        self.visual_feat_c5 = tf.concat([self.visual_feat_c5, im_bgr], -1)
+        self.visual_feat_c5 = tf.concat([self.visual_feat_c5, im_hsv], -1)
         visual_feat_c5 = self._conv("c5_lateral", self.visual_feat_c5, 1, self.vf_dim + 3, self.v_emb_dim, [1, 1, 1, 1])
         visual_feat_c5 = tf.nn.tanh(visual_feat_c5)
         visual_feat_c5 = tf.nn.l2_normalize(visual_feat_c5, 3)
-        
+
         self.visual_feat_c4 = tf.concat([self.visual_feat_c4, im_bgr], -1)
         visual_feat_c4 = self._conv("c4_lateral", self.visual_feat_c4, 1, 1024 + 3, self.v_emb_dim, [1, 1, 1, 1])
         visual_feat_c4 = tf.nn.tanh(visual_feat_c4)
