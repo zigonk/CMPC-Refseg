@@ -118,8 +118,8 @@ class LSTM_model(object):
         words_feat, lang_feat = self.BiLSTM()
 
         mu = tf.constant([104.00698793, 116.66876762, 122.67891434])
-        im_bgr = self.im + mu
-        print(tf.shape(im_bgr))
+        
+        im_bgr = tf.add(self.im, mu)
         im_rgb = tf.reverse(im_bgr, axis=-1)
         im_hsv = tf.image.rgb_to_hsv(im_rgb)
         visual_feat_size = tf.shape(self.visual_feat_c5)[1:3]
