@@ -130,7 +130,7 @@ class LSTM_model(object):
         visual_feat_c5 = tf.nn.tanh(visual_feat_c5)
         visual_feat_c5 = tf.nn.l2_normalize(visual_feat_c5, 3)
 
-        self.visual_feat_c4 = tf.concat([self.visual_feat_c4, im_bgr], -1)
+        self.visual_feat_c4 = tf.concat([self.visual_feat_c4, im_hsv], -1)
         visual_feat_c4 = self._conv("c4_lateral", self.visual_feat_c4, 1, 1024 + 3, self.v_emb_dim, [1, 1, 1, 1])
         visual_feat_c4 = tf.nn.tanh(visual_feat_c4)
         visual_feat_c4 = tf.nn.l2_normalize(visual_feat_c4, 3)
