@@ -6,6 +6,7 @@ import CMPCv4_model
 import CMPCv4_BiLSTM_T2_model
 import CMPCv4_BERT_model
 import CMPCv5_model
+import CMPCv5_HSV_model
 import CMPCv5_BiLSTM_model
 import CMPCv5_BiLSTM_HSV_model
 
