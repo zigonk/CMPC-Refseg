@@ -9,7 +9,7 @@ import CMPCv5_model
 import CMPCv5_BiLSTM_model
 import CMPCv5_BiLSTM_HSV_model
 import CMPCv6_model
-import CMPCv6+_model
+import CMPCv6_plus_model
 
 def get_segmentation_model(name, **kwargs):
     model = eval(name).LSTM_model(**kwargs)
