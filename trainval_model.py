@@ -72,7 +72,7 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
     valid_idx_batch = np.zeros(bs, dtype=np.int32)
 
     if dataset == 'refvos':
-        reader = data_reader_refvos.DataReader(im_dir=args.im_dir, mask_dir=args.mask_dir, train_metadata=args.meta, T=T, H=H, W=W)
+        reader = data_reader_refvos.DataReader(im_dir=args.im_dir, mask_dir=args.mask_dir, train_metadata=args.meta, T=T, input_H=H, input_W=W)
 
     # for time calculate
     last_time = time.time()
