@@ -17,7 +17,8 @@ from util import im_processing, eval_tools, MovingAverage
 
 
 def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_folder,
-          conv5, model_name, stop_iter, last_iter, pre_emb=False, finetune=False, pretrain_path = '', emb_dir=''):
+          conv5, model_name, stop_iter, last_iter, pre_emb=False, finetune=False, pretrain_path = '', emb_dir='',
+          T=20, H=320, W=320):
     global args
     iters_per_log = 100
     data_folder = os.path.join(data_dir, dataset + '/' + setname + '_batch/')
@@ -36,7 +37,8 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
         print("Use pretrained Embeddings.")
         model = get_segmentation_model(model_name, mode='train',
                                        vocab_size=vocab_size, start_lr=lr,
-                                       batch_size=bs, conv5=conv5, emb_name=emb_name, emb_dir=emb_dir, freeze_bn = args.freeze_bn, is_aug = args.is_aug)
+                                       batch_size=bs, conv5=conv5, emb_name=emb_name, emb_dir=emb_dir, freeze_bn = args.freeze_bn, is_aug = args.is_aug,
+                                       num_steps=T, H=H, W=W)
     else:
         model = get_segmentation_model(model_name, mode='train',
                                        vocab_size=vocab_size, start_lr=lr,
@@ -70,7 +72,7 @@ def train(max_iter, snapshot, dataset, data_dir, setname, mu, lr, bs, tfmodel_fo
     valid_idx_batch = np.zeros(bs, dtype=np.int32)
 
     if dataset == 'refvos':
-        reader = data_reader_refvos.DataReader(im_dir=args.im_dir, mask_dir=args.mask_dir, train_metadata=args.meta)
+        reader = data_reader_refvos.DataReader(im_dir=args.im_dir, mask_dir=args.mask_dir, train_metadata=args.meta, T=T, H=H, W=W)
 
     # for time calculate
     last_time = time.time()
@@ -360,6 +362,9 @@ if __name__ == "__main__":
     parser.add_argument('-im_dir', type=str, default='')
     parser.add_argument('-mask_dir', type=str, default='')
     parser.add_argument('-meta', type=str, default='./train_meta.json')
+    parser.add_argument('-T', type=int, default=20)
+    parser.add_argument('-H', type=int, default=320)
+    parser.add_argument('-W', type=int, default=320)
 
     args = parser.parse_args()
     # os.environ['CUDA_VISIBLE_DEVICES'] = args.g
@@ -382,7 +387,10 @@ if __name__ == "__main__":
               finetune=args.finetune,
               last_iter=args.lastiter,
               pretrain_path=args.pretrain,
-              emb_dir=args.embdir)
+              emb_dir=args.embdir,
+              T=args.T,
+              H=args.H,
+              W=args.W)
     elif args.m == 'test':
         test(iter=args.i,
              dataset=args.d,

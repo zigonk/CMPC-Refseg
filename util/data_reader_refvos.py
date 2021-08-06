@@ -20,15 +20,11 @@ object_color = {
     '6': [102, 153, 204]
 }
 
-T = 20
-input_H = 320
-input_W = 320
-
 vocab_file = './data/vocabulary_refvos.txt'
 anchor_file = './data/anchors.txt'
 vocab_dict = text_processing.load_vocab_dict_from_file(vocab_file)
 
-def preprocess_data(im, mask, sent, obj_id):
+def preprocess_data(im, mask, sent, obj_id, T, input_H, input_W):
     anchors = io.read_anchors(anchor_file)
     mask_color = object_color[obj_id]
     mask_obj = np.asarray(((mask == mask_color)[:,:,0]))
@@ -49,7 +45,7 @@ def preprocess_data(im, mask, sent, obj_id):
         'true_bbox': true_bbox
     }
 
-def run_prefetch(prefetch_queue, im_dir, mask_dir, metadata, num_batch, shuffle):
+def run_prefetch(prefetch_queue, im_dir, mask_dir, metadata, num_batch, shuffle, T, input_H, input_W):
     n_batch_prefetch = 0
     fetch_order = np.arange(num_batch)
     while True:
@@ -67,7 +63,7 @@ def run_prefetch(prefetch_queue, im_dir, mask_dir, metadata, num_batch, shuffle)
         mask_name = os.path.join(mask_dir, mask_name)
         mask = skimage.io.imread(mask_name)[:,:,:3]
         # Preprocess data
-        batch = preprocess_data(im, mask, sent, obj_id)
+        batch = preprocess_data(im, mask, sent, obj_id, T, input_H, input_W)
         
         # add loaded batch to fetchqing queue
         prefetch_queue.put(batch, block=True)
@@ -76,7 +72,7 @@ def run_prefetch(prefetch_queue, im_dir, mask_dir, metadata, num_batch, shuffle)
         n_batch_prefetch = (n_batch_prefetch + 1) % num_batch
 
 class DataReader:
-    def __init__(self, im_dir, mask_dir, train_metadata, shuffle=True, prefetch_num=8):
+    def __init__(self, im_dir, mask_dir, train_metadata, shuffle=True, prefetch_num=8, T=20, input_H=320, input_W=320):
         self.im_dir = im_dir
         self.mask_dir = mask_dir
         self.metadata = json.load(open(train_metadata))
@@ -85,6 +81,9 @@ class DataReader:
 
         self.n_batch = 0
         self.n_epoch = 0
+        self.T = T
+        self.input_H = input_H
+        self.input_W = input_W
 
         # Search the folder to see the number of num_batch
         self.num_batch = len(self.metadata)
@@ -93,7 +92,8 @@ class DataReader:
         self.prefetch_queue = queue.Queue(maxsize=prefetch_num)
         self.prefetch_thread = threading.Thread(target=run_prefetch,
             args=(self.prefetch_queue, self.im_dir, self.mask_dir, self.metadata,
-                  self.num_batch, self.shuffle))
+                  self.num_batch, self.shuffle,
+                  self.T, self.input_H, self.input_W))
         self.prefetch_thread.daemon = True
         self.prefetch_thread.start()
 
