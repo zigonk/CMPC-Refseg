@@ -49,8 +49,8 @@ class LSTM_model(object):
                  is_aug=False):
         self.batch_size = batch_size
         self.num_steps = num_steps
-        self.vf_h = vf_h
-        self.vf_w = vf_w
+        self.vf_h = H // 8
+        self.vf_w = W // 8
         self.H = H
         self.W = W
         self.vf_dim = vf_dim
