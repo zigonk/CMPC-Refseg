@@ -49,8 +49,8 @@ class LSTM_model(object):
                  is_aug=False):
         self.batch_size = batch_size
         self.num_steps = num_steps
-        self.vf_h = vf_h
-        self.vf_w = vf_w
+        self.vf_h = H // 8
+        self.vf_w = W // 8
         self.H = H
         self.W = W
         self.vf_dim = vf_dim
@@ -330,8 +330,10 @@ class LSTM_model(object):
         :param lang_feat: [B, 1, 1, C]
         :return: feat', [B, H, W, C]
         '''
-        gv_lang = self.global_vec(feat, lang_feat, level + 'gv_f1')  # [B, 1, 1, C]
-        feat1 = self.lang_se(feat1, gv_lang, level + '_f1')
+        gv_lang = self.global_vec(feat, lang_feat, level + 'gv_f')  # [B, 1, 1, C]
+        feat = self.lang_se(feat, gv_lang, level + '_f')
+        gv_lang1 = self.global_vec(feat1, lang_feat, level + 'gv_f1')  # [B, 1, 1, C]
+        feat1 = self.lang_se(feat1, gv_lang1, level + '_f1')
 #         feat2 = self.lang_se(feat2, gv_lang, level + '_f2')
         feat_exg = feat + feat1
         return feat_exg
@@ -414,18 +416,17 @@ class LSTM_model(object):
 
     def build_lang2vis(self, visual_feat, words_feat, lang_feat, words_parse, spatial, level=""):
         valid_lang_feat = self.valid_lang(words_parse, words_feat)
-        vis_la_sp = self.mutan_fusion(valid_lang_feat, spatial, visual_feat, level="entity_fusion_" + level)
+        vis_la_sp = self.mutan_fusion(valid_lang_feat, spatial, visual_feat, level=level)
         print("Build MutanFusion Module to get multi-modal features.")
         spa_graph_feat = self.build_spa_graph(vis_la_sp, words_feat, spatial,
                                               words_parse, level=level)
         print("Build Lang2Vis Module.")
 
-
-        nec_lang_feat = self.nec_lang(words_parse, words_feat)
-        feat_all = self.mutan_fusion(nec_lang_feat, spatial, spa_graph_feat, level="sent_fusion_" + level)
+        lang_vis_feat = tf.tile(valid_lang_feat, [1, self.vf_h, self.vf_w, 1])  # [B, H, W, C]
+        feat_all = tf.concat([vis_la_sp, spa_graph_feat, lang_vis_feat, spatial], 3)
         # Feature fusion
         fusion = self._conv("fusion_{}".format(level), feat_all, 1,
-                            self.v_emb_dim,
+                            self.v_emb_dim * 2 + self.rnn_size + 8,
                             self.mlp_dim, [1, 1, 1, 1])
         fusion = tf.nn.relu(fusion)
         return fusion
@@ -463,11 +464,9 @@ class LSTM_model(object):
         words_trans = self._conv("words_trans_{}".format(level), words_feat, 1, self.rnn_size, self.rnn_size,
                                  [1, 1, 1, 1])
         words_trans = tf.reshape(words_trans, [self.batch_size, self.num_steps, self.rnn_size])
-        words_trans = tf.nn.l2_normalize(words_trans, -1)
         spa_graph_trans2 = self._conv("spa_graph_trans2_{}".format(level), spa_graph, 1, self.v_emb_dim, self.v_emb_dim,
                                      [1, 1, 1, 1])
         spa_graph_trans2 = tf.reshape(spa_graph_trans2, [self.batch_size, self.vf_h * self.vf_w, self.v_emb_dim])
-        spa_graph_trans2 = tf.nn.l2_normalize(spa_graph_trans2, -1)
         graph_words_affi = tf.matmul(spa_graph_trans2, words_trans, transpose_b=True)
         # Normalization for affinity matrix
         graph_words_affi = tf.divide(graph_words_affi, self.v_emb_dim ** 0.5)
