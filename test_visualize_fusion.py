@@ -232,8 +232,8 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
             avg_time = 0
             total_frame = 0
 #             Process text
-            text, seq_len = text_processing.preprocess_sentence_lstm(exp, vocab_dict, T)
             exp = args.exp_test
+            text, seq_len = text_processing.preprocess_sentence_lstm(exp, vocab_dict, T)
             for fid in frame_ids:
                 frame_id = int(fid)
                 if (frame_id % 20 != 0):
