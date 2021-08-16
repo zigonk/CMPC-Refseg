@@ -233,6 +233,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
             total_frame = 0
 #             Process text
             text, seq_len = text_processing.preprocess_sentence_lstm(exp, vocab_dict, T)
+            exp = args.exp_test
             for fid in frame_ids:
                 frame_id = int(fid)
                 if (frame_id % 20 != 0):
@@ -244,6 +245,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 # if (os.path.exists(vis_path)): 
                 #     continue
                 frame = load_frame_from_id(vid, fid)
+                frame = np.asarray(skimage.io.imread(args.im_test))
                 if frame is None:
                     continue
                 last_time = time.time()
@@ -307,6 +309,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 print(word)
                 print(words_parse[0][0][i])
             print('---------------------')
+            return
                 # words_parse_dict[word] += words_parse[0][0][i]
                 # words_count[word] += 1
 #                 pred_raw = (up_val >= score_thresh).astype('uint8') * 255
@@ -428,6 +431,8 @@ if __name__ == "__main__":
     parser.add_argument('-maskdir', type=str)
     parser.add_argument('-meta', type=str)
     parser.add_argument('-embdir', type=str)
+    parser.add_argument('-im_test', type=str)
+    parser.add_argument('-exp_test', type=str)
     parser.add_argument('-d', type=str, default='referit')  # 'Gref' 'unc' 'unc+' 'referit'
     parser.add_argument('-t', type=str)  # 'train' 'trainval' 'val' 'test' 'testA' 'testB'
     parser.add_argument('-f', type=str)  # directory to save models
