@@ -304,7 +304,8 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 plt.imshow(sigm_val).set_cmap('jet')
                 # plt.axis('off')
                 # plt.savefig(vis_path, bbox_inches='tight',pad_inches = 0)
-                plt.savefig(vis_path)
+                # plt.savefig(vis_path)
+                plt.savefig(args.export_dir)
                 break
             for i, word in enumerate(exp_split):
                 print(word)
@@ -434,6 +435,7 @@ if __name__ == "__main__":
     parser.add_argument('-embdir', type=str)
     parser.add_argument('-im_test', type=str)
     parser.add_argument('-exp_test', type=str)
+    parser.add_argument('-export_dir', type=str)
     parser.add_argument('-d', type=str, default='referit')  # 'Gref' 'unc' 'unc+' 'referit'
     parser.add_argument('-t', type=str)  # 'train' 'trainval' 'val' 'test' 'testA' 'testB'
     parser.add_argument('-f', type=str)  # directory to save models
