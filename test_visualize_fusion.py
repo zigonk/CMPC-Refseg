@@ -305,7 +305,7 @@ def test(iter, dataset, visualize, setname, dcrf, mu, tfmodel_path, model_name, 
                 # plt.axis('off')
                 # plt.savefig(vis_path, bbox_inches='tight',pad_inches = 0)
                 # plt.savefig(vis_path)
-                plt.savefig(args.export_dir)
+                plt.savefig(args.export_dir + '/' + exp.replace(' ', '_') + '.png')
                 break
             for i, word in enumerate(exp_split):
                 print(word)
